@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mcp-quick-start:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        WORKSPACES: "@unique/mcp-quick-start"
+    ports:
+      - "51345:51345"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
