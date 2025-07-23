@@ -1,0 +1,54 @@
+name: "[mcp/server/quick-start] Publish"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - servers/quick-start/**
+      - .github/workflows/quick-start.server.mcp.cd.yaml
+
+jobs:
+  validate:
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVER_PATH: servers/quick-start
+      CHART_REPO: ghcr.io/unique-ag/mcp/server/quick-start
+    outputs:
+      version: ${{ steps.version.outputs.content }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+      - uses: docker/setup-buildx-action@v3
+      - id: version
+        run: |
+          VERSION=$(jq -r '.version' "${{ env.SERVER_PATH }}/package.json")
+          echo "Extracted version: $VERSION"
+          echo "content=$VERSION" >> $GITHUB_OUTPUT
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CHART_REPO }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.content }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          file: ./Dockerfile
+          context: .
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.CHART_REPO }}:cache
+          cache-to: type=registry,ref=${{ env.CHART_REPO }}:cache,mode=max
+          push: true
+          build-args: |
+            --build-arg=VERSION=${{ steps.version.outputs.content }}
+          tags: ${{ steps.meta.outputs.tags }}

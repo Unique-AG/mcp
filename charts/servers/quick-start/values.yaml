@@ -1,0 +1,43 @@
+server:
+  extraRoutes:
+    mcp:
+      annotations:
+        konghq.com/plugins: unique-route-metrics
+        konghq.com/strip-path: "true"
+      enabled: true
+      matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/server/quick-start
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: kong
+          namespace: system
+  image:
+    repository: ghcr.io/unique-ag/mcp/server/quick-start
+    tag: 0.2.0
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: system
+            podSelector:
+              matchLabels:
+                app: kong-gateway
+  ports:
+    application: 51345
+  probes:
+    enabled: false
+  prometheus:
+    enabled: false
+  resources:
+    limits:
+      cpu: 80m
+      memory: 128Mi
+    requests:
+      cpu: 40m
+      memory: 64Mi
+  # routes: can not yet use since that uses the JWT middleware
