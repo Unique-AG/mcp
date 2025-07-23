@@ -1,0 +1,21 @@
+{
+  "name": "@unique/mcp-quick-start",
+  "version": "0.1.0",
+  "description": "A quick start for MCP servers implementing the quick start example from https://github.com/modelcontextprotocol/typescript-sdk.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Unique AI",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.16.0",
+    "typescript": "^5.8.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@unique/eslint-config": "workspace:*",
+    "@unique/typescript-config": "workspace:*"
+  }
+}
