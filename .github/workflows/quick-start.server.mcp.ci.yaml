@@ -1,0 +1,49 @@
+name: "[mcp/server/quick-start] Validate"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/servers/quick-start/**"
+      - .github/workflows/quick-start.server.mcp.ci.yaml
+
+jobs:
+  publish:
+    permissions:
+      packages: read
+    runs-on: singularity
+    timeout-minutes: 15
+    env:
+      SERVER_PATH: servers/quick-start
+      CHART_REPO: ghcr.io/unique-ag/mcp/server/quick-start
+    outputs:
+      version: ${{ steps.version.outputs.content }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+      - uses: docker/setup-buildx-action@v3
+      - id: version
+        run: |
+          VERSION=$(jq -r '.version' "${{ env.SERVER_PATH }}/package.json")
+          echo "Extracted version: $VERSION"
+          echo "content=$VERSION" >> $GITHUB_OUTPUT
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CHART_REPO }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.content }}
+      - uses: docker/build-push-action@v6
+        with:
+          file: ./Dockerfile
+          context: docker
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
