@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "**/servers/quick-start/**"
+      - servers/quick-start/**
       - .github/workflows/quick-start.server.mcp.cd.yaml
 
 jobs:
