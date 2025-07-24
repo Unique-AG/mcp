@@ -16,7 +16,7 @@ jobs:
   publish:
     permissions:
       packages: read
-    runs-on: singularity
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       SERVER_PATH: servers/quick-start
