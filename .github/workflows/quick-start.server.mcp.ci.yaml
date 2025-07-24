@@ -13,7 +13,7 @@ on:
       - .github/workflows/quick-start.server.mcp.ci.yaml
 
 jobs:
-  publish:
+  validate:
     permissions:
       packages: read
     runs-on: ubuntu-latest
@@ -43,7 +43,9 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           file: ./Dockerfile
-          context: docker
+          context: .
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            --build-arg=VERSION=${{ steps.version.outputs.content }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
