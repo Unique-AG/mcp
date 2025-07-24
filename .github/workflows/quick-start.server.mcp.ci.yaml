@@ -15,7 +15,7 @@ on:
 jobs:
   validate:
     permissions:
-      packages: read
+      packages: write # cache needs write access
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
