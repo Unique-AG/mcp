@@ -6,6 +6,9 @@ import { z } from "zod";
 
 // Environment variables schema
 const EnvSchema = z.object({
+  /**
+   * The port that the MCP Server will listen on.
+   */
   PORT: z
     .string()
     .optional()
@@ -13,14 +16,24 @@ const EnvSchema = z.object({
     .refine((port) => port > 0 && port < 65536, {
       message: "PORT must be between 1 and 65535",
     }),
+  /**
+   * Allows modifing the MCP Server Name if desired.
+   */
   SERVER_NAME: z.string().optional().default("mcp-server-quick-start"),
+  /**
+   * The version should be set at runtime and point to the package.json version (Singe Source of Truth).
+   */
   VERSION: z
     .string()
     .optional()
     .default("local")
-    .refine((version) => /^\d+\.\d+\.\d+$/.test(version) || /^[a-z]+$/.test(version), {
-      message: "VERSION must be in semver format (e.g., 0.1.0) or lowercase string",
-    }),
+    .refine(
+      (version) => /^\d+\.\d+\.\d+$/.test(version) || /^[a-z]+$/.test(version),
+      {
+        message:
+          "VERSION must be in semver format (e.g., 0.1.0) or lowercase string",
+      }
+    ),
 });
 
 // JSON-RPC error response schema

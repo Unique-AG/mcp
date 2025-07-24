@@ -1,6 +1,6 @@
 {
   "name": "@unique/mcp-server-quick-start",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A quick start for MCP servers implementing the quick start example from https://github.com/modelcontextprotocol/typescript-sdk.",
   "main": "dist/server.js",
   "type": "module",
