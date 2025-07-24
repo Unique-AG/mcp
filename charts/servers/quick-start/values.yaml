@@ -4,6 +4,12 @@ server:
     tag: 0.2.0
   networkPolicy:
     enabled: true
+    ingress:
+      - from:
+          - podSelector:
+              matchLabels:
+                app.kubernetes.io/instance: kong
+                app.kubernetes.io/name: gateway
   ports:
     application: 51345
   probes:
@@ -18,6 +24,7 @@ server:
       cpu: 40m
       memory: 64Mi
   routes:
+    hostname: must-be-set.example.com
     paths:
       default:
         enabled: true
