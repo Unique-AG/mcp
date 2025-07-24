@@ -21,10 +21,12 @@ server:
     enabled: true
     ingress:
       - from:
-          - podSelector:
+          - namespaceSelector:
               matchLabels:
-                app.kubernetes.io/instance: kong
-                app.kubernetes.io/name: gateway
+                kubernetes.io/metadata.name: system
+            podSelector:
+              matchLabels:
+                app: kong-gateway
   ports:
     application: 51345
   probes:
