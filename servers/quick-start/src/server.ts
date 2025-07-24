@@ -13,6 +13,14 @@ const EnvSchema = z.object({
     .refine((port) => port > 0 && port < 65536, {
       message: "PORT must be between 1 and 65535",
     }),
+  SERVER_NAME: z.string().optional().default("mcp-server-quick-start"),
+  SERVER_VERSION: z
+    .string()
+    .optional()
+    .default("0.1.0")
+    .refine((version) => /^\d+\.\d+\.\d+$/.test(version), {
+      message: "SERVER_VERSION must be in semver format (e.g., 0.1.0)",
+    }),
 });
 
 // JSON-RPC error response schema
@@ -46,8 +54,8 @@ const env = EnvSchema.parse(process.env);
 
 // Server configuration
 const serverConfig = ServerConfigSchema.parse({
-  name: "mcp-quick-start",
-  version: "0.1.0",
+  name: env.SERVER_NAME,
+  version: env.SERVER_VERSION,
 });
 
 // Function to create a new server instance with tools

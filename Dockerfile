@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for turborepo
-# Usage: docker build --build-arg WORKSPACES="servers/mcp-quick-start packages/eslint-config" .
+# Usage: docker build --build-arg WORKSPACES="servers/mcp-server-quick-start packages/eslint-config" .
 
 # Build stage
 FROM node:22-alpine AS builder
@@ -17,7 +17,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Build argument for workspaces to build (use package names, not file paths)
-ARG WORKSPACES="@unique/mcp-quick-start"
+ARG WORKSPACES="@unique/mcp-server-quick-start"
 
 # Build selected workspaces
 RUN pnpm turbo run build --filter="${WORKSPACES}"
@@ -47,4 +47,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
 
 # Set default command
-CMD ["node", "servers/mcp-quick-start/dist/server.js"] 
+CMD ["node", "servers/mcp-server-quick-start/dist/server.js"] 

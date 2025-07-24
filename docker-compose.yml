@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  mcp-quick-start:
+  quick-start-server:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        WORKSPACES: "@unique/mcp-quick-start"
+        WORKSPACES: "@unique/mcp-server-quick-start"
     ports:
       - "51345:51345"
     environment:
