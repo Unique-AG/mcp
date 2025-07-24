@@ -1,4 +1,19 @@
 server:
+  extraRoutes:
+    mcp:
+      annotations:
+        konghq.com/plugins: unique-route-metrics
+        konghq.com/strip-path: "true"
+      enabled: true
+      matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/server/quick-start
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: kong
+          namespace: system
   image:
     repository: ghcr.io/unique-ag/mcp/server/quick-start
     tag: 0.2.0
@@ -23,8 +38,4 @@ server:
     requests:
       cpu: 40m
       memory: 64Mi
-  routes:
-    hostname: must-be-set.example.com
-    paths:
-      default:
-        enabled: true
+  # routes: can not yet use since that uses the JWT middleware
