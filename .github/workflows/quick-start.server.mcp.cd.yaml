@@ -48,6 +48,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ env.CHART_REPO }}:cache
           cache-to: type=registry,ref=${{ env.CHART_REPO }}:cache,mode=max
+          push: true
           build-args: |
             --build-arg=VERSION=${{ steps.version.outputs.content }}
           tags: ${{ steps.meta.outputs.tags }}
