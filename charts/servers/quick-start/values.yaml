@@ -1,0 +1,23 @@
+server:
+  image:
+    repository: ghcr.io/unique-ag/mcp/server/quick-start
+    tag: 0.2.0
+  networkPolicy:
+    enabled: true
+  ports:
+    application: 51345
+  probes:
+    enabled: false
+  prometheus:
+    enabled: false
+  resources:
+    limits:
+      cpu: 80m
+      memory: 128Mi
+    requests:
+      cpu: 40m
+      memory: 64Mi
+  routes:
+    paths:
+      default:
+        enabled: true

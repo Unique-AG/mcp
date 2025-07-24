@@ -1,0 +1,11 @@
+apiVersion: v2
+name: mcp-server-quick-start
+description: A quick start for MCP servers implementing the quick start example from https://github.com/modelcontextprotocol/typescript-sdk.
+type: application
+version: 0.2.0
+appVersion: 0.2.0 # this does not work as intended sadly, this version does not trickle down into the dependency
+dependencies:
+  - alias: server
+    name: backend-service
+    repository: oci://ghcr.io/unique-ag/helm-charts
+    version: ~4.6.0
