@@ -14,12 +14,12 @@ const EnvSchema = z.object({
       message: "PORT must be between 1 and 65535",
     }),
   SERVER_NAME: z.string().optional().default("mcp-server-quick-start"),
-  SERVER_VERSION: z
+  VERSION: z
     .string()
     .optional()
-    .default("0.1.0")
-    .refine((version) => /^\d+\.\d+\.\d+$/.test(version), {
-      message: "SERVER_VERSION must be in semver format (e.g., 0.1.0)",
+    .default("local")
+    .refine((version) => /^\d+\.\d+\.\d+$/.test(version) || /^[a-z]+$/.test(version), {
+      message: "VERSION must be in semver format (e.g., 0.1.0) or lowercase string",
     }),
 });
 
@@ -44,9 +44,7 @@ const McpRequestSchema = z.object({
 // Server configuration schema
 const ServerConfigSchema = z.object({
   name: z.string().min(1),
-  version: z
-    .string()
-    .regex(/^\d+\.\d+\.\d+$/, "Version must be in semver format"),
+  version: z.string(),
 });
 
 // Parse and validate environment variables
@@ -55,7 +53,7 @@ const env = EnvSchema.parse(process.env);
 // Server configuration
 const serverConfig = ServerConfigSchema.parse({
   name: env.SERVER_NAME,
-  version: env.SERVER_VERSION,
+  version: env.VERSION,
 });
 
 // Function to create a new server instance with tools
@@ -195,7 +193,7 @@ setupServer()
         process.exit(1);
       }
       console.log(
-        `MCP Stateless Streamable HTTP Server listening on port ${env.PORT}`
+        `MCP Stateless Streamable HTTP Server listening on port [${env.PORT}] with server name [${env.SERVER_NAME}] and version [${env.VERSION}].`
       );
     });
   })

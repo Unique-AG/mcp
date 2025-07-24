@@ -47,4 +47,5 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
 
 # Set default command
-CMD ["node", "servers/mcp-server-quick-start/dist/server.js"] 
+CMD ["node", "servers/quick-start/dist/server.js"]
+# @valerio: need help to make this generic
