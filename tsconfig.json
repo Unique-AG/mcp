@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		/* Type Checking */
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		/* Modules */
+		"module": "node18",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"isolatedModules": true,
+		"forceConsistentCasingInFileNames": true,
+		"experimentalDecorators": true,
+		/* Emit */
+		"target": "es2022",
+		"baseUrl": ".",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"emitDecoratorMetadata": true,
+		/* Completeness */
+		"skipLibCheck": true,
+		"resolveJsonModule": true,
+		/* Paths */
+		"paths": {
+			"@unique/*": ["packages/*"]
+		}
+	},
+	"exclude": ["node_modules"]
+}
