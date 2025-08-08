@@ -1,6 +1,4 @@
 export class CoinMarketCapAPI {
-  public constructor(private readonly apiKey: string) {}
-
   public async listCurrencies() {
     return [
       {

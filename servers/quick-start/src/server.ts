@@ -173,13 +173,13 @@ app.post('/mcp', async (req: Request, res: Response) => {
 });
 
 // SSE notifications not supported in stateless mode
-app.get('/mcp', async (req: Request, res: Response) => {
+app.get('/mcp', async (_req: Request, res: Response) => {
   console.log('Received GET MCP request');
   sendMethodNotAllowedResponse(res);
 });
 
 // Session termination not needed in stateless mode
-app.delete('/mcp', async (req: Request, res: Response) => {
+app.delete('/mcp', async (_req: Request, res: Response) => {
   console.log('Received DELETE MCP request');
   sendMethodNotAllowedResponse(res);
 });
