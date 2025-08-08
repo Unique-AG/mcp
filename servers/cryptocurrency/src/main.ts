@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import http from 'node:http';
-
 import { CoinMarketCapAPI } from '@unique/coin-market-cap';
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';

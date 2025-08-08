@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.16.0",
-    "@unique/coin-market-cap": "workspace:^",
+    "@unique/coin-market-cap": "workspace:*",
     "typescript": "^5.8.3",
     "zod": "^3.25.76"
   },
