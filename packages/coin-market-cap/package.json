@@ -1,33 +1,33 @@
 {
-	"name": "@unique/coin-market-cap",
-	"version": "0.0.0",
-	"description": "",
-	"type": "module",
-	"keywords": [],
-	"author": "Unique AI",
-	"exports": {
-		".": {
-			"import": "./dist/service.js",
-			"types": "./dist/service.d.ts",
-			"source": "./src/service.ts"
-		}
-	},
-	"scripts": {
-		"build": "tsc",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "biome check .",
-		"lint:fix": "biome check . --write",
-		"format": "biome format .",
-		"format:fix": "biome format . --write",
-		"typecheck": "tsc --noEmit"
-	},
-	"dependencies": {
-		"typescript": "^5.8.3",
-		"undici": "^7.12.0",
-		"zod": "^3.25.76"
-	},
-	"devDependencies": {
-		"@types/node": "^22.0.0",
-		"tsx": "^4.19.2"
-	}
+  "name": "@unique/coin-market-cap",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "keywords": [],
+  "author": "Unique AI",
+  "exports": {
+    ".": {
+      "import": "./dist/service.js",
+      "types": "./dist/service.d.ts",
+      "source": "./src/service.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "typescript": "^5.8.3",
+    "undici": "^7.12.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2"
+  }
 }
