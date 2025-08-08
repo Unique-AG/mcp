@@ -1,15 +1,15 @@
 {
-  "name": "@unique/mcp-server-quick-start",
-  "version": "0.2.0",
-  "description": "A quick start for MCP servers implementing the quick start example from https://github.com/modelcontextprotocol/typescript-sdk.",
-  "main": "dist/server.js",
+  "name": "@unique/server-cryptocurrency",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/main.js",
   "type": "module",
   "keywords": [],
   "author": "Unique AI",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
@@ -19,12 +19,11 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.16.0",
-    "express": "^5.1.0",
+    "@unique/coin-market-cap": "workspace:^",
     "typescript": "^5.8.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.2"
   }

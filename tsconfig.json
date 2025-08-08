@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /* Type Checking */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    /* Modules */
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    /* Emit */
+    "target": "ES2022",
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    /* Completeness */
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    /* Paths */
+    "paths": {
+      "@unique/*": ["packages/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
