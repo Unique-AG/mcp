@@ -5,7 +5,7 @@
 FROM node:22-alpine AS builder
 
 # Install pnpm
-RUN npm install -g pnpm@9.0.0
+RUN npm install -g pnpm@10.14.0
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN pnpm turbo run build --filter="${WORKSPACES}"
 FROM node:22-alpine AS production
 
 # Install pnpm
-RUN npm install -g pnpm@9.0.0
+RUN npm install -g pnpm@10.14.0
 
 # Set working directory
 WORKDIR /app
@@ -48,4 +48,3 @@ COPY --from=builder /app/node_modules ./node_modules
 
 # Set default command
 CMD ["node", "servers/quick-start/dist/server.js"]
-# @valerio: need help to make this generic
