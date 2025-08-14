@@ -1,11 +1,43 @@
-import { LoggerModule } from '@unique/logger';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { McpModule } from '@rekog/mcp-nest';
+import { LoggerModule } from '@unique-ag/logger';
+import { typeid } from 'typeid-js';
+import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
+import { AuthModule } from './auth/auth.module';
+import { MicrosoftOAuthProvider } from './auth/microsoft.provider';
+import { GreetingTool } from './greeting.tool';
 
 @Module({
-  imports: [LoggerModule.forRoot({})],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validateConfig,
+    }),
+    LoggerModule.forRootAsync({}),
+    AuthModule.forRootAsync({
+      useFactory: (configService: ConfigService<AppConfig, true>) => ({
+        provider: MicrosoftOAuthProvider,
+        clientId: configService.get(AppSettings.MICROSOFT_CLIENT_ID),
+        clientSecret: configService.get(AppSettings.MICROSOFT_CLIENT_SECRET),
+        jwtSecret: configService.get(AppSettings.JWT_SECRET),
+        serverUrl: configService.get(AppSettings.SELF_URL),
+        resource: configService.get(AppSettings.SELF_URL),
+      }),
+      inject: [ConfigService],
+    }),
+    McpModule.forRoot({
+      name: 'outlook-mcp',
+      version: '0.0.1',
+      streamableHttp: {
+        enableJsonResponse: false,
+        sessionIdGenerator: () => typeid('session').toString(),
+        statelessMode: false,
+      },
+      guards: [],
+    }),
+  ],
+  controllers: [],
+  providers: [GreetingTool],
 })
 export class AppModule {}

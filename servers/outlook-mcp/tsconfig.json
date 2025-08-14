@@ -8,13 +8,16 @@
     "resolvePackageJsonExports": true,
     "removeComments": true,
     "incremental": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
     // "strict": false,
     // "noImplicitAny": false,
     // "strictBindCallApply": false,
     // "noFallthroughCasesInSwitch": false,
     // "noUncheckedIndexedAccess": false
+    "paths": {
+      "@generated/*": ["./@generated/*"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "@generated/**/*"]
 }
