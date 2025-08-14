@@ -1,7 +1,7 @@
 import { OAuthProviderConfig } from '@rekog/mcp-nest';
 import { Strategy as Microsoft } from 'passport-microsoft';
 
-const SCOPES = ['openid', 'profile', 'email', 'offline_access', 'User.Read', 'Mail.Read'];
+export const SCOPES = ['openid', 'profile', 'email', 'offline_access', 'User.Read', 'Mail.Read'];
 
 export const MicrosoftOAuthProvider: OAuthProviderConfig = {
   name: 'microsoft',

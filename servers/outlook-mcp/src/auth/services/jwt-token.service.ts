@@ -12,6 +12,38 @@ export interface TokenPair {
   scope?: string;
 }
 
+interface BaseTokenPayload extends JwtPayload {
+  sub: string; // User ID
+  iss?: string; // Issuer
+  aud?: string | string[]; // Audience
+  jti?: string; // JWT ID
+}
+
+export interface AccessTokenPayload extends BaseTokenPayload {
+  type: 'access';
+  azp: string; // Authorized party (client ID)
+  resource: string;
+  scope: string;
+  user_profile_id?: string;
+  user_data?: unknown;
+}
+
+export interface RefreshTokenPayload extends BaseTokenPayload {
+  type: 'refresh';
+  client_id: string;
+  scope: string;
+  resource: string;
+  user_profile_id?: string;
+  user_data?: unknown;
+}
+
+export interface UserTokenPayload extends BaseTokenPayload {
+  type: 'user';
+  user_data: unknown;
+}
+
+export type CustomTokenPayload = AccessTokenPayload | RefreshTokenPayload | UserTokenPayload;
+
 @Injectable()
 export class JwtTokenService {
   public constructor(
@@ -69,11 +101,15 @@ export class JwtTokenService {
     };
   }
 
-  public validateToken(token: string): JwtPayload | string | null {
+  public validateToken(token: string): CustomTokenPayload | null {
     try {
-      return jwt.verify(token, this.options.jwtSecret, {
+      const decoded = jwt.verify(token, this.options.jwtSecret, {
         algorithms: ['HS256'],
       });
+
+      if (typeof decoded === 'string') return null;
+
+      return decoded as CustomTokenPayload;
     } catch {
       return null;
     }
@@ -82,7 +118,7 @@ export class JwtTokenService {
   public refreshAccessToken(refreshToken: string, clientId: string): TokenPair | null {
     const payload = this.validateToken(refreshToken);
 
-    if (!payload || typeof payload === 'string' || payload.type !== 'refresh') return null;
+    if (!payload || payload.type !== 'refresh') return null;
     if (payload.client_id !== clientId) return null;
     if (!payload.client_id || !payload.sub) return null;
 

@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { McpModule } from '@rekog/mcp-nest';
 import { LoggerModule } from '@unique-ag/logger';
 import { typeid } from 'typeid-js';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { AuthModule } from './auth/auth.module';
+import { McpAuthJwtGuard } from './auth/guards/mcp-auth-jwt.guard';
 import { MicrosoftOAuthProvider } from './auth/microsoft.provider';
 import { GreetingTool } from './greeting.tool';
+import { OutlookModule } from './outlook/outlook.module';
 
 @Module({
   imports: [
@@ -34,10 +37,16 @@ import { GreetingTool } from './greeting.tool';
         sessionIdGenerator: () => typeid('session').toString(),
         statelessMode: false,
       },
-      guards: [],
     }),
+    OutlookModule,
   ],
   controllers: [],
-  providers: [GreetingTool],
+  providers: [
+    GreetingTool,
+    {
+      provide: APP_GUARD,
+      useClass: McpAuthJwtGuard,
+    },
+  ],
 })
 export class AppModule {}

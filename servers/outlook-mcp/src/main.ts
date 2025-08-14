@@ -10,8 +10,7 @@ async function bootstrap() {
 
   const configService = app.get<ConfigService<AppConfig, true>>(ConfigService);
 
-  if (configService.get(AppSettings.NODE_ENV, { infer: true }) === 'production')
-    app.enableShutdownHooks();
+  app.enableShutdownHooks();
 
   const logger = app.get(Logger);
   app.useLogger(logger);
@@ -26,11 +25,19 @@ async function bootstrap() {
   const gracefulShutdown = async (signal: string) => {
     logger.log(`Received ${signal}. Starting graceful shutdown...`);
 
+    // Set a timeout to force shutdown if cleanup takes too long
+    const forceShutdownTimeout = setTimeout(() => {
+      logger.warn('Graceful shutdown timeout exceeded, forcing exit...');
+      process.exit(1);
+    }, 5000); // 5 second timeout
+
     try {
       await app.close();
+      clearTimeout(forceShutdownTimeout);
       logger.log('Application closed successfully');
       process.exit(0);
     } catch (error) {
+      clearTimeout(forceShutdownTimeout);
       logger.error('Error during graceful shutdown:', error);
       process.exit(1);
     }
