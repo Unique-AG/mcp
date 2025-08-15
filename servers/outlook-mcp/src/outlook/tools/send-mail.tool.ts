@@ -8,13 +8,15 @@ import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { BaseOutlookTool } from './base-outlook.tool';
 
-const ReadMailsInputSchema = z.object({
-  folder: z.string().default('inbox').describe('Mail folder to read from'),
-  limit: z.number().min(1).max(50).default(10).describe('Number of emails to retrieve'),
+const SendMailInput = z.object({
+  to: z.string().email().describe('Recipient email address'),
+  subject: z.string().describe('Email subject'),
+  body: z.string().describe('Email body content'),
+  isHtml: z.boolean().default(false).describe('Whether the body is HTML'),
 });
 
 @Injectable()
-export class ReadMailsTool extends BaseOutlookTool {
+export class SendMailTool extends BaseOutlookTool {
   private readonly logger = new Logger(this.constructor.name);
 
   // biome-ignore lint/complexity/noUselessConstructor: We need the constructor for DI to work.
@@ -23,41 +25,42 @@ export class ReadMailsTool extends BaseOutlookTool {
   }
 
   @Tool({
-    name: 'read_mails',
-    description: 'Read emails from Outlook',
-    parameters: ReadMailsInputSchema,
+    name: 'send_mail',
+    description: 'Send an email via Outlook',
+    parameters: SendMailInput,
   })
-  public async readMails(
-    { folder, limit }: z.infer<typeof ReadMailsInputSchema>,
+  public async sendMail(
+    { to, subject, body, isHtml }: z.infer<typeof SendMailInput>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
     const graphClient = this.getGraphClient(request);
 
     try {
-      const messages = await graphClient
-        .api(`/me/mailFolders/${folder}/messages`)
-        .select('subject,from,receivedDateTime,bodyPreview,importance,isRead')
-        .top(limit)
-        .orderby('receivedDateTime desc')
-        .get();
+      const message: Message = {
+        subject: subject,
+        body: {
+          contentType: isHtml ? 'html' : 'text',
+          content: body,
+        },
+        toRecipients: [
+          {
+            emailAddress: {
+              address: to,
+            },
+          },
+        ],
+      };
+
+      await graphClient.api('/me/sendMail').post({ message });
 
       return {
-        emails: messages.value.map((email: Message) => ({
-          subject: email.subject,
-          from: email.from?.emailAddress?.address,
-          fromName: email.from?.emailAddress?.name,
-          receivedAt: email.receivedDateTime,
-          preview: email.bodyPreview,
-          importance: email.importance,
-          isRead: email.isRead,
-        })),
-        count: messages.value.length,
-        folder,
+        success: true,
+        message: `Email sent successfully to ${to}`,
       };
     } catch (error) {
       this.logger.error({
-        msg: 'Failed to read emails from Outlook',
+        msg: 'Failed to send email via Outlook',
         error: serializeError(normalizeError(error)),
       });
       throw new InternalServerErrorException(error);
