@@ -16,7 +16,7 @@ const mcpServer = new McpServer({
   version: '1.0.0',
 });
 
-const api = new CoinMarketCapAPI('');
+const api = new CoinMarketCapAPI();
 
 mcpServer.resource('listCurrencies', 'crypto://currencies', async (uri) => {
   const symbols = await api.listCurrencies();

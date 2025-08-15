@@ -213,18 +213,10 @@ export class AuthController {
           });
 
           request.user = user;
-          const { jwt, redirectUrl } = await this.authService.processAuthenticationSuccess({
+          const { redirectUrl } = await this.authService.processAuthenticationSuccess({
             user,
             sessionId: request.cookies?.oauth_session,
             sessionState: request.cookies?.oauth_state,
-          });
-
-          // Set JWT token as cookie for UI endpoints
-          response.cookie('auth_token', jwt, {
-            httpOnly: true,
-            secure: this.options.cookieSecure,
-            maxAge: this.options.cookieMaxAge,
-            sameSite: 'lax',
           });
 
           // Clear temporary cookies
@@ -262,7 +254,7 @@ export class AuthController {
   public async token(@Body() tokenDto: TokenRequestDto) {
     this.logger.debug({
       msg: 'Token exchange request',
-      tokenDto, // TODO: remove this
+      grantType: tokenDto.grant_type,
     });
 
     switch (tokenDto.grant_type) {

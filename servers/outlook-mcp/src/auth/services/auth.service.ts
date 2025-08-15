@@ -54,8 +54,6 @@ export class AuthService {
 
     if (session.state !== sessionState) throw new UnauthorizedException('Invalid state.');
 
-    const jwt = this.jwtTokenService.generateUserToken(user.profile.username, user.profile);
-
     const userProfileId = await this.store.upsertUserProfile(user);
     const authCode = randomBytes(32).toString('base64url');
 
@@ -90,7 +88,6 @@ export class AuthService {
     await this.store.removeOAuthSession(sessionId);
 
     return {
-      jwt,
       redirectUrl: redirectUrl.toString(),
     };
   }

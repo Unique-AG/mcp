@@ -127,23 +127,4 @@ export class JwtTokenService {
       user_data: payload.user_data,
     });
   }
-
-  public generateUserToken(userId: string, userData: unknown): string {
-    const jti = typeid('jti').toString();
-    const serverUrl = this.options.serverUrl;
-
-    const payload = {
-      sub: userId,
-      type: 'user',
-      user_data: userData,
-      jti,
-      iss: serverUrl,
-      aud: 'mcp-client',
-    };
-
-    return jwt.sign(payload, this.options.jwtSecret, {
-      algorithm: 'HS256',
-      expiresIn: this.options.jwtUserTokenExpiresIn,
-    });
-  }
 }
