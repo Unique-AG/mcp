@@ -1,9 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { AuthorizationCode, OAuthClient, OAuthSession, OAuthUserProfile } from '@rekog/mcp-nest';
+import { Logger } from '@nestjs/common';
+import {
+  AuthorizationCode,
+  type IEncryptionService,
+  IOAuthStore,
+  OAuthClient,
+  OAuthSession,
+  OAuthUserProfile,
+  PassportUser,
+} from '@unique-ag/mcp-oauth';
 import { typeid } from 'typeid-js';
 import { PrismaService } from '../prisma/prisma.service';
-import { IOAuthStore } from './io-auth-store.interface';
-import { PassportUser } from './services/oauth-strategy.service';
 import {
   convertAuthCodeToPrisma,
   convertOAuthClientToPrisma,
@@ -11,13 +17,15 @@ import {
   convertPrismaToOAuthClient,
   convertPrismaToSession,
   convertSessionToPrisma,
-} from './utils/case-converter';
+} from '../utils/case-converter';
 
-@Injectable()
 export class McpOAuthStore implements IOAuthStore {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(private prisma: PrismaService) {}
+  public constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryptionService: IEncryptionService,
+  ) {}
 
   public async storeClient(client: OAuthClient): Promise<OAuthClient> {
     const saved = await this.prisma.oAuthClient.create({
@@ -121,6 +129,9 @@ export class McpOAuthStore implements IOAuthStore {
   public async upsertUserProfile(user: PassportUser): Promise<string> {
     const { profile, accessToken, refreshToken, provider } = user;
 
+    const encryptedAccessToken = this.encryptionService.encryptToString(accessToken);
+    const encryptedRefreshToken = this.encryptionService.encryptToString(refreshToken);
+
     const mappedProfile = {
       provider,
       providerUserId: profile.id,
@@ -129,9 +140,8 @@ export class McpOAuthStore implements IOAuthStore {
       displayName: profile.displayName,
       avatarUrl: profile.avatarUrl,
       raw: profile.raw,
-      // TODO: we need to encrypt these tokens.
-      accessToken,
-      refreshToken,
+      accessToken: encryptedAccessToken,
+      refreshToken: encryptedRefreshToken,
     };
 
     const saved = await this.prisma.userProfile.upsert({

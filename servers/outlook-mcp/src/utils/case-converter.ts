@@ -3,7 +3,7 @@ import {
   OAuthClient as PrismaOAuthClient,
   OAuthSession as PrismaOAuthSession,
 } from '@generated/prisma';
-import { AuthorizationCode, OAuthClient, OAuthSession } from '@rekog/mcp-nest';
+import { AuthorizationCode, OAuthClient, OAuthSession } from '@unique-ag/mcp-oauth';
 
 /**
  * Type-safe converter for OAuthClient

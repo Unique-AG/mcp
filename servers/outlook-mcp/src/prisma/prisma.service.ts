@@ -10,7 +10,6 @@ const ExtendedPrismaClient = class {
 
 @Injectable()
 export class PrismaService extends ExtendedPrismaClient {
-  // biome-ignore lint/complexity/noUselessConstructor: We need the constructor for DI to work.
   public constructor(provider: PrismaProvider) {
     super(provider);
   }

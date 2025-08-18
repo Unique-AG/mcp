@@ -1,6 +1,7 @@
 import { Client, ClientOptions, MiddlewareFactory } from '@microsoft/microsoft-graph-client';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { AppConfig, AppSettings } from '../app-settings.enum';
 import { SCOPES } from '../auth/microsoft.provider';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,6 +17,7 @@ export class GraphClientFactory {
   public constructor(
     private readonly configService: ConfigService<AppConfig, true>,
     private readonly prisma: PrismaService,
+    private readonly encryptionService: AesGcmEncryptionService,
   ) {
     this.clientId = this.configService.get(AppSettings.MICROSOFT_CLIENT_ID);
     this.clientSecret = this.configService.get(AppSettings.MICROSOFT_CLIENT_SECRET);
@@ -24,11 +26,16 @@ export class GraphClientFactory {
 
   public createClientForUser(userProfileId: string): Client {
     const tokenProvider = new TokenProvider(
-      this.prisma,
-      userProfileId,
-      this.clientId,
-      this.clientSecret,
-      this.scopes,
+      {
+        userProfileId,
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        scopes: this.scopes,
+      },
+      {
+        prisma: this.prisma,
+        encryptionService: this.encryptionService,
+      },
     );
 
     // Get the default middleware chain as an array

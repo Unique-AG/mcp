@@ -1,9 +1,9 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { type Context, Tool } from '@rekog/mcp-nest';
+import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
-import { type McpAuthenticatedRequest } from '../../auth/guards/mcp-auth-jwt.guard';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { BaseOutlookTool } from './base-outlook.tool';
@@ -17,7 +17,6 @@ const ReadMailsInputSchema = z.object({
 export class ReadMailsTool extends BaseOutlookTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  // biome-ignore lint/complexity/noUselessConstructor: We need the constructor for DI to work.
   public constructor(graphClientFactory: GraphClientFactory) {
     super(graphClientFactory);
   }

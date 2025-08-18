@@ -11,7 +11,10 @@ import { AesGcmEncryptionService } from './aes-gcm-encryption.service';
   providers: [
     {
       provide: AES_GCM_ENCRYPTION_MODULE_OPTIONS_RESOLVED_TOKEN,
-      useFactory: (options: { key: Buffer | string; ivLength?: number }): ResolvedEncryptionOptions => {
+      useFactory: (options: {
+        key: Buffer | string;
+        ivLength?: number;
+      }): ResolvedEncryptionOptions => {
         let keyBuffer: Buffer;
         if (Buffer.isBuffer(options.key)) {
           keyBuffer = options.key;

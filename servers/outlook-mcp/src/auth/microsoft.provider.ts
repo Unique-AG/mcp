@@ -1,7 +1,17 @@
-import { OAuthProviderConfig } from '@rekog/mcp-nest';
+import { type OAuthProviderConfig } from '@unique-ag/mcp-oauth';
 import { Strategy as Microsoft } from 'passport-microsoft';
 
-export const SCOPES = ['openid', 'profile', 'email', 'offline_access', 'User.Read', 'Mail.Read'];
+export const SCOPES = [
+  'openid',
+  'profile',
+  'email',
+  'offline_access',
+  'User.Read',
+  'Mail.ReadWrite',
+  'Mail.Send',
+  'Calendars.ReadWrite',
+  'Contacts.ReadWrite',
+];
 
 export const MicrosoftOAuthProvider: OAuthProviderConfig = {
   name: 'microsoft',
@@ -10,9 +20,8 @@ export const MicrosoftOAuthProvider: OAuthProviderConfig = {
     clientID: clientId,
     clientSecret,
     callbackURL: `${serverUrl}${callbackPath}`,
-    scope: SCOPES, // Bug in the library. Needs scope to be set here too.
+    scope: SCOPES,
   }),
-  scope: SCOPES,
   profileMapper: (profile) => ({
     id: profile.id,
     username: profile.userPrincipalName,

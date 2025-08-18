@@ -3,20 +3,47 @@ import {
   AuthenticationProviderOptions,
 } from '@microsoft/microsoft-graph-client';
 import { Logger } from '@nestjs/common';
+import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { serializeError } from 'serialize-error-cjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizeError } from '../utils/normalize-error';
 
 export class TokenProvider implements AuthenticationProvider {
   private readonly logger = new Logger(TokenProvider.name);
+  private readonly userProfileId: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly scopes: string[];
+  private readonly prisma: PrismaService;
+  private readonly encryptionService: AesGcmEncryptionService;
 
   public constructor(
-    private readonly prisma: PrismaService,
-    private readonly userProfileId: string,
-    private readonly clientId: string,
-    private readonly clientSecret: string,
-    private readonly scopes: string[],
-  ) {}
+    {
+      userProfileId,
+      clientId,
+      clientSecret,
+      scopes,
+    }: {
+      userProfileId: string;
+      clientId: string;
+      clientSecret: string;
+      scopes: string[];
+    },
+    {
+      prisma,
+      encryptionService,
+    }: {
+      prisma: PrismaService;
+      encryptionService: AesGcmEncryptionService;
+    },
+  ) {
+    this.userProfileId = userProfileId;
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.scopes = scopes;
+    this.prisma = prisma;
+    this.encryptionService = encryptionService;
+  }
 
   public async getAccessToken(
     _authenticationProviderOptions?: AuthenticationProviderOptions,
@@ -31,10 +58,12 @@ export class TokenProvider implements AuthenticationProvider {
     if (!userProfile.accessToken)
       throw new Error(`Access token not found for user: ${this.userProfileId}`);
 
+    const decrypedAccessToken = this.encryptionService.decryptFromString(userProfile.accessToken);
+
     // Return the access token directly
     // If the token is expired, the Microsoft Graph SDK will handle the error
     // when making actual API calls, and you can implement retry logic there
-    return userProfile.accessToken;
+    return decrypedAccessToken.toString('utf-8');
   }
 
   public async refreshAccessToken(userProfileId: string): Promise<string> {
@@ -47,6 +76,8 @@ export class TokenProvider implements AuthenticationProvider {
     if (!userProfile?.refreshToken)
       throw new Error(`No refresh token available for user: ${this.userProfileId}`);
 
+    const decrypedRefreshToken = this.encryptionService.decryptFromString(userProfile.refreshToken);
+
     try {
       // Microsoft OAuth2 token refresh endpoint
       const response = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
@@ -56,7 +87,7 @@ export class TokenProvider implements AuthenticationProvider {
         },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          refresh_token: userProfile.refreshToken,
+          refresh_token: decrypedRefreshToken.toString('utf-8'),
           client_id: this.clientId,
           client_secret: this.clientSecret,
           scope: this.scopes.join(' '),
@@ -71,12 +102,18 @@ export class TokenProvider implements AuthenticationProvider {
 
       const tokenData = await response.json();
 
+      const encryptedAccessToken = this.encryptionService.encryptToString(tokenData.access_token);
+      // Keep old refresh token if new one not provided
+      const encryptedRefreshToken = this.encryptionService.encryptToString(
+        tokenData.refresh_token || userProfile.refreshToken,
+      );
+
       // Update the stored tokens
       await this.prisma.userProfile.update({
         where: { id: this.userProfileId },
         data: {
-          accessToken: tokenData.access_token,
-          refreshToken: tokenData.refresh_token || userProfile.refreshToken, // Keep old refresh token if new one not provided
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
         },
       });
 

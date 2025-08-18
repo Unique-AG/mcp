@@ -24,6 +24,28 @@ const appSettingsSchema = z.object({
     .describe('The client secret of the Microsoft App Registration that the MCP Server will use.'),
   JWT_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign JWT tokens.'),
   SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
+  ENCRYPTION_KEY: z
+    .union([z.string(), z.instanceof(Buffer)])
+    .transform((key) => {
+      if (Buffer.isBuffer(key)) {
+        return key;
+      }
+
+      try {
+        const hexBuffer = Buffer.from(key, 'hex');
+        if (hexBuffer.length === key.length / 2) return hexBuffer;
+      } catch {
+        // fallback to base64
+      }
+
+      return Buffer.from(key, 'base64');
+    })
+    .refine((buffer) => buffer.length === 32, {
+      message: 'Key must be 32 bytes (AES-256)',
+    })
+    .describe(
+      'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',
+    ),
 });
 
 export const AppSettings = appSettingsSchema.keyof().enum;

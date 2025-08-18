@@ -7,7 +7,7 @@ export type { AuthorizationCode, OAuthClient } from './interfaces/oauth-client.i
 export type {
   OAuthProviderConfig,
   OAuthSession,
-  OAuthUserProfile
+  OAuthUserProfile,
 } from './interfaces/oauth-provider.interface';
 export * from './mcp-oauth.controller';
 export * from './mcp-oauth.module';
@@ -16,8 +16,8 @@ export {
   MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
   MCP_OAUTH_MODULE_OPTIONS_TOKEN,
   type McpOAuthModuleOptions,
-  type McpOAuthModuleOptionsInput,  
-  OAUTH_STORE_TOKEN 
+  type McpOAuthModuleOptionsInput,
+  OAUTH_STORE_TOKEN,
 } from './mcp-oauth.module-definition';
 export * from './services/client.service';
 export type {
@@ -25,7 +25,7 @@ export type {
   CustomTokenPayload,
   RefreshTokenPayload,
   TokenPair,
-  UserTokenPayload
+  UserTokenPayload,
 } from './services/jwt-token.service';
 export * from './services/jwt-token.service';
 export * from './services/mcp-oauth.service';
