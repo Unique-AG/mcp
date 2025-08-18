@@ -1,15 +1,29 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { type CustomTokenPayload, JwtTokenService } from '../services/jwt-token.service';
+import {
+  MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
+  type McpOAuthModuleOptions,
+} from '../mcp-oauth.module-definition';
+import { OpaqueTokenService, type TokenValidationResult } from '../services/opaque-token.service';
 
-// Extend the AuthenticatedRequest to properly type the user property with our custom claims
+// Extend the AuthenticatedRequest to properly type the user property with our token validation result
 export interface McpAuthenticatedRequest extends Request {
-  user?: CustomTokenPayload;
+  user?: TokenValidationResult;
 }
 
 @Injectable()
 export class McpAuthJwtGuard implements CanActivate {
-  public constructor(private readonly jwtTokenService: JwtTokenService) {}
+  public constructor(
+    private readonly tokenService: OpaqueTokenService,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: McpOAuthModuleOptions,
+  ) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<McpAuthenticatedRequest>();
@@ -21,10 +35,17 @@ export class McpAuthJwtGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException('Access token required');
 
-    const payload = this.jwtTokenService.validateToken(token);
-    if (!payload) throw new UnauthorizedException('Invalid or expired access token');
+    const validationResult = await this.tokenService.validateAccessToken(token);
+    if (!validationResult) throw new UnauthorizedException('Invalid or expired access token');
 
-    request.user = payload;
+    // Validate that the token was issued for this specific MCP server resource
+    // This prevents token passthrough attacks as required by the MCP specification
+    if (validationResult.resource !== this.options.resource)
+      throw new UnauthorizedException(
+        'Token not valid for this resource. Token was issued for a different resource.',
+      );
+
+    request.user = validationResult;
     return true;
   }
 

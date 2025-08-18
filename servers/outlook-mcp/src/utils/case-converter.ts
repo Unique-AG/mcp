@@ -63,8 +63,6 @@ export function convertAuthCodeToPrisma(code: AuthorizationCode) {
     resource: code.resource,
     scope: code.scope,
     expiresAt: new Date(code.expires_at),
-    usedAt: code.used_at,
-    githubAccessToken: code.github_access_token,
     userProfileId: code.user_profile_id,
   };
 }
@@ -83,9 +81,7 @@ export function convertPrismaToAuthCode(prismaCode: PrismaAuthorizationCode) {
     resource: prismaCode.resource ?? undefined,
     scope: prismaCode.scope ?? undefined,
     expires_at: prismaCode.expiresAt.getTime(),
-    used_at: prismaCode.usedAt ?? undefined,
-    github_access_token: prismaCode.githubAccessToken ?? '',
-    user_profile_id: prismaCode.userProfileId ?? undefined,
+    user_profile_id: prismaCode.userProfileId,
   };
 }
 

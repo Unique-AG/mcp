@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import passport from 'passport';
+import { OAUTH_ENDPOINTS } from '../constants/oauth.constants';
 import { OAuthUserProfile } from '../interfaces/oauth-provider.interface';
-import { OAUTH_ENDPOINTS } from '../mcp-oauth.controller';
 import {
-  MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN as MCP_OAUTH_MODULE_OPTIONS_TOKEN,
+  MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
   type McpOAuthModuleOptions,
 } from '../mcp-oauth.module-definition';
 
@@ -21,7 +21,7 @@ export class OAuthStrategyService implements OnModuleInit {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
   ) {}
 
   public onModuleInit() {

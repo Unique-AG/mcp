@@ -1,112 +1,45 @@
 import { randomBytes } from 'node:crypto';
 import {
   BadRequestException,
-  Body,
   Controller,
   Get,
-  Header,
-  HttpCode,
   HttpStatus,
   Inject,
   Logger,
   Next,
-  Post,
   Query,
   Req,
   Res,
   UnauthorizedException,
-  UsePipes,
+  UseGuards,
 } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { type NextFunction, type Request, type Response } from 'express';
-import { ZodValidationPipe } from 'nestjs-zod';
 import passport from 'passport';
 import { serializeError } from 'serialize-error-cjs';
-import { RegisterClientDto } from './dtos/register-client.dto';
-import { TokenRequestDto } from './dtos/token-request.dto';
-import type { IOAuthStore } from './interfaces/io-auth-store.interface';
+import { OAUTH_ENDPOINTS } from '../constants/oauth.constants';
+import type { IOAuthStore } from '../interfaces/io-auth-store.interface';
 import {
-  MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN as MCP_OAUTH_MODULE_OPTIONS_TOKEN,
+  MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
   type McpOAuthModuleOptions,
   OAUTH_STORE_TOKEN,
-} from './mcp-oauth.module-definition';
-import { ClientService } from './services/client.service';
-import { McpOAuthService } from './services/mcp-oauth.service';
-import { PassportUser, STRATEGY_NAME } from './services/oauth-strategy.service';
-import { normalizeError } from './utils/normalize-error';
-
-export const OAUTH_ENDPOINTS = {
-  authorize: '/auth/authorize',
-  callback: '/auth/callback',
-  register: '/auth/register',
-  token: '/auth/token',
-  revoke: '/auth/revoke',
-};
+} from '../mcp-oauth.module-definition';
+import { ClientService } from '../services/client.service';
+import { McpOAuthService } from '../services/mcp-oauth.service';
+import { PassportUser, STRATEGY_NAME } from '../services/oauth-strategy.service';
+import { normalizeError } from '../utils/normalize-error';
 
 @Controller()
-export class McpOAuthController {
+@UseGuards(ThrottlerGuard)
+export class OAuthController {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
     private readonly authService: McpOAuthService,
     private readonly clientService: ClientService,
     @Inject(OAUTH_STORE_TOKEN) private readonly store: IOAuthStore,
   ) {}
-
-  /*
-   * TODO: Extend this with more additional metadata.
-   * TODO: Move well-known endpoints to a separate controller.
-   *
-   * For example:
-   *
-   * {
-   *   "jwks_uri": "https://mcp.example.com/.well-known/jwks.json",
-   *   "resource_name": "Example MCP Server",
-   *   "resource_documentation": "https://docs.example.com/mcp",
-   *   "resource_policy_uri": "https://example.com/policy",
-   *   "resource_tos_uri": "https://example.com/tos",
-   *   "resource_signing_alg_values_supported": ["RS256"],
-   *   "tls_client_certificate_bound_access_tokens": false,
-   *   "dpop_bound_access_tokens_required": false
-   * }
-   */
-  @Get('.well-known/oauth-protected-resource')
-  public getProtectedResourceMetadata() {
-    const metadata = {
-      authorization_servers: [this.options.jwtIssuer],
-      resource: this.options.resource,
-      scopes_supported: this.options.protectedResourceMetadata.scopesSupported,
-      bearer_methods_supported: this.options.protectedResourceMetadata.bearerMethodsSupported,
-      mcp_versions_supported: this.options.protectedResourceMetadata.mcpVersionsSupported,
-    };
-
-    return metadata;
-  }
-
-  @Get('.well-known/oauth-authorization-server')
-  public getAuthorizationServerMetadata() {
-    return {
-      issuer: this.options.serverUrl,
-      authorization_endpoint: `${this.options.serverUrl}${OAUTH_ENDPOINTS.authorize}`,
-      token_endpoint: `${this.options.serverUrl}${OAUTH_ENDPOINTS.token}`,
-      registration_endpoint: `${this.options.serverUrl}${OAUTH_ENDPOINTS.register}`,
-      response_types_supported: this.options.authorizationServerMetadata.responseTypesSupported,
-      response_modes_supported: this.options.authorizationServerMetadata.responseModesSupported,
-      grant_types_supported: this.options.authorizationServerMetadata.grantTypesSupported,
-      token_endpoint_auth_methods_supported:
-        this.options.authorizationServerMetadata.tokenEndpointAuthMethodsSupported,
-      scopes_supported: this.options.authorizationServerMetadata.scopesSupported,
-      revocation_endpoint: `${this.options.serverUrl}${OAUTH_ENDPOINTS.revoke}`,
-      code_challenge_methods_supported:
-        this.options.authorizationServerMetadata.codeChallengeMethodsSupported,
-    };
-  }
-
-  @Post(OAUTH_ENDPOINTS.register)
-  @UsePipes(ZodValidationPipe)
-  public async registerClient(@Body() registerClientDto: RegisterClientDto) {
-    return this.clientService.registerClient(registerClientDto);
-  }
 
   @Get(OAUTH_ENDPOINTS.authorize)
   public async authorize(
@@ -117,6 +50,7 @@ export class McpOAuthController {
     @Query('code_challenge_method') codeChallengeMethod: string,
     @Query('state') state: string,
     @Query('scope') scope: string,
+    @Query('resource') resource: string,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
     @Next() next: NextFunction,
@@ -125,10 +59,22 @@ export class McpOAuthController {
       msg: 'Start oAuth autorization',
       clientId,
       redirectUri,
+      resource,
     });
 
     if (responseType !== 'code') throw new BadRequestException('Invalid response type');
     if (!clientId) throw new BadRequestException('Missing client_id parameter');
+
+    // Validate resource parameter according to RFC 8707
+    // The resource parameter MUST identify the MCP server that the client intends to use the token with
+    if (resource && resource !== this.options.resource) {
+      this.logger.error({
+        msg: 'Invalid resource parameter',
+        requested: resource,
+        expected: this.options.resource,
+      });
+      throw new BadRequestException('Invalid resource parameter');
+    }
 
     const client = await this.clientService.getClient(clientId);
     if (!client) throw new BadRequestException('Invalid client_id parameter');
@@ -150,7 +96,7 @@ export class McpOAuthController {
       codeChallengeMethod,
       oauthState: state, // This is the PKCE state of the MCP client.
       scope,
-      resource: this.options.resource,
+      resource: resource || this.options.resource, // Use provided resource or default to configured resource
       expiresAt: Date.now() + this.options.oauthSessionExpiresIn,
     });
 
@@ -248,26 +194,5 @@ export class McpOAuthController {
     );
 
     authMiddleware(request, response, next);
-  }
-
-  @Post(OAUTH_ENDPOINTS.token)
-  @Header('Cache-Control', 'no-store')
-  @Header('Pragma', 'no-cache')
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(ZodValidationPipe)
-  public async token(@Body() tokenDto: TokenRequestDto) {
-    this.logger.debug({
-      msg: 'Token exchange request',
-      grantType: tokenDto.grant_type,
-    });
-
-    switch (tokenDto.grant_type) {
-      case 'authorization_code':
-        return this.authService.exchangeAuthorizationCodeForToken(tokenDto);
-      case 'refresh_token':
-        return this.authService.exchangeRefreshTokenForToken(tokenDto);
-      default:
-        throw new BadRequestException(`Unsupported grant type ${tokenDto.grant_type}`);
-    }
   }
 }

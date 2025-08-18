@@ -8,6 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TokenType {
+  ACCESS
+  REFRESH
+}
+
 /// @idPrefix(oauth_client)
 model OAuthClient {
   id                      String   @id @default(cuid())
@@ -29,8 +34,8 @@ model OAuthClient {
 
 /// @idPrefix(auth_code)
 model AuthorizationCode {
-  id                  String       @id @default(cuid())
-  code                String       @unique
+  id                  String      @id @default(cuid())
+  code                String      @unique
   userId              String
   clientId            String
   redirectUri         String
@@ -41,10 +46,10 @@ model AuthorizationCode {
   expiresAt           DateTime
   usedAt              DateTime?
   githubAccessToken   String?
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  userProfileId       String?
-  userProfile         UserProfile? @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  userProfileId       String
+  userProfile         UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 }
 
 /// @idPrefix(oauth_session)
@@ -80,6 +85,24 @@ model UserProfile {
   updatedAt      DateTime @updatedAt
 
   authorizationCodes AuthorizationCode[]
+  tokens             Token[]
 
   @@unique([provider, providerUserId])
+}
+
+/// @idPrefix(token)
+model Token {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  userId    String
+  clientId  String
+  scope     String
+  resource  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userProfileId String
+  userProfile   UserProfile? @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 }

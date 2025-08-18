@@ -43,7 +43,7 @@ import { PrismaService } from './prisma/prisma.service';
         jwtSecret: configService.get(AppSettings.JWT_SECRET),
 
         serverUrl: configService.get(AppSettings.SELF_URL),
-        resource: configService.get(AppSettings.SELF_URL),
+        resource: `${configService.get(AppSettings.SELF_URL)}/mcp`,
         jwtIssuer: configService.get(AppSettings.SELF_URL),
 
         oauthStore: new McpOAuthStore(prisma, aesService),

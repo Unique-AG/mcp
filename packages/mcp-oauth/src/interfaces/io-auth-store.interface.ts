@@ -2,6 +2,25 @@ import { PassportUser } from '../services/oauth-strategy.service';
 import { AuthorizationCode, OAuthClient } from './oauth-client.interface';
 import { OAuthSession, OAuthUserProfile } from './oauth-provider.interface';
 
+export interface AccessTokenMetadata {
+  userId: string;
+  clientId: string;
+  scope: string;
+  resource: string;
+  expiresAt: Date;
+  userProfileId: string;
+  userData?: unknown;
+}
+
+export interface RefreshTokenMetadata {
+  userId: string;
+  clientId: string;
+  scope: string;
+  resource: string;
+  expiresAt: Date;
+  userProfileId: string;
+}
+
 export interface IOAuthStore {
   // Client management
   storeClient(client: OAuthClient): Promise<OAuthClient>;
@@ -19,6 +38,15 @@ export interface IOAuthStore {
   getOAuthSession(sessionId: string): Promise<OAuthSession | undefined>;
   removeOAuthSession(sessionId: string): Promise<void>;
 
+  // Token management (for opaque tokens)
+  storeAccessToken(token: string, metadata: AccessTokenMetadata): Promise<void>;
+  getAccessToken(token: string): Promise<AccessTokenMetadata | undefined>;
+  removeAccessToken(token: string): Promise<void>;
+
+  storeRefreshToken(token: string, metadata: RefreshTokenMetadata): Promise<void>;
+  getRefreshToken(token: string): Promise<RefreshTokenMetadata | undefined>;
+  removeRefreshToken(token: string): Promise<void>;
+
   // User profile management
   /**
    * Upsert a user profile from an OAuth provider and return a stable profile_id.
@@ -26,7 +54,6 @@ export interface IOAuthStore {
    */
   upsertUserProfile(user: PassportUser): Promise<string>;
 
-  /** Retrieve a stored user profile by its profile_id */
   getUserProfileById(
     profileId: string,
   ): Promise<(OAuthUserProfile & { profile_id: string; provider: string }) | undefined>;

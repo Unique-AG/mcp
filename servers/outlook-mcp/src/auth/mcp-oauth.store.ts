@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
+  AccessTokenMetadata,
   AuthorizationCode,
   type IEncryptionService,
   IOAuthStore,
@@ -7,6 +8,7 @@ import {
   OAuthSession,
   OAuthUserProfile,
   PassportUser,
+  RefreshTokenMetadata,
 } from '@unique-ag/mcp-oauth';
 import { typeid } from 'typeid-js';
 import { PrismaService } from '../prisma/prisma.service';
@@ -177,5 +179,86 @@ export class McpOAuthStore implements IOAuthStore {
       avatarUrl: profile.avatarUrl || undefined,
       raw: profile.raw || undefined,
     };
+  }
+
+  public async storeAccessToken(token: string, metadata: AccessTokenMetadata): Promise<void> {
+    const profile = await this.getUserProfileById(metadata.userProfileId);
+    if (!profile) throw new Error('User profile not found');
+
+    await this.prisma.token.create({
+      data: {
+        token,
+        type: 'ACCESS',
+        expiresAt: metadata.expiresAt,
+        userId: metadata.userId,
+        clientId: metadata.clientId,
+        scope: metadata.scope,
+        resource: metadata.resource,
+        userProfileId: metadata.userProfileId,
+      },
+    });
+  }
+
+  public async getAccessToken(token: string): Promise<AccessTokenMetadata | undefined> {
+    const metadata = await this.prisma.token.findUnique({
+      where: { token },
+      include: {
+        userProfile: true,
+      },
+    });
+    if (!metadata) return undefined;
+    if (metadata.expiresAt < new Date()) {
+      await this.removeAccessToken(token);
+      return undefined;
+    }
+
+    return {
+      ...metadata,
+      userData: metadata.userProfile?.raw,
+    };
+  }
+
+  public async removeAccessToken(token: string): Promise<void> {
+    await this.prisma.token.delete({
+      where: { token },
+    });
+  }
+
+  public async storeRefreshToken(token: string, metadata: RefreshTokenMetadata): Promise<void> {
+    const profile = await this.getUserProfileById(metadata.userProfileId);
+    if (!profile) throw new Error('User profile not found');
+
+    await this.prisma.token.create({
+      data: {
+        token,
+        type: 'REFRESH',
+        expiresAt: metadata.expiresAt,
+        userId: metadata.userId,
+        clientId: metadata.clientId,
+        scope: metadata.scope,
+        resource: metadata.resource,
+        userProfileId: metadata.userProfileId,
+      },
+    });
+  }
+
+  public async getRefreshToken(token: string): Promise<RefreshTokenMetadata | undefined> {
+    const metadata = await this.prisma.token.findUnique({
+      where: { token },
+    });
+
+    if (!metadata) return undefined;
+    if (metadata.expiresAt < new Date()) {
+      await this.removeRefreshToken(token);
+      return undefined;
+    }
+
+    return metadata;
+  }
+
+  public async removeRefreshToken(token: string): Promise<void> {
+    await this.prisma.token.delete({
+      where: { token },
+    });
   }
 }

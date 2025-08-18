@@ -64,17 +64,33 @@ export const TokenRequestSchema = z
     // Additional fields
     resource: z
       .string()
-      .url()
+      .optional()
+      .transform((val) => {
+        // Handle cases where JavaScript sends "undefined" as a string
+        if (val === 'undefined' || val === 'null' || val === '') {
+          return undefined;
+        }
+        return val;
+      })
+      .refine((val) => val === undefined || z.string().url().safeParse(val).success, {
+        message: 'Resource must be a valid URL',
+      })
       .describe(
         'The logical name of the target service where the client intends to use the requested security token',
-      )
-      .optional(),
+      ),
     audience: z
       .string()
+      .optional()
+      .transform((val) => {
+        // Handle cases where JavaScript sends "undefined" as a string
+        if (val === 'undefined' || val === 'null' || val === '') {
+          return undefined;
+        }
+        return val;
+      })
       .describe(
         'The logical name of the target service where the client intends to use the requested security token',
-      )
-      .optional(),
+      ),
   })
   .refine(
     (data) => {

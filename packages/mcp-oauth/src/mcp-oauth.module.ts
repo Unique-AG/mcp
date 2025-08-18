@@ -1,6 +1,12 @@
 import { type DynamicModule, Module, type Provider } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+import { seconds, ThrottlerModule } from '@nestjs/throttler';
+import { ClientController } from './controllers/client.controller';
+import { DiscoveryController } from './controllers/discovery.controller';
+import { OAuthController } from './controllers/oauth.controller';
+import { TokenController } from './controllers/token.controller';
+import { OAuthExceptionFilter } from './filters/oauth-exception.filter';
 import { McpAuthJwtGuard } from './guards/mcp-auth-jwt.guard';
-import { McpOAuthController } from './mcp-oauth.controller';
 import {
   ConfigurableModuleClass,
   ENCRYPTION_SERVICE_TOKEN,
@@ -13,34 +19,41 @@ import {
   OAUTH_STORE_TOKEN,
 } from './mcp-oauth.module-definition';
 import { ClientService } from './services/client.service';
-import { JwtTokenService } from './services/jwt-token.service';
 import { McpOAuthService } from './services/mcp-oauth.service';
 import { OAuthStrategyService } from './services/oauth-strategy.service';
+import { OpaqueTokenService } from './services/opaque-token.service';
 
 /**
- * Modular AuthModule that supports dependency injection for storage and encryption.
- * This module uses the standard NestJS async configuration pattern.
+ * NestJS module that implements the OAuth 2.1 Authorization Code + PKCE flow for MCP servers.
  *
  * The module expects the following to be provided via the options:
  * - oauthStore: An instance of IOAuthStore for persistent storage
  * - encryptionService: An instance of IEncryptionService for encryption
  *
  * Example usage:
- * ```typescript
- * AuthModule.forRootAsync({
- *   imports: [PrismaModule, AesGcmEncryptionModule],
- *   useFactory: (prisma: PrismaService, encryption: AesGcmEncryptionService) => ({
- *     // OAuth configuration
- *     provider: MicrosoftProvider,
- *     clientId: 'your-client-id',
- *     clientSecret: 'your-client-secret',
- *     jwtSecret: 'your-jwt-secret',
- *     // Services
- *     oauthStore: new McpOAuthStore(prisma, new AesGcmEncryptionAdapter(encryption)),
- *     encryptionService: new AesGcmEncryptionAdapter(encryption),
+ * ```ts
+ * McpOAuthModule.forRootAsync({
+ *   imports: [ConfigModule, PrismaModule],
+ *   useFactory: async (
+ *     configService: ConfigService<AppConfig, true>,
+ *     aesService: AesGcmEncryptionService,
+ *     prisma: PrismaService,
+ *   ) => ({
+ *     provider: ExampleOAuthProvider,
+ *
+ *     clientId: configService.get(AppSettings.CLIENT_ID),
+ *     clientSecret: configService.get(AppSettings.CLIENT_SECRET),
+ *     jwtSecret: configService.get(AppSettings.JWT_SECRET),
+ *
+ *     serverUrl: configService.get(AppSettings.SELF_URL),
+ *     resource: configService.get(AppSettings.SELF_URL),
+ *     jwtIssuer: configService.get(AppSettings.SELF_URL),
+ *
+ *     oauthStore: new McpOAuthStore(prisma, aesService),
+ *     encryptionService: aesService,
  *   }),
- *   inject: [PrismaService, AesGcmEncryptionService],
- * })
+ *   inject: [ConfigService, AesGcmEncryptionService, PrismaService],
+ * }),
  * ```
  */
 @Module({})
@@ -58,9 +71,13 @@ export class McpOAuthModule extends ConfigurableModuleClass {
       },
       McpOAuthService,
       ClientService,
-      JwtTokenService,
+      OpaqueTokenService,
       OAuthStrategyService,
       McpAuthJwtGuard,
+      {
+        provide: APP_FILTER,
+        useClass: OAuthExceptionFilter,
+      },
       {
         provide: OAUTH_STORE_TOKEN,
         useFactory: (moduleOptions: McpOAuthModuleOptions) => {
@@ -71,7 +88,7 @@ export class McpOAuthModule extends ConfigurableModuleClass {
           }
           return moduleOptions.oauthStore;
         },
-        inject: [MCP_OAUTH_MODULE_OPTIONS_TOKEN],
+        inject: [MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN],
       },
       {
         provide: ENCRYPTION_SERVICE_TOKEN,
@@ -83,17 +100,28 @@ export class McpOAuthModule extends ConfigurableModuleClass {
           }
           return moduleOptions.encryptionService;
         },
-        inject: [MCP_OAUTH_MODULE_OPTIONS_TOKEN],
+        inject: [MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN],
       },
     ];
 
     return {
       ...baseModule,
       module: McpOAuthModule,
-      controllers: [McpOAuthController],
+      imports: [
+        ...(baseModule.imports || []),
+        ThrottlerModule.forRoot({
+          throttlers: [
+            {
+              ttl: seconds(60),
+              limit: 10,
+            },
+          ],
+        }),
+      ],
+      controllers: [DiscoveryController, ClientController, OAuthController, TokenController],
       providers: [...(baseModule.providers || []), ...providers],
       exports: [
-        JwtTokenService,
+        OpaqueTokenService,
         McpAuthJwtGuard,
         OAUTH_STORE_TOKEN,
         ENCRYPTION_SERVICE_TOKEN,
