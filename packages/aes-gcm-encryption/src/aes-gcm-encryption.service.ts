@@ -2,8 +2,8 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import {
-  AES_GCM_ENCRYPTION_MODULE_OPTIONS_TOKEN,
-  type EncryptionOptions,
+  AES_GCM_ENCRYPTION_MODULE_OPTIONS_RESOLVED_TOKEN,
+  type ResolvedEncryptionOptions,
 } from './aes-gcm-encryption.module-definition';
 
 const CipherPayloadSchema = z.object({
@@ -19,7 +19,8 @@ export class AesGcmEncryptionService {
   private readonly algorithm = 'aes-256-gcm';
 
   public constructor(
-    @Inject(AES_GCM_ENCRYPTION_MODULE_OPTIONS_TOKEN) private readonly options: EncryptionOptions,
+    @Inject(AES_GCM_ENCRYPTION_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: ResolvedEncryptionOptions,
   ) {}
 
   public encrypt(plain: Buffer | string): CipherPayload {

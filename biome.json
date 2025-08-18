@@ -28,6 +28,9 @@
             "accessibility": "explicit"
           }
         }
+      },
+      "complexity": {
+        "noUselessConstructor": "off"
       }
     }
   },
