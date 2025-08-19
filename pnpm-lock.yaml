@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -112,7 +113,7 @@ importers:
         version: 1.16.0
       '@unique/coin-market-cap':
         specifier: workspace:*
-        version: link:../../packages/coin-market-cap
+        version: file:packages/coin-market-cap
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1579,6 +1580,9 @@ packages:
     peerDependenciesMeta:
       pino-http-print:
         optional: true
+
+  '@unique/coin-market-cap@file:packages/coin-market-cap':
+    resolution: {directory: packages/coin-market-cap, type: directory}
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
     resolution: {integrity: sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw==}
@@ -5747,6 +5751,12 @@ snapshots:
     transitivePeerDependencies:
       - pino
       - rxjs
+
+  '@unique/coin-market-cap@file:packages/coin-market-cap':
+    dependencies:
+      typescript: 5.9.2
+      undici: 7.12.0
+      zod: 3.25.76
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
     optional: true

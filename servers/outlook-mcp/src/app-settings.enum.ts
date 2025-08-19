@@ -16,13 +16,17 @@ const appSettingsSchema = z.object({
     .describe('The prisma database url for Postgres. Must start with "postgresql://".'),
   ACCESS_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
+    .optional()
+    .default('60')
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(1).default(60))
+    .pipe(z.number().int())
     .describe('The expiration time of the access token in seconds. Default is 60 seconds.'),
   REFRESH_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
+    .optional()
+    .default('2592000')
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(1).default(30 * 24 * 60 * 60))
+    .pipe(z.number().int())
     .describe('The expiration time of the refresh token in seconds. Default is 30 days.'),
   MICROSOFT_CLIENT_ID: z
     .string()
