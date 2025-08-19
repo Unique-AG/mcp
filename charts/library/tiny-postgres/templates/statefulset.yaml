@@ -19,10 +19,13 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Values.secretRef }}
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           ports:
             - containerPort: {{ .Values.port }}
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
+            - mountPath: /var/lib/postgresql
               name: data
   volumeClaimTemplates:
     - metadata:
