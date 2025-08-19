@@ -11,7 +11,7 @@ export abstract class BaseOutlookTool {
    * @throws UnauthorizedException if the user is not authenticated
    */
   protected getGraphClient(request: McpAuthenticatedRequest): Client {
-    const userProfileId = request.user?.userProfileId
+    const userProfileId = request.user?.userProfileId;
     if (!userProfileId) throw new UnauthorizedException('User not authenticated');
 
     return this.graphClientFactory.createClientForUser(userProfileId);

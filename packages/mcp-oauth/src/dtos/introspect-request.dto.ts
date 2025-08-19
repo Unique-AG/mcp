@@ -7,21 +7,18 @@ import { z } from 'zod';
  */
 export const IntrospectRequestSchema = z.object({
   token: z.string().min(1).describe('The string value of the token to introspect'),
-  
+
   token_type_hint: z
     .enum(['access_token', 'refresh_token'])
     .optional()
     .describe(
       'A hint about the type of the token submitted for introspection. ' +
-      'The introspection endpoint MAY ignore this parameter.',
+        'The introspection endpoint MAY ignore this parameter.',
     ),
-  
+
   // Client authentication for confidential clients
-  client_id: z
-    .string()
-    .min(1)
-    .describe('The client identifier for authentication'),
-  
+  client_id: z.string().min(1).describe('The client identifier for authentication'),
+
   client_secret: z
     .string()
     .optional()
@@ -47,7 +44,7 @@ export interface IntrospectionResponse {
   aud?: string | string[];
   iss?: string;
   jti?: string;
-  
+
   // Additional fields for MCP-specific metadata
   resource?: string;
   user_profile_id?: string;

@@ -19,6 +19,8 @@ export interface RefreshTokenMetadata {
   resource: string;
   expiresAt: Date;
   userProfileId: string;
+  familyId?: string | null;
+  generation?: number | null;
 }
 
 export interface IOAuthStore {
@@ -46,6 +48,11 @@ export interface IOAuthStore {
   storeRefreshToken(token: string, metadata: RefreshTokenMetadata): Promise<void>;
   getRefreshToken(token: string): Promise<RefreshTokenMetadata | undefined>;
   removeRefreshToken(token: string): Promise<void>;
+
+  // Refresh token family management for reuse detection
+  revokeTokenFamily?(familyId: string): Promise<void>;
+  markRefreshTokenAsUsed?(token: string): Promise<void>;
+  isRefreshTokenUsed?(token: string): Promise<boolean>;
 
   // User profile management
   /**

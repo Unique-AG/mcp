@@ -22,7 +22,8 @@ export class OAuthExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: McpOAuthModuleOptions,
   ) {}
 
   public catch(exception: UnauthorizedException, host: ArgumentsHost): void {
@@ -37,7 +38,6 @@ export class OAuthExceptionFilter implements ExceptionFilter {
       message: exception.message,
     });
 
-    // Check if this is a protected resource request (MCP endpoints)
     if (request.url?.startsWith('/mcp')) {
       const resourceMetadataUrl = `${this.options.serverUrl}/.well-known/oauth-protected-resource/mcp`;
 
@@ -95,7 +95,6 @@ export class OAuthExceptionFilter implements ExceptionFilter {
       return 'insufficient_scope';
     }
 
-    // Default to invalid_token for generic authentication failures
     return 'invalid_token';
   }
 }

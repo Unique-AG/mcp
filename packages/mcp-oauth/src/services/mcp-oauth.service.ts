@@ -6,16 +6,19 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { type IntrospectionResponse, type IntrospectRequestDto } from '../dtos/introspect-request.dto';
+import {
+  type IntrospectionResponse,
+  type IntrospectRequestDto,
+} from '../dtos/introspect-request.dto';
 import { type RevokeRequestDto } from '../dtos/revoke-request.dto';
 import { TokenRequestDto } from '../dtos/token-request.dto';
 import type { IOAuthStore } from '../interfaces/io-auth-store.interface';
-import { OAuthClient } from '../interfaces/oauth-client.interface';
 import {
   MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
   type McpOAuthModuleOptions,
   OAUTH_STORE_TOKEN,
 } from '../mcp-oauth.module-definition';
+import { ClientService } from './client.service';
 import { PassportUser } from './oauth-strategy.service';
 import { OpaqueTokenService } from './opaque-token.service';
 
@@ -24,9 +27,11 @@ export class McpOAuthService {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: McpOAuthModuleOptions,
     @Inject(OAUTH_STORE_TOKEN) private readonly store: IOAuthStore,
     private readonly tokenService: OpaqueTokenService,
+    private readonly clientService: ClientService,
   ) {}
 
   public async processAuthenticationSuccess({
@@ -40,9 +45,7 @@ export class McpOAuthService {
   }) {
     this.logger.debug({
       msg: 'Processing authentication success',
-      user: user.profile.username,
       sessionId,
-      sessionState,
     });
 
     if (!user) throw new UnauthorizedException('Authentication failed');
@@ -67,8 +70,6 @@ export class McpOAuthService {
       msg: 'Session PKCE validated, user profile upserted, auth code generated.',
       userProfileId,
       sessionId: session.sessionId,
-      sessionState: session.state,
-      oauthState: session.oauthState,
     });
 
     await this.store.storeAuthCode({
@@ -89,7 +90,6 @@ export class McpOAuthService {
     redirectUrl.searchParams.set('code', authCode);
     if (session.oauthState) redirectUrl.searchParams.set('state', session.oauthState);
 
-    // Clean up session
     await this.store.removeOAuthSession(sessionId);
 
     return {
@@ -102,7 +102,14 @@ export class McpOAuthService {
 
     // 1. Validate the authorization code
     if (!code) throw new BadRequestException('Missing code parameter');
+
+    // Immediately consume the code (single-use enforcement)
     const authCode = await this.store.getAuthCode(code);
+    if (authCode) {
+      // Remove it immediately to prevent replay attacks
+      await this.store.removeAuthCode(code);
+    }
+
     if (!authCode) {
       this.logger.error({
         msg: 'Invalid or expired authorization code',
@@ -112,7 +119,6 @@ export class McpOAuthService {
     }
 
     if (authCode.expires_at < Date.now()) {
-      await this.store.removeAuthCode(code);
       this.logger.error({
         msg: 'Authorization code expired',
         code,
@@ -149,32 +155,35 @@ export class McpOAuthService {
       throw new BadRequestException('Resource parameter mismatch');
     }
 
-    // 2. Validate the code against the registered client
-    const client = await this.store.getClient(client_id);
-    if (!client) {
+    // 2. Validate the client credentials
+    const isValidClient = await this.clientService.validateClientCredentials(
+      client_id,
+      client_secret,
+    );
+    if (!isValidClient) {
       this.logger.error({
-        msg: 'Client not found',
+        msg: 'Invalid client credentials',
         client_id,
       });
-      throw new BadRequestException('Invalid client');
+      throw new BadRequestException('Invalid client credentials');
     }
-    this.validateClientAuthentication(client, client_secret);
 
-    // 3. Validate the PKCE if it's present
-    if (authCode.code_challenge) {
-      if (!code_verifier) throw new BadRequestException('Invalid request');
-      const isValid = this.validatePKCE(
-        code_verifier,
-        authCode.code_challenge,
-        authCode.code_challenge_method,
-      );
-      if (!isValid) {
-        this.logger.error({
-          msg: 'PKCE validation failed',
-          code_challenge_method: authCode.code_challenge_method,
-        });
-        throw new BadRequestException('Invalid request');
-      }
+    // 3. Validate the PKCE (mandatory!)
+    if (!authCode.code_challenge || !code_verifier)
+      throw new BadRequestException('PKCE is required for all clients.');
+
+    const isValid = this.validatePKCE(
+      code_verifier,
+      authCode.code_challenge,
+      authCode.code_challenge_method,
+    );
+
+    if (!isValid) {
+      this.logger.error({
+        msg: 'PKCE validation failed',
+        code_challenge_method: authCode.code_challenge_method,
+      });
+      throw new BadRequestException('Invalid request');
     }
 
     // 4. Generate tokens
@@ -185,9 +194,6 @@ export class McpOAuthService {
       authCode.resource,
       authCode.user_profile_id,
     );
-
-    // 5. Clean up the authorization code
-    await this.store.removeAuthCode(code);
 
     this.logger.debug({
       msg: 'Token pair generated',
@@ -202,14 +208,14 @@ export class McpOAuthService {
 
     if (!refresh_token) throw new BadRequestException('Missing refresh_token parameter');
 
-    const client = await this.store.getClient(client_id);
-    if (!client) throw new BadRequestException('Invalid client');
-    this.validateClientAuthentication(client, client_secret);
-
-    if (client.client_id !== client_id)
-      throw new BadRequestException(
-        'Invalid refresh token or token does not belong to this client',
-      );
+    // Validate client credentials
+    const isValidClient = await this.clientService.validateClientCredentials(
+      client_id,
+      client_secret,
+    );
+    if (!isValidClient) {
+      throw new BadRequestException('Invalid client credentials');
+    }
 
     const tokenPair = await this.tokenService.refreshAccessToken(refresh_token, client_id);
     if (!tokenPair) throw new BadRequestException('Invalid or expired refresh token');
@@ -220,86 +226,77 @@ export class McpOAuthService {
   /**
    * Introspect a token to determine its current state and metadata.
    * Implements RFC 7662: OAuth 2.0 Token Introspection
-   * 
-   * Security: Only allows introspection by the client that the token was issued to.
    */
-  public async introspectToken(introspectDto: IntrospectRequestDto): Promise<IntrospectionResponse> {
+  public async introspectToken(
+    introspectDto: IntrospectRequestDto,
+  ): Promise<IntrospectionResponse> {
     const { token, token_type_hint, client_id, client_secret } = introspectDto;
 
     // Validate client authentication
-    const client = await this.store.getClient(client_id);
-    if (!client) {
-      this.logger.warn({ msg: 'Invalid client attempting introspection', client_id });
-      return { active: false };
-    }
-
-    try {
-      this.validateClientAuthentication(client, client_secret);
-    } catch (error) {
-      this.logger.warn({ 
-        msg: 'Client authentication failed for introspection', 
+    const isValidClient = await this.clientService.validateClientCredentials(
+      client_id,
+      client_secret,
+    );
+    if (!isValidClient) {
+      this.logger.warn({
+        msg: 'Client authentication failed for introspection',
         client_id,
-        error: error instanceof Error ? error.message : 'Unknown error'
       });
       return { active: false };
     }
 
-    // Try to introspect as access token first (unless hint says otherwise)
+    // Access Token
     if (!token_type_hint || token_type_hint === 'access_token') {
       const accessTokenResult = await this.tokenService.validateAccessToken(token);
-      
-      if (accessTokenResult) {
-        // Security check: Only allow introspection by the client that owns the token
-        if (accessTokenResult.clientId !== client_id) {
-          this.logger.warn({ 
-            msg: 'Client attempted to introspect token belonging to another client',
-            requesting_client: client_id,
-            token_client: accessTokenResult.clientId
-          });
-          return { active: false };
-        }
 
-        return {
-          active: true,
-          scope: accessTokenResult.scope,
-          client_id: accessTokenResult.clientId,
-          username: accessTokenResult.userId,
-          token_type: 'Bearer',
-          // Additional metadata
-          resource: accessTokenResult.resource,
-          user_profile_id: accessTokenResult.userProfileId,
-          // Note: We don't have exp/iat/nbf for opaque tokens
-          // If we switch to JWT, we would include these
-        };
+      if (!accessTokenResult) return { active: false };
+
+      if (accessTokenResult.clientId !== client_id) {
+        this.logger.warn({
+          msg: 'Client attempted to introspect token belonging to another client',
+          requesting_client: client_id,
+          token_client: accessTokenResult.clientId,
+        });
+        return { active: false };
       }
+
+      return {
+        active: true,
+        scope: accessTokenResult.scope,
+        client_id: accessTokenResult.clientId,
+        username: accessTokenResult.userId,
+        token_type: 'Bearer',
+        // Additional metadata
+        resource: accessTokenResult.resource,
+        user_profile_id: accessTokenResult.userProfileId,
+      };
     }
 
-    // Try as refresh token if not found as access token
+    // Refresh Token
     if (!token_type_hint || token_type_hint === 'refresh_token') {
       const refreshTokenResult = await this.tokenService.validateRefreshToken(token);
-      
-      if (refreshTokenResult) {
-        // Security check: Only allow introspection by the client that owns the token
-        if (refreshTokenResult.clientId !== client_id) {
-          this.logger.warn({ 
-            msg: 'Client attempted to introspect refresh token belonging to another client',
-            requesting_client: client_id,
-            token_client: refreshTokenResult.clientId
-          });
-          return { active: false };
-        }
 
-        return {
-          active: true,
-          scope: refreshTokenResult.scope,
-          client_id: refreshTokenResult.clientId,
-          username: refreshTokenResult.userId,
-          token_type: 'refresh_token',
-          // Additional metadata
-          resource: refreshTokenResult.resource,
-          user_profile_id: refreshTokenResult.userProfileId,
-        };
+      if (!refreshTokenResult) return { active: false };
+
+      if (refreshTokenResult.clientId !== client_id) {
+        this.logger.warn({
+          msg: 'Client attempted to introspect refresh token belonging to another client',
+          requesting_client: client_id,
+          token_client: refreshTokenResult.clientId,
+        });
+        return { active: false };
       }
+
+      return {
+        active: true,
+        scope: refreshTokenResult.scope,
+        client_id: refreshTokenResult.clientId,
+        username: refreshTokenResult.userId,
+        token_type: 'refresh_token',
+        // Additional metadata
+        resource: refreshTokenResult.resource,
+        user_profile_id: refreshTokenResult.userProfileId,
+      };
     }
 
     // Token not found or expired
@@ -309,83 +306,83 @@ export class McpOAuthService {
   /**
    * Revoke a token to invalidate it immediately.
    * Implements RFC 7009: OAuth 2.0 Token Revocation
-   * 
-   * Security: Only allows revocation by the client that the token was issued to.
+   *
    * Note: Revocation is idempotent - revoking an already revoked token is a no-op.
    */
   public async revokeToken(revokeDto: RevokeRequestDto): Promise<void> {
     const { token, token_type_hint, client_id, client_secret } = revokeDto;
 
-    // Validate client authentication
-    const client = await this.store.getClient(client_id);
-    if (!client) {
-      this.logger.warn({ msg: 'Invalid client attempting revocation', client_id });
-      // Per RFC 7009, we don't indicate errors
-      return;
-    }
-
-    try {
-      this.validateClientAuthentication(client, client_secret);
-    } catch (error) {
-      this.logger.warn({ 
-        msg: 'Client authentication failed for revocation', 
+    const isValidClient = await this.clientService.validateClientCredentials(
+      client_id,
+      client_secret,
+    );
+    if (!isValidClient) {
+      this.logger.warn({
+        msg: 'Client authentication failed for revocation',
         client_id,
-        error: error instanceof Error ? error.message : 'Unknown error'
       });
       // Per RFC 7009, we don't indicate errors
       return;
     }
 
-    // Try to revoke as access token first (unless hint says otherwise)
+    // Access Token
     if (!token_type_hint || token_type_hint === 'access_token') {
       const accessTokenResult = await this.tokenService.validateAccessToken(token);
-      
-      if (accessTokenResult) {
-        // Security check: Only allow revocation by the client that owns the token
-        if (accessTokenResult.clientId !== client_id) {
-          this.logger.warn({ 
-            msg: 'Client attempted to revoke token belonging to another client',
-            requesting_client: client_id,
-            token_client: accessTokenResult.clientId
-          });
-          return;
-        }
 
-        // Revoke the access token
-        await this.store.removeAccessToken(token);
-        this.logger.log({
-          msg: 'Access token revoked',
-          clientId: client_id,
-          tokenPrefix: token.substring(0, 8),
+      if (!accessTokenResult) return;
+
+      if (accessTokenResult.clientId !== client_id) {
+        this.logger.warn({
+          msg: 'Client attempted to revoke token belonging to another client',
+          requesting_client: client_id,
+          token_client: accessTokenResult.clientId,
         });
         return;
       }
+
+      await this.store.removeAccessToken(token);
+      this.logger.log({
+        msg: 'Access token revoked',
+        clientId: client_id,
+        tokenPrefix: token.substring(0, 8),
+      });
+      return;
     }
 
-    // Try as refresh token if not found as access token
+    // Refresh Token
     if (!token_type_hint || token_type_hint === 'refresh_token') {
       const refreshTokenResult = await this.tokenService.validateRefreshToken(token);
-      
-      if (refreshTokenResult) {
-        // Security check: Only allow revocation by the client that owns the token
-        if (refreshTokenResult.clientId !== client_id) {
-          this.logger.warn({ 
-            msg: 'Client attempted to revoke refresh token belonging to another client',
-            requesting_client: client_id,
-            token_client: refreshTokenResult.clientId
-          });
-          return;
-        }
 
-        // Revoke the refresh token (and any associated access tokens would be handled here)
-        await this.store.removeRefreshToken(token);
-        this.logger.log({
-          msg: 'Refresh token revoked',
-          clientId: client_id,
-          tokenPrefix: token.substring(0, 8),
+      if (!refreshTokenResult) return;
+
+      if (refreshTokenResult.clientId !== client_id) {
+        this.logger.warn({
+          msg: 'Client attempted to revoke refresh token belonging to another client',
+          requesting_client: client_id,
+          token_client: refreshTokenResult.clientId,
         });
         return;
       }
+
+      // Revoke the entire token family for security
+      if (refreshTokenResult.familyId && this.store.revokeTokenFamily) {
+        await this.store.revokeTokenFamily(refreshTokenResult.familyId);
+        this.logger.log({
+          msg: 'Refresh token family revoked',
+          clientId: client_id,
+          familyId: refreshTokenResult.familyId,
+          tokenPrefix: token.substring(0, 8),
+        });
+      } else {
+        // Fallback to removing just this token if family revocation is not available
+        await this.store.removeRefreshToken(token);
+        this.logger.log({
+          msg: 'Refresh token revoked (family revocation not available)',
+          clientId: client_id,
+          tokenPrefix: token.substring(0, 8),
+        });
+      }
+      return;
     }
 
     // Token not found or already revoked - this is still a success per RFC 7009
@@ -393,28 +390,6 @@ export class McpOAuthService {
       msg: 'Token revocation attempted for non-existent or already revoked token',
       clientId: client_id,
     });
-  }
-
-  private validateClientAuthentication(client: OAuthClient, clientSecret?: string) {
-    const { token_endpoint_auth_method } = client;
-
-    switch (token_endpoint_auth_method) {
-      case 'client_secret_basic':
-      case 'client_secret_post':
-        if (!clientSecret)
-          throw new BadRequestException('Client secret required for this authentication method');
-        if (client.client_secret !== clientSecret)
-          throw new BadRequestException('Invalid client credentials');
-        break;
-      case 'none':
-        if (clientSecret)
-          throw new BadRequestException('Client secret not allowed for public clients');
-        break;
-      default:
-        throw new BadRequestException(
-          `Unsupported authentication method: ${token_endpoint_auth_method}`,
-        );
-    }
   }
 
   private validatePKCE(codeVerifier: string, codeChallenge: string, codeChallengeMethod: string) {

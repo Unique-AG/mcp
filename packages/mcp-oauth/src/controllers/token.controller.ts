@@ -29,6 +29,9 @@ export class TokenController {
   @Post(OAUTH_ENDPOINTS.token)
   @Header('Cache-Control', 'no-store')
   @Header('Pragma', 'no-cache')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('X-Frame-Options', 'DENY')
+  @Header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   @HttpCode(HttpStatus.OK)
   public async token(@Body() tokenDto: TokenRequestDto) {
     this.logger.debug({
@@ -49,17 +52,17 @@ export class TokenController {
   /**
    * Token introspection endpoint as defined in RFC 7662.
    * Allows authorized clients to query the status and metadata of tokens.
-   * 
-   * Security considerations:
-   * - Only the client that the token was issued to (or resource servers) should be able to introspect
-   * - Response must not leak information about token existence to unauthorized parties
-   * - Always returns { active: false } for invalid requests rather than errors
    */
   @Post(OAUTH_ENDPOINTS.introspect)
   @Header('Cache-Control', 'no-store')
   @Header('Pragma', 'no-cache')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('X-Frame-Options', 'DENY')
+  @Header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   @HttpCode(HttpStatus.OK)
-  public async introspect(@Body() introspectDto: IntrospectRequestDto): Promise<IntrospectionResponse> {
+  public async introspect(
+    @Body() introspectDto: IntrospectRequestDto,
+  ): Promise<IntrospectionResponse> {
     this.logger.debug({
       msg: 'Token introspection request',
       clientId: introspectDto.client_id,
@@ -75,7 +78,7 @@ export class TokenController {
         msg: 'Token introspection failed',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      
+
       return { active: false };
     }
   }
@@ -83,15 +86,13 @@ export class TokenController {
   /**
    * Token revocation endpoint as defined in RFC 7009.
    * Allows clients to notify the authorization server that a token is no longer needed.
-   * 
-   * Security considerations:
-   * - Clients can only revoke their own tokens
-   * - Revocation is a best-effort operation - always returns 200 OK
-   * - Does not indicate whether the token existed or was already revoked
    */
   @Post(OAUTH_ENDPOINTS.revoke)
   @Header('Cache-Control', 'no-store')
   @Header('Pragma', 'no-cache')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @Header('X-Frame-Options', 'DENY')
+  @Header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   @HttpCode(HttpStatus.OK)
   public async revoke(@Body() revokeDto: RevokeRequestDto): Promise<void> {
     this.logger.debug({

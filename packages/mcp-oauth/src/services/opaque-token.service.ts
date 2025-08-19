@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { typeid } from 'typeid-js';
 import type { IOAuthStore, RefreshTokenMetadata } from '../interfaces/io-auth-store.interface';
 import {
   MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
@@ -32,7 +33,8 @@ export class OpaqueTokenService {
   private readonly REFRESH_TOKEN_BYTES = 64;
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: McpOAuthModuleOptions,
     @Inject(OAUTH_STORE_TOKEN) private readonly store: IOAuthStore,
   ) {}
 
@@ -46,13 +48,17 @@ export class OpaqueTokenService {
     scope = '',
     resource: string,
     userProfileId: string,
+    familyId?: string | null,
+    generation = 0,
   ): Promise<TokenPair> {
     const accessToken = this.generateSecureToken(this.ACCESS_TOKEN_BYTES);
     const refreshToken = this.generateSecureToken(this.REFRESH_TOKEN_BYTES);
 
     const now = Date.now();
-    const accessExpiresAt = new Date(now + this.options.jwtAccessTokenExpiresIn * 1000);
-    const refreshExpiresAt = new Date(now + this.options.jwtRefreshTokenExpiresIn * 1000);
+    const accessExpiresAt = new Date(now + this.options.accessTokenExpiresIn * 1000);
+    const refreshExpiresAt = new Date(now + this.options.refreshTokenExpiresIn * 1000);
+
+    const tokenFamilyId = familyId || typeid('tkfam').toString();
 
     await this.store.storeAccessToken(accessToken, {
       userId,
@@ -70,6 +76,8 @@ export class OpaqueTokenService {
       resource,
       expiresAt: refreshExpiresAt,
       userProfileId,
+      familyId: tokenFamilyId,
+      generation,
     });
 
     this.logger.debug({
@@ -82,7 +90,7 @@ export class OpaqueTokenService {
       access_token: accessToken,
       refresh_token: refreshToken,
       token_type: 'bearer',
-      expires_in: this.options.jwtAccessTokenExpiresIn,
+      expires_in: this.options.accessTokenExpiresIn,
       scope,
     };
   }
@@ -140,8 +148,25 @@ export class OpaqueTokenService {
     refreshToken: string,
     clientId: string,
   ): Promise<TokenPair | null> {
-    const metadata = await this.validateRefreshToken(refreshToken);
+    if (this.store.isRefreshTokenUsed) {
+      const wasUsed = await this.store.isRefreshTokenUsed(refreshToken);
+      if (wasUsed) {
+        this.logger.error({
+          msg: 'SECURITY: Refresh token reuse detected! Revoking entire token family.',
+          tokenPrefix: refreshToken.substring(0, 8),
+        });
 
+        // Get the token metadata to find the family
+        const metadata = await this.store.getRefreshToken(refreshToken);
+        if (metadata?.familyId && this.store.revokeTokenFamily) {
+          await this.store.revokeTokenFamily(metadata.familyId);
+        }
+
+        return null;
+      }
+    }
+
+    const metadata = await this.validateRefreshToken(refreshToken);
     if (!metadata) return null;
 
     if (metadata.clientId !== clientId) {
@@ -153,7 +178,9 @@ export class OpaqueTokenService {
       return null;
     }
 
-    // Rotate refresh token
+    if (this.store.markRefreshTokenAsUsed) await this.store.markRefreshTokenAsUsed(refreshToken);
+
+    // Rotate refresh token with same family but incremented generation
     await this.store.removeRefreshToken(refreshToken);
     return this.generateTokenPair(
       metadata.userId,
@@ -161,6 +188,8 @@ export class OpaqueTokenService {
       metadata.scope,
       metadata.resource,
       metadata.userProfileId,
+      metadata.familyId,
+      (metadata.generation || 0) + 1,
     );
   }
 

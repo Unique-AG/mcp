@@ -92,17 +92,24 @@ model UserProfile {
 
 /// @idPrefix(token)
 model Token {
-  id        String    @id @default(cuid())
-  token     String    @unique
-  type      TokenType
-  expiresAt DateTime
-  userId    String
-  clientId  String
-  scope     String
-  resource  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         String    @id @default(cuid())
+  token      String    @unique
+  type       TokenType
+  expiresAt  DateTime
+  userId     String
+  clientId   String
+  scope      String
+  resource   String
+  familyId   String?
+  generation Int?
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   userProfileId String
   userProfile   UserProfile? @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([expiresAt])
+  @@index([userProfileId])
 }

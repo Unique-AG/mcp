@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import {
   BadRequestException,
   Controller,
@@ -13,7 +13,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { seconds, Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { type NextFunction, type Request, type Response } from 'express';
 import passport from 'passport';
 import { serializeError } from 'serialize-error-cjs';
@@ -35,13 +35,15 @@ export class OAuthController {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(
-    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN) private readonly options: McpOAuthModuleOptions,
+    @Inject(MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN)
+    private readonly options: McpOAuthModuleOptions,
     private readonly authService: McpOAuthService,
     private readonly clientService: ClientService,
     @Inject(OAUTH_STORE_TOKEN) private readonly store: IOAuthStore,
   ) {}
 
   @Get(OAUTH_ENDPOINTS.authorize)
+  @Throttle({ auth: { limit: 3, ttl: seconds(60) } })
   public async authorize(
     @Query('response_type') responseType: string,
     @Query('client_id') clientId: string,
@@ -82,10 +84,13 @@ export class OAuthController {
     const validRedirectUri = await this.clientService.validateRedirectUri(clientId, redirectUri);
     if (!validRedirectUri) throw new BadRequestException('Invalid redirect_uri parameter');
 
-    // Create OAuth session
     const sessionId = randomBytes(32).toString('base64url');
     // This state is used to validate the callback between the MCP server and the third-party provider.
-    const sessionState = randomBytes(32).toString('base64url');
+    // We bind it to the session using HMAC to prevent CSRF attacks
+    const sessionNonce = randomBytes(32).toString('base64url');
+    const sessionState = createHmac('sha256', this.options.hmacSecret)
+      .update(`${sessionId}:${sessionNonce}`)
+      .digest('base64url');
 
     await this.store.storeOAuthSession(sessionId, {
       sessionId,
@@ -96,24 +101,21 @@ export class OAuthController {
       codeChallengeMethod,
       oauthState: state, // This is the PKCE state of the MCP client.
       scope,
-      resource: resource || this.options.resource, // Use provided resource or default to configured resource
+      resource: resource || this.options.resource,
       expiresAt: Date.now() + this.options.oauthSessionExpiresIn,
     });
 
-    response.cookie('oauth_session', sessionId, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: this.options.cookieSecure,
+      secure: this.options.cookieSecure || process.env.NODE_ENV === 'production',
       maxAge: this.options.oauthSessionExpiresIn,
-      sameSite: 'lax',
-    });
+      sameSite: 'strict' as const,
+      path: '/auth',
+      ...(this.options.cookieDomain && { domain: this.options.cookieDomain }),
+    };
 
-    // Store state for passport
-    response.cookie('oauth_state', sessionState, {
-      httpOnly: true,
-      secure: this.options.cookieSecure,
-      maxAge: this.options.oauthSessionExpiresIn,
-      sameSite: 'lax',
-    });
+    response.cookie('oauth_session', sessionId, cookieOptions);
+    response.cookie('oauth_state', sessionState, cookieOptions);
 
     const authMiddleware = passport.authenticate(STRATEGY_NAME, {
       state: sessionState,
@@ -123,14 +125,13 @@ export class OAuthController {
       msg: 'Redirecting to authorization server. New session created.',
       redirectUri,
       sessionId,
-      sessionState,
-      oauthState: state,
     });
 
     authMiddleware(request, response, next);
   }
 
   @Get(OAUTH_ENDPOINTS.callback)
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   public async callback(
     @Req() request: Request & { sessionId: string; sessionState: string },
     @Res() response: Response,
@@ -139,7 +140,6 @@ export class OAuthController {
     this.logger.debug({
       msg: 'Callback from authorization server.',
       sessionId: request.sessionId,
-      sessionState: request.sessionState,
     });
 
     const authMiddleware = passport.authenticate(
@@ -157,10 +157,7 @@ export class OAuthController {
 
           if (!user) throw new UnauthorizedException('Authentication failed');
 
-          this.logger.debug({
-            msg: 'User authenticated.',
-            user,
-          });
+          this.logger.debug({ msg: 'User authenticated.' });
 
           request.user = user;
           const { redirectUrl } = await this.authService.processAuthenticationSuccess({
@@ -169,7 +166,6 @@ export class OAuthController {
             sessionState: request.cookies?.oauth_state,
           });
 
-          // Clear temporary cookies
           response.clearCookie('oauth_session');
           response.clearCookie('oauth_state');
 

@@ -43,11 +43,10 @@ import { OpaqueTokenService } from './services/opaque-token.service';
  *
  *     clientId: configService.get(AppSettings.CLIENT_ID),
  *     clientSecret: configService.get(AppSettings.CLIENT_SECRET),
- *     jwtSecret: configService.get(AppSettings.JWT_SECRET),
+ *     hmacSecret: configService.get(AppSettings.HMAC_SECRET),
  *
  *     serverUrl: configService.get(AppSettings.SELF_URL),
  *     resource: configService.get(AppSettings.SELF_URL),
- *     jwtIssuer: configService.get(AppSettings.SELF_URL),
  *
  *     oauthStore: new McpOAuthStore(prisma, aesService),
  *     encryptionService: aesService,

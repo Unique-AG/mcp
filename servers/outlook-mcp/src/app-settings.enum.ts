@@ -14,6 +14,16 @@ const appSettingsSchema = z.object({
     .url()
     .startsWith('postgresql://')
     .describe('The prisma database url for Postgres. Must start with "postgresql://".'),
+  ACCESS_TOKEN_EXPIRES_IN_SECONDS: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().int().min(1).default(60))
+    .describe('The expiration time of the access token in seconds. Default is 60 seconds.'),
+  REFRESH_TOKEN_EXPIRES_IN_SECONDS: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().int().min(1).default(30 * 24 * 60 * 60))
+    .describe('The expiration time of the refresh token in seconds. Default is 30 days.'),
   MICROSOFT_CLIENT_ID: z
     .string()
     .min(1)
@@ -22,7 +32,10 @@ const appSettingsSchema = z.object({
     .string()
     .min(1)
     .describe('The client secret of the Microsoft App Registration that the MCP Server will use.'),
-  JWT_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign JWT tokens.'),
+  HMAC_SECRET: z
+    .string()
+    .min(1)
+    .describe('The secret key for the MCP Server to sign HMAC tokens or cookies.'),
   SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
     .union([z.string(), z.instanceof(Buffer)])

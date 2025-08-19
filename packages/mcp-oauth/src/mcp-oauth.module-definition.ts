@@ -31,7 +31,9 @@ export const mcpOAuthModuleOptionsSchema = z.object({
   clientSecret: z.string().describe('The client secret of the OAuth provider.'),
 
   // Required JWT Configuration
-  jwtSecret: z.string().describe('The secret key for the MCP Server to sign JWT tokens.'),
+  hmacSecret: z
+    .string()
+    .describe('The secret key for the MCP Server to sign HMAC tokens or cookies.'),
 
   // Server Configuration
   serverUrl: z.string().url(),
@@ -40,24 +42,22 @@ export const mcpOAuthModuleOptionsSchema = z.object({
     .url()
     .describe("should be the endpoint clients connect to, e.g.: 'http://localhost:3000/mcp'"),
 
-  // JWT Configuration
-  jwtIssuer: z.string().url(),
-  jwtAudience: z.string().default('mcp-client'),
-  jwtAccessTokenExpiresIn: z
+  // Token Configuration
+  accessTokenExpiresIn: z
     .number()
     .default(60)
     .describe('The expiration time of the JWT access token. Default is 60 seconds.'),
-  jwtRefreshTokenExpiresIn: z
+  refreshTokenExpiresIn: z
     .number()
     .default(30 * 24 * 60 * 60)
     .describe('The expiration time of the JWT refresh token. Default is 30 days.'),
-  jwtUserTokenExpiresIn: z
-    .number()
-    .default(24 * 60 * 60)
-    .describe('The expiration time of the JWT user token. Default is 24 hours.'),
 
   // Cookie Configuration
   cookieSecure: z.boolean().default(false),
+  cookieDomain: z
+    .string()
+    .optional()
+    .describe('The domain for cookies. If not set, cookies will use the default domain.'),
   cookieMaxAge: z
     .number()
     .default(24 * 60 * 60 * 1000)
@@ -80,13 +80,13 @@ export const mcpOAuthModuleOptionsSchema = z.object({
       scopesSupported: z.array(z.string()).default(['offline_access']),
       bearerMethodsSupported: z.array(z.string()).default(['header']),
       mcpVersionsSupported: z.array(z.string()).default(['2025-06-18']),
-      
+
       // Optional metadata fields
       resourceName: z.string().optional(),
       resourceDocumentation: z.string().url().optional(),
       resourcePolicyUri: z.string().url().optional(),
       resourceTosUri: z.string().url().optional(),
-      
+
       // Token binding capabilities
       resourceSigningAlgValuesSupported: z.array(z.string()).optional(),
       tlsClientCertificateBoundAccessTokens: z.boolean().optional(),
@@ -97,7 +97,7 @@ export const mcpOAuthModuleOptionsSchema = z.object({
   // Authorization Server Metadata Configuration (RFC8414)
   authorizationServerMetadata: z
     .object({
-      // Required/core fields
+      // Required/core fields (OAuth 2.1 compliant)
       responseTypesSupported: z.array(z.string()).default(['code']),
       responseModesSupported: z.array(z.string()).default(['query']),
       grantTypesSupported: z.array(z.string()).default(['authorization_code', 'refresh_token']),
@@ -106,19 +106,19 @@ export const mcpOAuthModuleOptionsSchema = z.object({
         .default(['client_secret_basic', 'client_secret_post', 'none']),
       scopesSupported: z.array(z.string()).default(['offline_access']),
       codeChallengeMethodsSupported: z.array(z.string()).default(['plain', 'S256']),
-      
+
       // Token endpoint authentication
       tokenEndpointAuthSigningAlgValuesSupported: z.array(z.string()).optional(),
-      
+
       // UI and localization
       uiLocalesSupported: z.array(z.string()).optional(),
       claimsSupported: z.array(z.string()).optional(),
-      
+
       // Service documentation
       serviceDocumentation: z.string().url().optional(),
       opPolicyUri: z.string().url().optional(),
       opTosUri: z.string().url().optional(),
-      
+
       // DPoP support
       dpopSigningAlgValuesSupported: z.array(z.string()).optional(),
     })

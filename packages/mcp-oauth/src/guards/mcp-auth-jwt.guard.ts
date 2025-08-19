@@ -12,7 +12,6 @@ import {
 } from '../mcp-oauth.module-definition';
 import { OpaqueTokenService, type TokenValidationResult } from '../services/opaque-token.service';
 
-// Extend the AuthenticatedRequest to properly type the user property with our token validation result
 export interface McpAuthenticatedRequest extends Request {
   user?: TokenValidationResult;
 }

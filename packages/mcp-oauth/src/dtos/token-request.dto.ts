@@ -5,19 +5,9 @@ export const TokenRequestSchema = z
   .object({
     grant_type: z
       .string()
-      .refine(
-        (val) =>
-          [
-            'authorization_code',
-            'refresh_token',
-            'client_credentials',
-            'password',
-            'urn:ietf:params:oauth:grant-type:device_code',
-          ].includes(val),
-        {
-          message: 'Invalid grant type',
-        },
-      )
+      .refine((val) => ['authorization_code', 'refresh_token'].includes(val), {
+        message: 'Invalid grant type. Only authorization_code and refresh_token are supported.',
+      })
       .describe('The grant type for the token request'),
 
     // Authorization Code Grant fields
@@ -42,20 +32,13 @@ export const TokenRequestSchema = z
     // Refresh Token Grant fields
     refresh_token: z.string().min(1).describe('The refresh token issued to the client').optional(),
 
-    // Client Credentials Grant fields
+    // Scope field (used in refresh token grant)
     scope: z
       .string()
       .describe(
         'The scope of the access request expressed as a list of space-delimited, case-sensitive strings',
       )
       .optional(),
-
-    // Resource Owner Password Credentials Grant fields
-    username: z.string().min(1).describe('The resource owner username').optional(),
-    password: z.string().min(1).describe('The resource owner password').optional(),
-
-    // Device Code Grant fields
-    device_code: z.string().min(1).describe('The device verification code').optional(),
 
     // Client authentication fields
     client_id: z.string().min(1).describe('The client identifier issued to the client'),
@@ -94,18 +77,12 @@ export const TokenRequestSchema = z
   })
   .refine(
     (data) => {
-      // Validation based on grant_type
+      // Validation based on grant_type (OAuth 2.1 compliant)
       switch (data.grant_type) {
         case 'authorization_code':
-          return !!data.code && !!data.redirect_uri;
+          return !!data.code && !!data.redirect_uri && !!data.code_verifier; // PKCE required
         case 'refresh_token':
           return !!data.refresh_token;
-        case 'client_credentials':
-          return true; // Only client_id (and optionally client_secret) required
-        case 'password':
-          return !!data.username && !!data.password;
-        case 'urn:ietf:params:oauth:grant-type:device_code':
-          return !!data.device_code;
         default:
           return false;
       }

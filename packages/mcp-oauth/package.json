@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@nestjs/throttler": "^6.4.0",
+    "bcrypt": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
     "nestjs-zod": "^4.3.1",
     "serialize-error-cjs": "^0.2.0",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.10.7",

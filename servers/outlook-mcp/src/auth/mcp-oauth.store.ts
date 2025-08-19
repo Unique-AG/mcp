@@ -10,6 +10,7 @@ import {
   PassportUser,
   RefreshTokenMetadata,
 } from '@unique-ag/mcp-oauth';
+import { Cache } from 'cache-manager';
 import { typeid } from 'typeid-js';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -24,9 +25,14 @@ import {
 export class McpOAuthStore implements IOAuthStore {
   private readonly logger = new Logger(this.constructor.name);
 
+  // Cache key prefixes
+  private readonly ACCESS_TOKEN_CACHE_PREFIX = 'access_token:';
+  private readonly REFRESH_TOKEN_CACHE_PREFIX = 'refresh_token:';
+
   public constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: IEncryptionService,
+    private readonly cacheManager: Cache,
   ) {}
 
   public async storeClient(client: OAuthClient): Promise<OAuthClient> {
@@ -197,9 +203,22 @@ export class McpOAuthStore implements IOAuthStore {
         userProfileId: metadata.userProfileId,
       },
     });
+
+    await this.cacheAccessTokenMetadata(token, metadata);
   }
 
   public async getAccessToken(token: string): Promise<AccessTokenMetadata | undefined> {
+    const cacheKey = this.getAccessTokenCacheKey(token);
+    const cached = await this.cacheManager.get<AccessTokenMetadata>(cacheKey);
+
+    if (cached) {
+      if (cached.expiresAt < new Date()) {
+        await this.removeAccessToken(token);
+        return undefined;
+      }
+      return cached;
+    }
+
     const metadata = await this.prisma.token.findUnique({
       where: { token },
       include: {
@@ -212,16 +231,22 @@ export class McpOAuthStore implements IOAuthStore {
       return undefined;
     }
 
-    return {
+    const result = {
       ...metadata,
       userData: metadata.userProfile?.raw,
     };
+
+    await this.cacheAccessTokenMetadata(token, result);
+
+    return result;
   }
 
   public async removeAccessToken(token: string): Promise<void> {
     await this.prisma.token.delete({
       where: { token },
     });
+
+    await this.removeCachedAccessToken(token);
   }
 
   public async storeRefreshToken(token: string, metadata: RefreshTokenMetadata): Promise<void> {
@@ -238,11 +263,26 @@ export class McpOAuthStore implements IOAuthStore {
         scope: metadata.scope,
         resource: metadata.resource,
         userProfileId: metadata.userProfileId,
+        familyId: metadata.familyId,
+        generation: metadata.generation,
       },
     });
+
+    await this.cacheRefreshTokenMetadata(token, metadata);
   }
 
   public async getRefreshToken(token: string): Promise<RefreshTokenMetadata | undefined> {
+    const cacheKey = this.getRefreshTokenCacheKey(token);
+    const cached = await this.cacheManager.get<RefreshTokenMetadata>(cacheKey);
+
+    if (cached) {
+      if (cached.expiresAt < new Date()) {
+        await this.removeRefreshToken(token);
+        return undefined;
+      }
+      return cached;
+    }
+
     const metadata = await this.prisma.token.findUnique({
       where: { token },
     });
@@ -253,6 +293,8 @@ export class McpOAuthStore implements IOAuthStore {
       return undefined;
     }
 
+    await this.cacheRefreshTokenMetadata(token, metadata);
+
     return metadata;
   }
 
@@ -260,5 +302,85 @@ export class McpOAuthStore implements IOAuthStore {
     await this.prisma.token.delete({
       where: { token },
     });
+
+    await this.removeCachedRefreshToken(token);
+  }
+
+  public async revokeTokenFamily(familyId: string): Promise<void> {
+    // First, get all tokens in the family from database to remove from cache
+    const tokensInFamily = await this.prisma.token.findMany({
+      where: { familyId },
+      select: { token: true, type: true },
+    });
+
+    await this.prisma.token.deleteMany({
+      where: { familyId },
+    });
+
+    // Remove each token from cache
+    for (const tokenData of tokensInFamily) {
+      if (tokenData.type === 'ACCESS') {
+        await this.removeCachedAccessToken(tokenData.token);
+      } else if (tokenData.type === 'REFRESH') {
+        await this.removeCachedRefreshToken(tokenData.token);
+      }
+    }
+  }
+
+  public async markRefreshTokenAsUsed(token: string): Promise<void> {
+    await this.prisma.token.update({
+      where: { token },
+      data: { usedAt: new Date() },
+    });
+
+    await this.removeCachedRefreshToken(token);
+  }
+
+  public async isRefreshTokenUsed(token: string): Promise<boolean> {
+    // Always check DB, not cache.
+    const metadata = await this.prisma.token.findUnique({
+      where: { token },
+    });
+
+    return !!metadata?.usedAt;
+  }
+
+  // Cache helper methods
+  private getAccessTokenCacheKey(token: string): string {
+    return `${this.ACCESS_TOKEN_CACHE_PREFIX}${token}`;
+  }
+
+  private getRefreshTokenCacheKey(token: string): string {
+    return `${this.REFRESH_TOKEN_CACHE_PREFIX}${token}`;
+  }
+
+  private async cacheAccessTokenMetadata(
+    token: string,
+    metadata: AccessTokenMetadata,
+  ): Promise<void> {
+    const cacheKey = this.getAccessTokenCacheKey(token);
+    const ttl = Math.max(0, Math.floor((metadata.expiresAt.getTime() - Date.now()) / 1000));
+
+    if (ttl > 0) await this.cacheManager.set(cacheKey, metadata, ttl);
+  }
+
+  private async cacheRefreshTokenMetadata(
+    token: string,
+    metadata: RefreshTokenMetadata,
+  ): Promise<void> {
+    const cacheKey = this.getRefreshTokenCacheKey(token);
+    const ttl = Math.max(0, Math.floor((metadata.expiresAt.getTime() - Date.now()) / 1000));
+
+    if (ttl > 0) await this.cacheManager.set(cacheKey, metadata, ttl);
+  }
+
+  private async removeCachedAccessToken(token: string): Promise<void> {
+    const cacheKey = this.getAccessTokenCacheKey(token);
+    await this.cacheManager.del(cacheKey);
+  }
+
+  private async removeCachedRefreshToken(token: string): Promise<void> {
+    const cacheKey = this.getRefreshTokenCacheKey(token);
+    await this.cacheManager.del(cacheKey);
   }
 }

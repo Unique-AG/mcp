@@ -1,3 +1,4 @@
+import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -5,6 +6,7 @@ import { McpModule } from '@rekog/mcp-nest';
 import { AesGcmEncryptionModule, AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { LoggerModule } from '@unique-ag/logger';
 import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
+import { Cache } from 'cache-manager';
 import { typeid } from 'typeid-js';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
@@ -29,27 +31,33 @@ import { PrismaService } from './prisma/prisma.service';
       }),
       inject: [ConfigService],
     }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
     McpOAuthModule.forRootAsync({
       imports: [ConfigModule, PrismaModule],
       useFactory: async (
         configService: ConfigService<AppConfig, true>,
         aesService: AesGcmEncryptionService,
         prisma: PrismaService,
+        cacheManager: Cache,
       ) => ({
         provider: MicrosoftOAuthProvider,
 
         clientId: configService.get(AppSettings.MICROSOFT_CLIENT_ID),
         clientSecret: configService.get(AppSettings.MICROSOFT_CLIENT_SECRET),
-        jwtSecret: configService.get(AppSettings.JWT_SECRET),
+        hmacSecret: configService.get(AppSettings.HMAC_SECRET),
 
         serverUrl: configService.get(AppSettings.SELF_URL),
         resource: `${configService.get(AppSettings.SELF_URL)}/mcp`,
-        jwtIssuer: configService.get(AppSettings.SELF_URL),
 
-        oauthStore: new McpOAuthStore(prisma, aesService),
+        accessTokenExpiresIn: configService.get(AppSettings.ACCESS_TOKEN_EXPIRES_IN_SECONDS),
+        refreshTokenExpiresIn: configService.get(AppSettings.REFRESH_TOKEN_EXPIRES_IN_SECONDS),
+
+        oauthStore: new McpOAuthStore(prisma, aesService, cacheManager),
         encryptionService: aesService,
       }),
-      inject: [ConfigService, AesGcmEncryptionService, PrismaService],
+      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER],
     }),
     McpModule.forRoot({
       name: 'outlook-mcp',
