@@ -8,17 +8,18 @@ import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { BaseOutlookTool } from './base-outlook.tool';
 
-const SendMailInput = z.object({
-  to: z.union([z.string().email(), z.array(z.string().email())]).describe('Recipient email address'),
+const CreateDraftEmailInputSchema = z.object({
+  to: z.union([z.string().email(), z.array(z.string().email())]).describe('Recipient email address(es)'),
   subject: z.string().describe('Email subject'),
   body: z.string().describe('Email body content'),
   isHtml: z.boolean().default(false).describe('Whether the body is HTML'),
   cc: z.array(z.string().email()).optional().describe('Carbon copy recipients'),
   bcc: z.array(z.string().email()).optional().describe('Blind carbon copy recipients'),
+  importance: z.enum(['low', 'normal', 'high']).default('normal').describe('Email importance'),
 });
 
 @Injectable()
-export class SendMailTool extends BaseOutlookTool {
+export class CreateDraftEmailTool extends BaseOutlookTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {
@@ -26,12 +27,12 @@ export class SendMailTool extends BaseOutlookTool {
   }
 
   @Tool({
-    name: 'send_mail',
-    description: 'Send an email via Outlook',
-    parameters: SendMailInput,
+    name: 'create_draft_email',
+    description: 'Create a draft email in Outlook',
+    parameters: CreateDraftEmailInputSchema,
   })
-  public async sendMail(
-    { to, subject, body, isHtml, cc, bcc }: z.infer<typeof SendMailInput>,
+  public async createDraftEmail(
+    { to, subject, body, isHtml, cc, bcc, importance }: z.infer<typeof CreateDraftEmailInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
@@ -40,7 +41,7 @@ export class SendMailTool extends BaseOutlookTool {
     const toRecipients = Array.isArray(to) ? to : [to];
 
     try {
-      const message: Message = {
+      const draftMessage: Message = {
         subject: subject,
         body: {
           contentType: isHtml ? 'html' : 'text',
@@ -61,17 +62,32 @@ export class SendMailTool extends BaseOutlookTool {
             address: email,
           },
         })),
+        importance,
+        isDraft: true,
       };
 
-      await graphClient.api('/me/sendMail').post({ message });
+      const createdMessage: Message = await graphClient.api('/me/messages').post(draftMessage);
+
+      this.logger.debug({
+        msg: 'Draft email created',
+        messageId: createdMessage.id,
+      });
 
       return {
         success: true,
-        message: `Email sent successfully to ${to}`,
+        messageId: createdMessage.id,
+        subject: createdMessage.subject,
+        to: toRecipients,
+        cc: cc || [],
+        bcc: bcc || [],
+        importance,
+        isDraft: createdMessage.isDraft,
+        message: 'Draft email created',
+        webLink: createdMessage.webLink,
       };
     } catch (error) {
       this.logger.error({
-        msg: 'Failed to send email via Outlook',
+        msg: 'Failed to create draft email in Outlook',
         error: serializeError(normalizeError(error)),
       });
       throw new InternalServerErrorException(error);
