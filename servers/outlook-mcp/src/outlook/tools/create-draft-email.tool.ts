@@ -9,7 +9,9 @@ import { normalizeError } from '../../utils/normalize-error';
 import { BaseOutlookTool } from './base-outlook.tool';
 
 const CreateDraftEmailInputSchema = z.object({
-  to: z.union([z.string().email(), z.array(z.string().email())]).describe('Recipient email address(es)'),
+  to: z
+    .union([z.string().email(), z.array(z.string().email())])
+    .describe('Recipient email address(es)'),
   subject: z.string().describe('Email subject'),
   body: z.string().describe('Email body content'),
   isHtml: z.boolean().default(false).describe('Whether the body is HTML'),

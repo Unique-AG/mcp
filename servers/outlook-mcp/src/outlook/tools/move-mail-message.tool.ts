@@ -9,7 +9,11 @@ import { BaseOutlookTool } from './base-outlook.tool';
 
 const MoveMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to move'),
-  destinationFolderId: z.string().describe('The ID or well-known name of the destination folder (e.g., "inbox", "deleteditems", "drafts", "sentitems", or a specific folder ID)'),
+  destinationFolderId: z
+    .string()
+    .describe(
+      'The ID or well-known name of the destination folder (e.g., "inbox", "deleteditems", "drafts", "sentitems", or a specific folder ID)',
+    ),
 });
 
 @Injectable()

@@ -36,7 +36,13 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
     parameters: ListMailFolderMessagesInputSchema,
   })
   public async listMailFolderMessages(
-    { folderId, limit, orderBy, orderDirection, filter }: z.infer<typeof ListMailFolderMessagesInputSchema>,
+    {
+      folderId,
+      limit,
+      orderBy,
+      orderDirection,
+      filter,
+    }: z.infer<typeof ListMailFolderMessagesInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
@@ -45,7 +51,9 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
     try {
       let query = graphClient
         .api(`/me/mailFolders/${folderId}/messages`)
-        .select('id,subject,from,receivedDateTime,bodyPreview,importance,isRead,hasAttachments,internetMessageId')
+        .select(
+          'id,subject,from,receivedDateTime,bodyPreview,importance,isRead,hasAttachments,internetMessageId',
+        )
         .top(limit)
         .orderby(`${orderBy} ${orderDirection}`);
 

@@ -10,20 +10,31 @@ import { BaseOutlookTool } from './base-outlook.tool';
 
 const SearchEmailInputSchema = z.object({
   query: z.string().optional().describe('Text to search for in subject, body, or sender'),
-  folderId: z.string().optional().describe('Specific folder ID to search in (searches all folders if not specified)'),
+  folderId: z
+    .string()
+    .optional()
+    .describe('Specific folder ID to search in (searches all folders if not specified)'),
   from: z.string().optional().describe('Email address or name of sender to filter by'),
   subject: z.string().optional().describe('Text to search for in subject line only'),
   hasAttachments: z.boolean().optional().describe('Filter by messages with/without attachments'),
   isRead: z.boolean().optional().describe('Filter by read/unread status'),
   importance: z.enum(['low', 'normal', 'high']).optional().describe('Filter by importance level'),
-  dateFrom: z.string().optional().describe('Start date for date range filter (ISO format: YYYY-MM-DD)'),
+  dateFrom: z
+    .string()
+    .optional()
+    .describe('Start date for date range filter (ISO format: YYYY-MM-DD)'),
   dateTo: z.string().optional().describe('End date for date range filter (ISO format: YYYY-MM-DD)'),
   limit: z.number().min(1).max(100).default(25).describe('Number of messages to retrieve'),
   orderBy: z
     .enum(['receivedDateTime', 'sentDateTime', 'subject', 'from', 'importance'])
     .default('receivedDateTime')
-    .describe('Field to order results by (only used when not searching - search results are ordered by relevance)'),
-  orderDirection: z.enum(['asc', 'desc']).default('desc').describe('Order direction (only used when not searching)'),
+    .describe(
+      'Field to order results by (only used when not searching - search results are ordered by relevance)',
+    ),
+  orderDirection: z
+    .enum(['asc', 'desc'])
+    .default('desc')
+    .describe('Order direction (only used when not searching)'),
 });
 
 @Injectable()
@@ -36,7 +47,8 @@ export class SearchEmailTool extends BaseOutlookTool {
 
   @Tool({
     name: 'search_email',
-    description: 'Search for emails in Outlook using various criteria. When using text search (query parameter), results are automatically ordered by relevance. Custom ordering is only available when not using text search.',
+    description:
+      'Search for emails in Outlook using various criteria. When using text search (query parameter), results are automatically ordered by relevance. Custom ordering is only available when not using text search.',
     parameters: SearchEmailInputSchema,
   })
   public async searchEmail(
@@ -64,9 +76,13 @@ export class SearchEmailTool extends BaseOutlookTool {
 
       const filterConditions: string[] = [];
 
-      if (from) filterConditions.push(`from/emailAddress/address eq '${from}' or from/emailAddress/name eq '${from}'`);
+      if (from)
+        filterConditions.push(
+          `from/emailAddress/address eq '${from}' or from/emailAddress/name eq '${from}'`,
+        );
       if (subject) filterConditions.push(`contains(subject,'${subject}')`);
-      if (hasAttachments !== undefined) filterConditions.push(`hasAttachments eq ${hasAttachments}`);
+      if (hasAttachments !== undefined)
+        filterConditions.push(`hasAttachments eq ${hasAttachments}`);
       if (isRead !== undefined) filterConditions.push(`isRead eq ${isRead}`);
       if (importance) filterConditions.push(`importance eq '${importance}'`);
       if (dateFrom) filterConditions.push(`receivedDateTime ge ${dateFrom}T00:00:00Z`);
@@ -74,7 +90,9 @@ export class SearchEmailTool extends BaseOutlookTool {
 
       let graphQuery = graphClient
         .api(endpoint)
-        .select('id,subject,from,receivedDateTime,sentDateTime,bodyPreview,importance,isRead,hasAttachments,internetMessageId,parentFolderId')
+        .select(
+          'id,subject,from,receivedDateTime,sentDateTime,bodyPreview,importance,isRead,hasAttachments,internetMessageId,parentFolderId',
+        )
         .top(limit);
 
       if (query) {

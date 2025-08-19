@@ -9,7 +9,10 @@ import { BaseOutlookTool } from './base-outlook.tool';
 
 const DeleteMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to delete'),
-  permanent: z.boolean().default(false).describe('Whether to permanently delete (true) or move to Deleted Items (false)'),
+  permanent: z
+    .boolean()
+    .default(false)
+    .describe('Whether to permanently delete (true) or move to Deleted Items (false)'),
 });
 
 @Injectable()
@@ -65,8 +68,8 @@ export class DeleteMailMessageTool extends BaseOutlookTool {
         success: true,
         messageId,
         action: permanent ? 'permanently_deleted' : 'moved_to_deleted_items',
-        message: permanent 
-          ? 'Message has been permanently deleted' 
+        message: permanent
+          ? 'Message has been permanently deleted'
           : 'Message has been moved to Deleted Items folder',
       };
     } catch (error) {

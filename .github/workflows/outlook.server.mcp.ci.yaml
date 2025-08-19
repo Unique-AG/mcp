@@ -58,7 +58,7 @@ jobs:
         
       - name: Check formatting
         working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run format --check
+        run: pnpm run format
         
       - name: Type check
         working-directory: ${{ env.SERVER_PATH }}

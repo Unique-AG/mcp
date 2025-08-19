@@ -10,8 +10,14 @@ import { BaseOutlookTool } from './base-outlook.tool';
 
 const GetMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to retrieve'),
-  includeAttachments: z.boolean().default(false).describe('Whether to include attachment information'),
-  bodyFormat: z.enum(['text', 'html']).default('text').describe('Format of the message body to return'),
+  includeAttachments: z
+    .boolean()
+    .default(false)
+    .describe('Whether to include attachment information'),
+  bodyFormat: z
+    .enum(['text', 'html'])
+    .default('text')
+    .describe('Format of the message body to return'),
 });
 
 @Injectable()
