@@ -2,4 +2,4 @@ image:
   registry: docker.io
   repository: postgres
 port: 5432
-secretRef: ""
+secretRef: override, must contain POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD

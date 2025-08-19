@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Release.AppVersion }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           envFrom:
             - secretRef:
                 name: {{ .Values.secretRef }}
