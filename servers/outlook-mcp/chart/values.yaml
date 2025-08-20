@@ -1,4 +1,9 @@
 server:
+  hooks:
+    migration:
+      enabled: true
+      command: |
+        pnpm run db:migrate:deploy
   extraRoutes:
     # TODO: Only for MCP inspector, potentiallyremove before BETA or for production environments
     mcp:
