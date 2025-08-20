@@ -30,8 +30,18 @@ COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
 
 RUN pnpm --filter=@unique/${APP_NAME} db:generate && \
+    # This triggers Prisma to download the engines, so we can stash them in the image.
+    pnpm --filter=@unique/${APP_NAME} exec prisma --version && \
     pnpm turbo build --filter=@unique/${APP_NAME}... && \
     pnpm --filter=@unique/${APP_NAME} deploy out
+
+RUN set -eux; \
+    cd servers/${APP_NAME}; \
+    ENG_DIR="$(node -e "console.log(require.resolve('@prisma/engines/package.json'))" | xargs dirname)"; \
+    echo "Engines resolved to: $ENG_DIR"; \
+    test -d "$ENG_DIR"; \
+    mkdir -p /app/_engines; \
+    cp -R "$ENG_DIR"/. /app/_engines;
 
 FROM node:22-bookworm-slim AS runner
 ARG APP_NAME=outlook-mcp
@@ -61,6 +71,19 @@ COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/@generated ./
 COPY --from=builder --chown=nestjs:nodejs /app/out/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/out/package.json ./package.json
 COPY --from=builder --chown=nestjs:nodejs /app/out/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/_engines /prisma/engines
+
+# Create symlink to the correct schema engine binary for the current platform
+ENV PRISMA_SCHEMA_ENGINE_BINARY=/prisma/engines/schema-engine
+RUN set -eux; \
+    cd /prisma/engines; \
+    SCHEMA_ENGINE=$(find . -name "schema-engine-*" -type f -executable | head -1); \
+    if [ -n "$SCHEMA_ENGINE" ]; then \
+        ln -sf "$SCHEMA_ENGINE" schema-engine; \
+        echo "Created symlink: schema-engine -> $SCHEMA_ENGINE"; \
+    else \
+        echo "Warning: No schema engine binary found"; \
+    fi
 
 USER nestjs
 EXPOSE 3000
