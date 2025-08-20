@@ -58,7 +58,7 @@ const appSettingsSchema = z.object({
       return Buffer.from(key, 'base64');
     })
     .refine((buffer) => buffer.length === 32, {
-      message: 'Key must be 32 bytes (AES-256)',
+      message: 'Key must be 32 bytes (AES-256). Ensure its generated in a suitable way like \'openssl rand -hex 32\' or terraform \'random_id\'.',
     })
     .describe(
       'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',
