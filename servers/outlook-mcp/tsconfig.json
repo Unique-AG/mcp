@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "target": "ES2023",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "removeComments": true,
+    "incremental": true,
+    "baseUrl": "./",
+    // "strict": false,
+    // "noImplicitAny": false,
+    // "strictBindCallApply": false,
+    // "noFallthroughCasesInSwitch": false,
+    // "noUncheckedIndexedAccess": false
+    "paths": {
+      "@generated/*": ["./@generated/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "@generated/**/*"]
+}

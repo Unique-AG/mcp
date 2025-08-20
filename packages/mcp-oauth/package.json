@@ -1,0 +1,41 @@
+{
+  "name": "@unique-ag/mcp-oauth",
+  "version": "0.0.0",
+  "description": "Modular authentication module for MCP servers with OAuth 2.1",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/throttler": "^6.4.0",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nestjs-zod": "^4.3.1",
+    "serialize-error-cjs": "^0.2.0",
+    "typeid-js": "^1.2.0",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "passport": "^0.7.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.10.7",
+    "@types/passport": "^1.0.17",
+    "typescript": "^5.8.3"
+  }
+}

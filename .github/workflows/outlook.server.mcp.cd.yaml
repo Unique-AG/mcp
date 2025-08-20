@@ -1,0 +1,56 @@
+name: "[mcp/server/outlook] Publish"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - servers/outlook-mcp/**
+      - .github/workflows/outlook.server.mcp.cd.yaml
+
+jobs:
+  validate:
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVER_PATH: servers/outlook-mcp
+      CHART_REPO: ghcr.io/unique-ag/mcp/server/outlook-mcp
+    outputs:
+      version: ${{ steps.version.outputs.content }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+      - uses: docker/setup-buildx-action@v3
+      - id: version
+        run: |
+          VERSION=$(jq -r '.version' "${{ env.SERVER_PATH }}/package.json")
+          echo "Extracted version: $VERSION"
+          echo "content=$VERSION" >> $GITHUB_OUTPUT
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CHART_REPO }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.content }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          file: ./servers/outlook-mcp/Dockerfile
+          context: .
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.CHART_REPO }}:cache
+          cache-to: type=registry,ref=${{ env.CHART_REPO }}:cache,mode=max
+          push: true
+          build-args: |
+            APP_NAME=outlook-mcp
+            PNPM_VERSION=10.15.0
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

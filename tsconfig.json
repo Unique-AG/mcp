@@ -20,11 +20,7 @@
     "emitDecoratorMetadata": true,
     /* Completeness */
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    /* Paths */
-    "paths": {
-      "@unique/*": ["packages/*"]
-    }
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules"]
 }

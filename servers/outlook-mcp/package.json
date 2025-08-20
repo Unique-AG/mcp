@@ -1,0 +1,107 @@
+{
+  "name": "@unique/outlook-mcp",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "dev": "nodemon",
+    "debug": "nest start --debug --watch",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write",
+    "check-types": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@nestjs/cache-manager": "^3.0.1",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "@prisma/client": "6.14.0",
+    "@proventuslabs/nestjs-zod": "^1.1.0",
+    "@rekog/mcp-nest": "^1.8.0",
+    "@unique-ag/aes-gcm-encryption": "workspace:*",
+    "@unique-ag/logger": "0.1.1",
+    "@unique-ag/mcp-oauth": "workspace:*",
+    "cache-manager": "^7.1.1",
+    "cookie-parser": "^1.4.7",
+    "jsonwebtoken": "^9.0.2",
+    "nestjs-zod": "^4.3.1",
+    "passport": "^0.7.0",
+    "passport-microsoft": "^2.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "serialize-error-cjs": "^0.2.0",
+    "typeid-js": "^1.2.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.40.0",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.1",
+    "@swc/cli": "^0.7.8",
+    "@swc/core": "^1.13.3",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.10.7",
+    "@types/passport": "^1.0.17",
+    "@types/passport-microsoft": "^2.1.0",
+    "@types/supertest": "^6.0.2",
+    "globals": "^16.0.0",
+    "jest": "^30.0.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.14.0",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "../../packages/**/dist/index.js"
+    ],
+    "ignore": [
+      "../../packages/**/node_modules/**",
+      "../../packages/**/.turbo/**"
+    ],
+    "exec": "nest start --watch"
+  }
+}

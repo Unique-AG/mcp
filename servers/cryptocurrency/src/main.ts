@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import http from 'node:http';
-
 import { CoinMarketCapAPI } from '@unique/coin-market-cap';
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
@@ -18,7 +16,7 @@ const mcpServer = new McpServer({
   version: '1.0.0',
 });
 
-const api = new CoinMarketCapAPI('');
+const api = new CoinMarketCapAPI();
 
 mcpServer.resource('listCurrencies', 'crypto://currencies', async (uri) => {
   const symbols = await api.listCurrencies();
