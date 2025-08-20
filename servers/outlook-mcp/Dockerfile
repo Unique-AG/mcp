@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs --shell /bin/bash --create-home nestjs
 
-ENV PNPM_HOME="/pnpm"
+ENV PNPM_HOME="/tmp/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV COREPACK_HOME="/tmp/.cache/corepack"
 RUN corepack enable

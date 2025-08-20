@@ -40,7 +40,11 @@ server:
   volumes:
     - name: tmp
       emptyDir: {}
+    - name: pnpm-virtual-store
+      emptyDir: {}
   volumeMounts:
     - name: tmp
       mountPath: /tmp
+    - name: pnpm-virtual-store
+      mountPath: /app/node_modules/.pnpm
   # routes: can not use since that uses the JWT middleware, see extraRoutes
