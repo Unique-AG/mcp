@@ -38,4 +38,10 @@ server:
     requests:
       cpu: 40m
       memory: 64Mi
+  volumes:
+    - name: tmp
+      emptyDir: {}
+  volumeMounts:
+    - name: tmp
+      mountPath: /tmp
   # routes: can not use since that uses the JWT middleware, see extraRoutes
