@@ -1,6 +1,6 @@
 {
   "name": "@unique/outlook-mcp",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "author": "",
   "private": true,
@@ -32,6 +32,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@prisma/adapter-pg": "^6.14.0",
     "@prisma/client": "6.14.0",
     "@proventuslabs/nestjs-zod": "^1.1.0",
     "@rekog/mcp-nest": "^1.8.0",
