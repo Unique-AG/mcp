@@ -4,22 +4,32 @@ server:
       enabled: true
       command: |
         pnpm run db:migrate:deploy
-  extraRoutes:
-    # TODO: Only for MCP inspector, potentiallyremove before BETA or for production environments
-    mcp:
-      annotations:
-        konghq.com/plugins: unique-route-metrics
-        konghq.com/strip-path: "true"
-      enabled: true
-      matches:
-        - path:
-            type: PathPrefix
-            value: /mcp/server/outlook
-      parentRefs:
-        - group: gateway.networking.k8s.io
-          kind: Gateway
-          name: kong
-          namespace: system
+  extraObjects:
+    - apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: apps-mcp-server-outlook-mcp
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt
+          external-dns.alpha.kubernetes.io/hostname: outlook.mcp.unique.app
+          konghq.com/plugins: unique-route-metrics
+      spec:
+        ingressClassName: kong
+        tls:
+          - hosts:
+              - outlook.mcp.unique.app
+            secretName: apps-mcp-server-outlook-mcp-tls
+        rules:
+          - host: outlook.mcp.unique.app
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: apps-mcp-server-outlook
+                      port:
+                        number: 80
   image:
     repository: ghcr.io/unique-ag/mcp/server/outlook-mcp # FIXME: Naming is not consistent, must be fixed before BETA (mcp is mentioned twice, mcp/servers/xxx-mcp)
     tag: 0.0.5 # TODO: Tag must be auto-injected via release process from package.json
