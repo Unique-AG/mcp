@@ -40,13 +40,7 @@ server:
   volumes:
     - name: tmp
       emptyDir: {}
-    - name: prisma-engines
-      emptyDir: {}
   volumeMounts:
     - name: tmp
       mountPath: /tmp
-    - name: prisma-engines
-      # FIXME: The prisma engine version is hard-coded. This is an issue when updating prisma.
-      # Prisma 7 should solve this as it will not use engines any more.
-      mountPath: /app/node_modules/.pnpm/@prisma+engines@6.14.0/node_modules/@prisma/engines
   # routes: can not use since that uses the JWT middleware, see extraRoutes
