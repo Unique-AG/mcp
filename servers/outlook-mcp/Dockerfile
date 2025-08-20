@@ -49,8 +49,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV COREPACK_HOME="/tmp/.cache/corepack"
 RUN corepack enable
 RUN corepack prepare pnpm@${PNPM_VERSION} --activate
+RUN mkdir -p /tmp/.cache/corepack && chown -R nestjs:nodejs /tmp/.cache/corepack
 
 ENV NODE_ENV=production
 
