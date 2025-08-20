@@ -1,0 +1,36 @@
+server:
+  extraRoutes:
+    # TODO: Only for MCP inspector, potentiallyremove before BETA or for production environments
+    mcp:
+      annotations:
+        konghq.com/plugins: unique-route-metrics
+        konghq.com/strip-path: "true"
+      enabled: true
+      matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/server/outlook
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: kong
+          namespace: system
+  image:
+    repository: ghcr.io/unique-ag/mcp/server/outlook-mcp # FIXME: Naming is not consistent, must be fixed before BETA (mcp is mentioned twice, mcp/servers/xxx-mcp)
+    tag: 0.0.1 # TODO: Tag must be auto-injected via release process from package.json
+  networkPolicy:
+    enabled: false # TODO: Policies must be defined as good practice, living documentation and as enterprise software and standard (ingress- and egress-policies)
+  ports:
+    application: 51345
+  probes:
+    enabled: false
+  prometheus:
+    enabled: false
+  resources:
+    limits:
+      cpu: 80m
+      memory: 128Mi
+    requests:
+      cpu: 40m
+      memory: 64Mi
+  # routes: can not use since that uses the JWT middleware, see extraRoutes
