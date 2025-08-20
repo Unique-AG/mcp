@@ -33,11 +33,10 @@ server:
     enabled: false
   resources:
     limits:
-      cpu: 80m
-      memory: 128Mi
+      memory: 1Gi
     requests:
-      cpu: 40m
-      memory: 64Mi
+      cpu: 500m
+      memory: 512Mi
   volumes:
     - name: tmp
       emptyDir: {}
