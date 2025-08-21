@@ -38,7 +38,7 @@ server:
   ports:
     application: 51345
   probes:
-    enabled: false
+    enabled: true
   prometheus:
     enabled: false
   resources:

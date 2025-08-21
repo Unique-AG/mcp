@@ -1,6 +1,6 @@
+import { McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { UnauthorizedException } from '@nestjs/common';
-import { McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 
 export abstract class BaseOutlookTool {

@@ -1,8 +1,8 @@
 import { join } from 'node:path';
+import { Logger } from '@unique-ag/logger';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { Logger } from '@unique-ag/logger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppConfig, AppSettings } from './app-settings.enum';
