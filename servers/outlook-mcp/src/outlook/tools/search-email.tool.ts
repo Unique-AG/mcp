@@ -1,7 +1,7 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -47,9 +47,22 @@ export class SearchEmailTool extends BaseOutlookTool {
 
   @Tool({
     name: 'search_email',
+    title: 'Search Emails',
     description:
-      'Search for emails in Outlook using various criteria. When using text search (query parameter), results are automatically ordered by relevance. Custom ordering is only available when not using text search.',
+      'Search and filter emails in Outlook using text queries, sender, date ranges, and other criteria. Supports full-text search across subject and body, with results ranked by relevance when searching.',
     parameters: SearchEmailInputSchema,
+    annotations: {
+      title: 'Search Emails',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'mail-search',
+      'unique.app/system-prompt':
+        'Use this tool to find specific emails. The query parameter searches across email content. You can combine multiple filters like sender, date range, attachment status, and importance. To search within a specific folder, first use list_mail_folders to get folder IDs, then pass the folderId parameter.',
+    },
   })
   public async searchEmail(
     {

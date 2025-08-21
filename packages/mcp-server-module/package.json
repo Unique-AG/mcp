@@ -1,0 +1,32 @@
+{
+  "name": "@unique-ag/mcp-server-module",
+  "version": "0.0.0",
+  "description": "Module to turn a NestJS application into an MCP server",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "path-to-regexp": "^8.2.0",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": ">=3.23.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.10.7",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,7 +1,7 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -29,8 +29,22 @@ export class SendMailTool extends BaseOutlookTool {
 
   @Tool({
     name: 'send_mail',
-    description: 'Send an email via Outlook',
+    title: 'Send Email',
+    description:
+      'Send an email immediately via Outlook. Use this for direct email sending with recipients, subject, and body content.',
     parameters: SendMailInput,
+    annotations: {
+      title: 'Send Email',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'send',
+      'unique.app/user-prompt':
+        'This tool will immediately send the email. Consider using create_draft_email instead if you want to review the email before sending.',
+    },
   })
   public async sendMail(
     { to, subject, body, isHtml, cc, bcc }: z.infer<typeof SendMailInput>,

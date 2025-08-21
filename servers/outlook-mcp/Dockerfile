@@ -68,6 +68,7 @@ ENV NODE_ENV=production
 
 COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/@generated ./@generated
+COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/public ./public
 COPY --from=builder --chown=nestjs:nodejs /app/out/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/out/package.json ./package.json
 COPY --from=builder --chown=nestjs:nodejs /app/out/prisma ./prisma

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -25,8 +25,24 @@ export class DeleteMailMessageTool extends BaseOutlookTool {
 
   @Tool({
     name: 'delete_mail_message',
-    description: 'Delete a specific email message from Outlook',
+    title: 'Delete Email',
+    description:
+      'Delete an email message from Outlook either by moving to trash or permanently removing. Use with caution for permanent deletion.',
     parameters: DeleteMailMessageInputSchema,
+    annotations: {
+      title: 'Delete Email',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'trash-2',
+      'unique.app/user-prompt':
+        'By default, emails are moved to the Deleted Items folder (recoverable). Set permanent to true only if you want to permanently delete the email (non-recoverable).',
+      'unique.app/system-prompt':
+        'Message IDs can be obtained from search_email, list_mails, or other email listing tools. Default behavior moves to Deleted Items folder. Use permanent:true with extreme caution as it cannot be undone.',
+    },
   })
   public async deleteMailMessage(
     { messageId, permanent }: z.infer<typeof DeleteMailMessageInputSchema>,

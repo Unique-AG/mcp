@@ -1,7 +1,7 @@
 import { Attachment, Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -30,8 +30,22 @@ export class GetMailMessageTool extends BaseOutlookTool {
 
   @Tool({
     name: 'get_mail_message',
-    description: 'Get a specific email message by ID from Outlook',
+    title: 'Get Email Details',
+    description:
+      'Retrieve complete details of a specific email message including body, recipients, attachments info, and metadata. Use this to read full email content.',
     parameters: GetMailMessageInputSchema,
+    annotations: {
+      title: 'Get Email Details',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'mail-open',
+      'unique.app/system-prompt':
+        'Fetches full email details by message ID. Message IDs can be obtained from search_email, list_mails, or list_mail_folder_messages. Set includeAttachments to true to get attachment metadata. Choose bodyFormat as "html" for formatted content or "text" for plain text.',
+    },
   })
   public async getMailMessage(
     { messageId, includeAttachments, bodyFormat }: z.infer<typeof GetMailMessageInputSchema>,

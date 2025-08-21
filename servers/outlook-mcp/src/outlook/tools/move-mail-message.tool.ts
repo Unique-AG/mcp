@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -26,8 +26,22 @@ export class MoveMailMessageTool extends BaseOutlookTool {
 
   @Tool({
     name: 'move_mail_message',
-    description: 'Move an email message to a different folder in Outlook',
+    title: 'Move Email to Folder',
+    description:
+      'Move an email message to a different folder in Outlook. Supports both well-known folder names and specific folder IDs for organization.',
     parameters: MoveMailMessageInputSchema,
+    annotations: {
+      title: 'Move Email to Folder',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'folder-input',
+      'unique.app/system-prompt':
+        'To move emails to custom folders, first use list_mail_folders to discover available folder IDs. You can use well-known names like "inbox", "deleteditems", "drafts", "sentitems" for standard folders, or specific folder IDs for custom folders. The messageId can be obtained from search_email, list_mails, or other email listing tools.',
+    },
   })
   public async moveMailMessage(
     { messageId, destinationFolderId }: z.infer<typeof MoveMailMessageInputSchema>,

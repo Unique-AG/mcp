@@ -1,7 +1,7 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -30,8 +30,22 @@ export class CreateDraftEmailTool extends BaseOutlookTool {
 
   @Tool({
     name: 'create_draft_email',
-    description: 'Create a draft email in Outlook',
+    title: 'Create Draft Email',
+    description:
+      'Create a new draft email in Outlook that can be edited and sent later. Use this to prepare emails without sending them immediately.',
     parameters: CreateDraftEmailInputSchema,
+    annotations: {
+      title: 'Create Draft Email',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'pencil-line',
+      'unique.app/system-prompt':
+        'Creates a draft email that will be saved in the Drafts folder. The email can be reviewed, edited, and sent manually later. Returns the draft message ID and a web link to view/edit the draft in Outlook.',
+    },
   })
   public async createDraftEmail(
     { to, subject, body, isHtml, cc, bcc, importance }: z.infer<typeof CreateDraftEmailInputSchema>,

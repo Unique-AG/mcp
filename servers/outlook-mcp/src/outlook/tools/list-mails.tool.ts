@@ -1,7 +1,7 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
@@ -23,8 +23,22 @@ export class ListMailsTool extends BaseOutlookTool {
 
   @Tool({
     name: 'list_mails',
-    description: 'List emails from Outlook',
+    title: 'List Emails',
+    description:
+      'List recent emails from a specific Outlook folder. Provides a quick overview of messages with subject, sender, and preview.',
     parameters: ListMailsInputSchema,
+    annotations: {
+      title: 'List Emails',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'inbox',
+      'unique.app/system-prompt':
+        'Returns the most recent emails from the specified folder (default: inbox). Use folder parameter with well-known names like "inbox", "sentitems", "drafts", "deleteditems" or specific folder IDs from list_mail_folders.',
+    },
   })
   public async listMails(
     { folder, limit }: z.infer<typeof ListMailsInputSchema>,
