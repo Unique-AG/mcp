@@ -23,8 +23,20 @@ export class ListMailsTool extends BaseOutlookTool {
 
   @Tool({
     name: 'list_mails',
-    description: 'List emails from Outlook',
+    title: 'List Emails',
+    description: 'List recent emails from a specific Outlook folder. Provides a quick overview of messages with subject, sender, and preview.',
     parameters: ListMailsInputSchema,
+    annotations: {
+      title: 'List Emails',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'inbox',
+      'unique.app/system-prompt': 'Returns the most recent emails from the specified folder (default: inbox). Use folder parameter with well-known names like "inbox", "sentitems", "drafts", "deleteditems" or specific folder IDs from list_mail_folders.'
+    }
   })
   public async listMails(
     { folder, limit }: z.infer<typeof ListMailsInputSchema>,

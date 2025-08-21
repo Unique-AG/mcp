@@ -5,20 +5,24 @@ import { MCP_TOOL_METADATA_KEY } from './constants';
 
 export interface ToolMetadata {
   name: string;
+  title?: string;
   description: string;
   parameters?: z.ZodTypeAny;
   outputSchema?: z.ZodTypeAny;
   annotations?: SdkToolAnnotations;
+  _meta?: z.ZodTypeAny;
 }
 
 export interface ToolAnnotations extends SdkToolAnnotations {}
 
 export interface ToolOptions {
   name?: string;
+  title?: string;
   description?: string;
   parameters?: z.ZodTypeAny;
   outputSchema?: z.ZodTypeAny;
   annotations?: ToolAnnotations;
+  _meta?: { [key: string]: unknown };
 }
 
 /**

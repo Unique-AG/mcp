@@ -32,8 +32,20 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
 
   @Tool({
     name: 'list_mail_folder_messages',
-    description: 'List messages from a specific mail folder in Outlook',
+    title: 'List Folder Messages',
+    description: 'List messages from a specific mail folder in Outlook with filtering and sorting options. More flexible than list_mails for accessing any folder.',
     parameters: ListMailFolderMessagesInputSchema,
+    annotations: {
+      title: 'List Folder Messages',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'mail',
+      'unique.app/system-prompt': 'Requires a folderId parameter - use list_mail_folders first to get available folder IDs. Supports OData filters for advanced filtering (e.g., "isRead eq false" for unread emails, "hasAttachments eq true" for emails with attachments). Can sort by receivedDateTime, subject, from, or importance.'
+    }
   })
   public async listMailFolderMessages(
     {

@@ -23,8 +23,20 @@ export class ListMailFoldersTool extends BaseOutlookTool {
 
   @Tool({
     name: 'list_mail_folders',
-    description: 'List mail folders from Outlook',
+    title: 'List Mail Folders',
+    description: 'List all mail folders in Outlook with their IDs, names, and message counts. Essential for discovering folder structure and obtaining folder IDs.',
     parameters: ListMailFoldersInputSchema,
+    annotations: {
+      title: 'List Mail Folders',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    _meta: {
+      'unique.app/icon': 'folder-tree',
+      'unique.app/system-prompt': 'Use this tool to discover available mail folders and their IDs. The folder IDs returned can be used with other tools like move_mail_message, search_email, and list_mail_folder_messages. Set includeChildFolders to true to see the complete folder hierarchy.'
+    }
   })
   public async listMailFolders(
     { includeChildFolders, limit }: z.infer<typeof ListMailFoldersInputSchema>,
