@@ -1,15 +1,16 @@
+# syntax=docker/dockerfile:1.7
+
 FROM node:22-bookworm AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ARG PNPM_VERSION=10.15.0
-RUN corepack enable
-RUN corepack prepare pnpm@${PNPM_VERSION} --activate
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 FROM base AS pruner
 WORKDIR /app
 ARG APP_NAME=outlook-mcp
-COPY . .
-RUN pnpm dlx turbo prune @unique-ag/${APP_NAME} --docker
+RUN --mount=type=bind,source=.,target=/src,ro \
+    pnpm dlx turbo prune @unique-ag/${APP_NAME} --docker --cwd /src --out-dir /app/out
 
 FROM base AS deps
 WORKDIR /app
@@ -18,16 +19,18 @@ COPY --from=pruner /app/out/json/ .
 COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
 FROM base AS builder
 ARG APP_NAME=outlook-mcp
 WORKDIR /app
 
 COPY --from=deps /app/ .
-COPY --from=pruner /app/tsconfig.json ./tsconfig.json
+COPY ./tsconfig.json ./tsconfig.json
+COPY ./turbo.json ./turbo.json
 COPY --from=pruner /app/out/full/ .
-COPY --from=pruner /app/servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
+COPY ./servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
 
 RUN pnpm --filter=@unique-ag/${APP_NAME} db:generate && \
     # This triggers Prisma to download the engines, so we can stash them in the image.

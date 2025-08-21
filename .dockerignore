@@ -1,8 +1,9 @@
 # ignore everything to be explicit about what we copy
-*
+**
 
 # configs
 !biome.json
+!turbo.json
 
 # node
 !package.json
@@ -12,8 +13,8 @@
 !*.ts
 !tsconfig*.json
 
-# ...even if they are in subdirectories
-!*/
+!packages/**
+!servers/**
 
 # keep the whole content of these always ignored no matter where they are
 node_modules/
