@@ -8,13 +8,16 @@ import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
 import { McpModule } from '@unique-ag/mcp-server-module';
 import { Cache } from 'cache-manager';
 import { typeid } from 'typeid-js';
+import * as packageJson from '../package.json';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
 import { MicrosoftOAuthProvider } from './auth/microsoft.provider';
+import { ManifestController } from './manifest.controller';
 import { MsGraphModule } from './msgraph/msgraph.module';
 import { OutlookModule } from './outlook/outlook.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
+import { serverInstructions } from './server.instructions';
 
 @Module({
   imports: [
@@ -61,7 +64,8 @@ import { PrismaService } from './prisma/prisma.service';
     }),
     McpModule.forRoot({
       name: 'outlook-mcp',
-      version: '0.0.1',
+      version: packageJson.version,
+      instructions: serverInstructions,
       streamableHttp: {
         enableJsonResponse: false,
         sessionIdGenerator: () => typeid('session').toString(),
@@ -71,7 +75,7 @@ import { PrismaService } from './prisma/prisma.service';
     MsGraphModule,
     OutlookModule,
   ],
-  controllers: [],
+  controllers: [ManifestController],
   providers: [
     {
       provide: APP_GUARD,
