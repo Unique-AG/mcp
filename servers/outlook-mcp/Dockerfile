@@ -9,7 +9,7 @@ FROM base AS pruner
 WORKDIR /app
 ARG APP_NAME=outlook-mcp
 COPY . .
-RUN pnpm dlx turbo prune @unique/${APP_NAME} --docker
+RUN pnpm dlx turbo prune @unique-ag/${APP_NAME} --docker
 
 FROM base AS deps
 WORKDIR /app
@@ -29,11 +29,11 @@ COPY --from=pruner /app/tsconfig.json ./tsconfig.json
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
 
-RUN pnpm --filter=@unique/${APP_NAME} db:generate && \
+RUN pnpm --filter=@unique-ag/${APP_NAME} db:generate && \
     # This triggers Prisma to download the engines, so we can stash them in the image.
-    pnpm --filter=@unique/${APP_NAME} exec prisma --version && \
-    pnpm turbo build --filter=@unique/${APP_NAME}... && \
-    pnpm --filter=@unique/${APP_NAME} deploy out
+    pnpm --filter=@unique-ag/${APP_NAME} exec prisma --version && \
+    pnpm turbo build --filter=@unique-ag/${APP_NAME}... && \
+    pnpm --filter=@unique-ag/${APP_NAME} deploy out
 
 RUN set -eux; \
     cd servers/${APP_NAME}; \

@@ -51,7 +51,7 @@
           "options": {
             "groups": [
               [":URL:", ":NODE:", ":BUN:"],
-              ["@unique/*"],
+              ["@unique/*", "@unique-ag/*"],
               [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"],
               [":ALIAS:"],
               [":PATH:"]

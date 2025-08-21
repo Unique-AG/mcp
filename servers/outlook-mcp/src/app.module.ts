@@ -1,11 +1,11 @@
-import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { AesGcmEncryptionModule, AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { LoggerModule } from '@unique-ag/logger';
 import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
 import { McpModule } from '@unique-ag/mcp-server-module';
+import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { Cache } from 'cache-manager';
 import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
@@ -71,6 +71,7 @@ import { serverInstructions } from './server.instructions';
         sessionIdGenerator: () => typeid('session').toString(),
         statelessMode: false,
       },
+      mcpEndpoint: 'mcp',
     }),
     MsGraphModule,
     OutlookModule,

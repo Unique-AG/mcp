@@ -1,5 +1,5 @@
 {
-  "name": "@unique/mcp-monorepo",
+  "name": "@unique-ag/mcp-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo build",
