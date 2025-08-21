@@ -72,10 +72,9 @@ export class McpToolsHandler extends McpHandlerBase {
           annotations: tool.metadata.annotations,
         };
 
-        // Add input schema if defined
-        if (tool.metadata.parameters) {
-          (toolSchema as any).inputSchema = zodToJsonSchema(tool.metadata.parameters);
-        }
+        if (tool.metadata.title) (toolSchema as any).title = tool.metadata.title;
+        if (tool.metadata.parameters) (toolSchema as any).inputSchema = zodToJsonSchema(tool.metadata.parameters);
+        if (tool.metadata._meta) (toolSchema as any)._meta = tool.metadata._meta;
 
         // Add output schema if defined, ensuring it has type: 'object'
         if (tool.metadata.outputSchema) {
