@@ -1,7 +1,7 @@
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { type Context, Tool } from '@rekog/mcp-nest';
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
+import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
