@@ -60,8 +60,9 @@ export class SearchEmailTool extends BaseOutlookTool {
     },
     _meta: {
       'unique.app/icon': 'mail-search',
-      'unique.app/system-prompt': 'Use this tool to find specific emails. The query parameter searches across email content. You can combine multiple filters like sender, date range, attachment status, and importance. To search within a specific folder, first use list_mail_folders to get folder IDs, then pass the folderId parameter.'
-    }
+      'unique.app/system-prompt':
+        'Use this tool to find specific emails. The query parameter searches across email content. You can combine multiple filters like sender, date range, attachment status, and importance. To search within a specific folder, first use list_mail_folders to get folder IDs, then pass the folderId parameter.',
+    },
   })
   public async searchEmail(
     {

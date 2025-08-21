@@ -31,7 +31,8 @@ export class GetMailMessageTool extends BaseOutlookTool {
   @Tool({
     name: 'get_mail_message',
     title: 'Get Email Details',
-    description: 'Retrieve complete details of a specific email message including body, recipients, attachments info, and metadata. Use this to read full email content.',
+    description:
+      'Retrieve complete details of a specific email message including body, recipients, attachments info, and metadata. Use this to read full email content.',
     parameters: GetMailMessageInputSchema,
     annotations: {
       title: 'Get Email Details',
@@ -42,8 +43,9 @@ export class GetMailMessageTool extends BaseOutlookTool {
     },
     _meta: {
       'unique.app/icon': 'mail-open',
-      'unique.app/system-prompt': 'Fetches full email details by message ID. Message IDs can be obtained from search_email, list_mails, or list_mail_folder_messages. Set includeAttachments to true to get attachment metadata. Choose bodyFormat as "html" for formatted content or "text" for plain text.'
-    }
+      'unique.app/system-prompt':
+        'Fetches full email details by message ID. Message IDs can be obtained from search_email, list_mails, or list_mail_folder_messages. Set includeAttachments to true to get attachment metadata. Choose bodyFormat as "html" for formatted content or "text" for plain text.',
+    },
   })
   public async getMailMessage(
     { messageId, includeAttachments, bodyFormat }: z.infer<typeof GetMailMessageInputSchema>,
