@@ -34,7 +34,8 @@ COPY ./servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
 
 RUN pnpm --filter=@unique-ag/${APP_NAME} db:generate && \
     # This triggers Prisma to download the engines, so we can stash them in the image.
-    pnpm --filter=@unique-ag/${APP_NAME} exec prisma --version && \
+    pnpm --filter=@unique-ag/${APP_NAME} exec prisma --version
+RUN --mount=type=cache,target=/root/.cache/turbo \
     pnpm turbo build --filter=@unique-ag/${APP_NAME}... && \
     pnpm --filter=@unique-ag/${APP_NAME} deploy out
 

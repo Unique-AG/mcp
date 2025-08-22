@@ -21,21 +21,17 @@ jobs:
       GHA_CACHE_SCOPE: outlook-mcp
     steps:
       - uses: actions/checkout@v4
-
       - uses: docker/setup-buildx-action@v3
-
       - id: version
         run: |
           VERSION=$(jq -r '.version' "${{ env.SERVER_PATH }}/package.json")
           echo "content=$VERSION" >> $GITHUB_OUTPUT
-
       - id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.CHART_REPO }}
           tags: |
             type=raw,value=${{ steps.version.outputs.content }}
-
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -53,7 +49,6 @@ jobs:
             type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
             type=registry,ref=${{ env.CHART_REPO }}:cache
           cache-to: |
-            type=gha,scope=${{ env.GHA_CACHE_SCOPE }},mode=max
             type=registry,ref=${{ env.CHART_REPO }}:cache,mode=min
           build-args: |
             APP_NAME=outlook-mcp

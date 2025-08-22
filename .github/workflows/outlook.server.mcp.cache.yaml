@@ -1,0 +1,58 @@
+name: "[mcp/server/outlook] Warm Docker Build Cache (nightly)"
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: read
+  actions: read
+
+env:
+  SERVER_PATH: servers/outlook-mcp
+  CHART_REPO: ghcr.io/unique-ag/mcp/server/outlook-mcp
+  GHA_CACHE_SCOPE: outlook-mcp
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip if no changes in last 3 days under servers/outlook-mcp
+        run: |
+          if ! git log --since="3 days ago" --name-only --pretty=format: | grep -q '^servers/outlook-mcp/'; then
+            echo "No recent changes; skipping warm."
+            exit 78  # neutral
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pre-warm GHA cache (no push)
+        uses: docker/build-push-action@v6
+        with:
+          file: ./servers/outlook-mcp/Dockerfile
+          context: .
+          platforms: linux/amd64
+          push: false
+          provenance: false
+
+          cache-from: |
+            type=gha,scope=${{ env.GHA_CACHE_SCOPE }}
+            type=registry,ref=${{ env.CHART_REPO }}:cache
+
+          cache-to: |
+            type=gha,scope=${{ env.GHA_CACHE_SCOPE }},mode=max,ignore-error=true
+
+          build-args: |
+            APP_NAME=outlook-mcp
+            PNPM_VERSION=10.15.0
