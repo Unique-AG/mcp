@@ -2,6 +2,7 @@ import { AesGcmEncryptionModule, AesGcmEncryptionService } from '@unique-ag/aes-
 import { LoggerModule } from '@unique-ag/logger';
 import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
 import { McpModule } from '@unique-ag/mcp-server-module';
+import { ProbeModule } from '@unique-ag/probe';
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -36,6 +37,9 @@ import { serverInstructions } from './server.instructions';
     }),
     CacheModule.register({
       isGlobal: true,
+    }),
+    ProbeModule.forRoot({
+      VERSION: packageJson.version,
     }),
     McpOAuthModule.forRootAsync({
       imports: [ConfigModule, PrismaModule],
