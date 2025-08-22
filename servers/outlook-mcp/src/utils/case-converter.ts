@@ -1,9 +1,9 @@
+import { AuthorizationCode, OAuthClient, OAuthSession } from '@unique-ag/mcp-oauth';
 import {
   AuthorizationCode as PrismaAuthorizationCode,
   OAuthClient as PrismaOAuthClient,
   OAuthSession as PrismaOAuthSession,
 } from '@generated/prisma';
-import { AuthorizationCode, OAuthClient, OAuthSession } from '@unique-ag/mcp-oauth';
 
 /**
  * Type-safe converter for OAuthClient

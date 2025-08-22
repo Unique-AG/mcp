@@ -88,13 +88,13 @@ export class OAuthController {
     // This state is used to validate the callback between the MCP server and the third-party provider.
     // We bind it to the session using HMAC to prevent CSRF attacks
     const sessionNonce = randomBytes(32).toString('base64url');
-    const sessionState = createHmac('sha256', this.options.hmacSecret)
+    const sessionHmac = createHmac('sha256', this.options.hmacSecret)
       .update(`${sessionId}:${sessionNonce}`)
       .digest('base64url');
 
     await this.store.storeOAuthSession(sessionId, {
       sessionId,
-      state: sessionState,
+      state: sessionHmac,
       clientId,
       redirectUri,
       codeChallenge,
@@ -105,20 +105,14 @@ export class OAuthController {
       expiresAt: Date.now() + this.options.oauthSessionExpiresIn,
     });
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: this.options.cookieSecure || process.env.NODE_ENV === 'production',
-      maxAge: this.options.oauthSessionExpiresIn,
-      sameSite: 'strict' as const,
-      path: '/auth',
-      ...(this.options.cookieDomain && { domain: this.options.cookieDomain }),
-    };
-
-    response.cookie('oauth_session', sessionId, cookieOptions);
-    response.cookie('oauth_state', sessionState, cookieOptions);
-
     const authMiddleware = passport.authenticate(STRATEGY_NAME, {
-      state: sessionState,
+      state: Buffer.from(
+        JSON.stringify({
+          sessionId,
+          sessionNonce,
+          sessionHmac,
+        }),
+      ).toString('base64url'),
     });
 
     this.logger.debug({
@@ -133,15 +127,11 @@ export class OAuthController {
   @Get(OAUTH_ENDPOINTS.callback)
   @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   public async callback(
-    @Req() request: Request & { sessionId: string; sessionState: string },
+    @Query('state') state: string,
+    @Req() request: Request,
     @Res() response: Response,
     @Next() next: NextFunction,
   ) {
-    this.logger.debug({
-      msg: 'Callback from authorization server.',
-      sessionId: request.sessionId,
-    });
-
     const authMiddleware = passport.authenticate(
       STRATEGY_NAME,
       { session: false },
@@ -156,18 +146,19 @@ export class OAuthController {
           }
 
           if (!user) throw new UnauthorizedException('Authentication failed');
+          if (!state) throw new UnauthorizedException('Authentication failed');
+          const decodedState = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'));
+          const { sessionId, sessionNonce, sessionHmac } = decodedState;
 
           this.logger.debug({ msg: 'User authenticated.' });
 
           request.user = user;
           const { redirectUrl } = await this.authService.processAuthenticationSuccess({
             user,
-            sessionId: request.cookies?.oauth_session,
-            sessionState: request.cookies?.oauth_state,
+            sessionId,
+            sessionNonce,
+            sessionHmac,
           });
-
-          response.clearCookie('oauth_session');
-          response.clearCookie('oauth_state');
 
           this.logger.debug({
             msg: 'User JWT created and oauth session cleared. Redirecting the user back to the MCP client.',

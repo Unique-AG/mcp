@@ -1,7 +1,7 @@
+import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { Client, ClientOptions, MiddlewareFactory } from '@microsoft/microsoft-graph-client';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { AppConfig, AppSettings } from '../app-settings.enum';
 import { SCOPES } from '../auth/microsoft.provider';
 import { PrismaService } from '../prisma/prisma.service';

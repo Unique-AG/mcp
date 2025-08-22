@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import {
   AccessTokenMetadata,
   AuthorizationCode,
@@ -10,6 +9,7 @@ import {
   PassportUser,
   RefreshTokenMetadata,
 } from '@unique-ag/mcp-oauth';
+import { Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { typeid } from 'typeid-js';
 import { PrismaService } from '../prisma/prisma.service';

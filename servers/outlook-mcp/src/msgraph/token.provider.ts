@@ -1,9 +1,9 @@
+import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import {
   AuthenticationProvider,
   AuthenticationProviderOptions,
 } from '@microsoft/microsoft-graph-client';
 import { Logger } from '@nestjs/common';
-import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { serializeError } from 'serialize-error-cjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizeError } from '../utils/normalize-error';
