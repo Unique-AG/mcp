@@ -106,11 +106,13 @@ export class OAuthController {
     });
 
     const authMiddleware = passport.authenticate(STRATEGY_NAME, {
-      state: Buffer.from(JSON.stringify({
-        sessionId,
-        sessionNonce,
-        sessionHmac,
-      })).toString('base64url'),
+      state: Buffer.from(
+        JSON.stringify({
+          sessionId,
+          sessionNonce,
+          sessionHmac,
+        }),
+      ).toString('base64url'),
     });
 
     this.logger.debug({

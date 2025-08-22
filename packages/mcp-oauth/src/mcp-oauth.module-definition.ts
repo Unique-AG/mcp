@@ -31,9 +31,7 @@ export const mcpOAuthModuleOptionsSchema = z.object({
   clientSecret: z.string().describe('The client secret of the OAuth provider.'),
 
   // Required JWT Configuration
-  hmacSecret: z
-    .string()
-    .describe('The secret key for the MCP Server to sign HMAC tokens.'),
+  hmacSecret: z.string().describe('The secret key for the MCP Server to sign HMAC tokens.'),
 
   // Server Configuration
   serverUrl: z.string().url(),

@@ -36,10 +36,7 @@ const appSettingsSchema = z.object({
     .string()
     .min(1)
     .describe('The client secret of the Microsoft App Registration that the MCP Server will use.'),
-  HMAC_SECRET: z
-    .string()
-    .min(1)
-    .describe('The secret key for the MCP Server to sign HMAC tokens.'),
+  HMAC_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign HMAC tokens.'),
   SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
     .union([z.string(), z.instanceof(Buffer)])
