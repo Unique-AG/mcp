@@ -3,7 +3,6 @@ import { Logger } from '@unique-ag/logger';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppConfig, AppSettings } from './app-settings.enum';
 
@@ -17,11 +16,8 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
 
-  app.use(cookieParser());
-
   app.enableCors({
     origin: true,
-    credentials: true,
   });
 
   app.useStaticAssets(join(__dirname, '..', 'public'));

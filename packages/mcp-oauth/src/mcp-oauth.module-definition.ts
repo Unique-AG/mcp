@@ -33,7 +33,7 @@ export const mcpOAuthModuleOptionsSchema = z.object({
   // Required JWT Configuration
   hmacSecret: z
     .string()
-    .describe('The secret key for the MCP Server to sign HMAC tokens or cookies.'),
+    .describe('The secret key for the MCP Server to sign HMAC tokens.'),
 
   // Server Configuration
   serverUrl: z.string().url(),
@@ -52,16 +52,6 @@ export const mcpOAuthModuleOptionsSchema = z.object({
     .default(30 * 24 * 60 * 60)
     .describe('The expiration time of the JWT refresh token. Default is 30 days.'),
 
-  // Cookie Configuration
-  cookieSecure: z.boolean().default(false),
-  cookieDomain: z
-    .string()
-    .optional()
-    .describe('The domain for cookies. If not set, cookies will use the default domain.'),
-  cookieMaxAge: z
-    .number()
-    .default(24 * 60 * 60 * 1000)
-    .describe('The expiration time of the cookie in milliseconds. Default is 24 hours.'),
   oauthSessionExpiresIn: z
     .number()
     .default(10 * 60 * 1000)

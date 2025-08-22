@@ -39,7 +39,7 @@ const appSettingsSchema = z.object({
   HMAC_SECRET: z
     .string()
     .min(1)
-    .describe('The secret key for the MCP Server to sign HMAC tokens or cookies.'),
+    .describe('The secret key for the MCP Server to sign HMAC tokens.'),
   SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
     .union([z.string(), z.instanceof(Buffer)])

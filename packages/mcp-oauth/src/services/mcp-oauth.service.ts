@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, createHmac, randomBytes } from 'node:crypto';
 import {
   BadRequestException,
   Inject,
@@ -37,11 +37,13 @@ export class McpOAuthService {
   public async processAuthenticationSuccess({
     user,
     sessionId,
-    sessionState,
+    sessionNonce,
+    sessionHmac,
   }: {
     user: PassportUser;
     sessionId: string;
-    sessionState: string;
+    sessionNonce: string;
+    sessionHmac: string;
   }) {
     this.logger.debug({
       msg: 'Processing authentication success',
@@ -61,7 +63,12 @@ export class McpOAuthService {
     )
       throw new UnauthorizedException('Invalid or expired OAuth session.');
 
-    if (session.state !== sessionState) throw new UnauthorizedException('Invalid state.');
+    if (session.state !== sessionHmac) throw new UnauthorizedException('Invalid state.');
+
+    const expectedHmac = createHmac('sha256', this.options.hmacSecret)
+      .update(`${session.sessionId}:${sessionNonce}`)
+      .digest('base64url');
+    if (sessionHmac !== expectedHmac) throw new UnauthorizedException('Invalid state validation.');
 
     const userProfileId = await this.store.upsertUserProfile(user);
     const authCode = randomBytes(32).toString('base64url');
