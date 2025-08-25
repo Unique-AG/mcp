@@ -152,31 +152,9 @@ export class SearchEmailTool extends BaseMsGraphTool {
         parentFolderId: message.parentFolderId,
       }));
 
-      let folderName = null;
-      if (folderId) {
-        try {
-          const folderStartTime = Date.now();
-          const folderEndpoint = `/me/mailFolders/${folderId}`;
-
-          const folder = await graphClient.api(folderEndpoint).select('displayName').get();
-
-          const folderDuration = Date.now() - folderStartTime;
-          this.trackMsgraphRequest(folderEndpoint, 'GET', 200, folderDuration);
-
-          folderName = folder.displayName;
-        } catch (folderError) {
-          this.logger.debug({
-            msg: 'Could not retrieve folder name for search results',
-            folderId,
-            error: serializeError(normalizeError(folderError)),
-          });
-        }
-      }
-
       const searchCriteria = {
         query,
         folderId,
-        folderName,
         from,
         subject,
         hasAttachments,
