@@ -37,10 +37,14 @@ server:
     enabled: false # TODO: Policies must be defined as good practice, living documentation and as enterprise software and standard (ingress- and egress-policies)
   ports:
     application: 51345
+    metrics: 51346
   probes:
     enabled: true
-  prometheus:
-    enabled: false
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "prometheus"
+    - name: OTEL_EXPORTER_PROMETHEUS_PORT
+      value: "51346"
   resources:
     limits:
       memory: 1Gi
@@ -57,4 +61,8 @@ server:
     dashboard:
       enabled: true
       folder: "MCP Servers"
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      port: metrics
   # routes: can not use since that uses the JWT middleware, see extraRoutes
