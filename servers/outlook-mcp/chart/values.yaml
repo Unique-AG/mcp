@@ -53,4 +53,8 @@ server:
   volumeMounts:
     - name: tmp
       mountPath: /tmp
+  grafana:
+    dashboard:
+      enabled: true
+      folder: "MCP Servers"
   # routes: can not use since that uses the JWT middleware, see extraRoutes
