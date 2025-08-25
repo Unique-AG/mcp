@@ -3,12 +3,13 @@ import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import type { Counter } from '@opentelemetry/api';
-import { MetricService, Span } from 'nestjs-otel';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailsInputSchema = z.object({
   folder: z.string().default('inbox').describe('Mail folder to read mails from'),
@@ -23,6 +24,7 @@ export class ListMailsTool extends BaseMsGraphTool {
   public constructor(
     graphClientFactory: GraphClientFactory,
     private readonly metric: MetricService,
+    private readonly traceService: TraceService,
   ) {
     super(graphClientFactory);
     this.actionCounter = this.metric.getCounter('outlook_actions_total', {
@@ -49,13 +51,18 @@ export class ListMailsTool extends BaseMsGraphTool {
         'Returns the most recent emails from the specified folder (default: inbox). Use folder parameter with well-known names like "inbox", "sentitems", "drafts", "deleteditems" or specific folder IDs from list_mail_folders.',
     },
   })
-  @Span()
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.OUTLOOK_FOLDER]: options.folder,
+      [OTEL_ATTRIBUTES.OUTLOOK_LIMIT]: options.limit,
+    },
+  }))
   public async listMails(
     { folder, limit }: z.infer<typeof ListMailsInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
     this.actionCounter.add(1, { action: 'list_mails' });
 
     try {

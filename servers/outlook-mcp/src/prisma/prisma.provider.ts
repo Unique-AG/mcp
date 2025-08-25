@@ -1,9 +1,17 @@
-import { PrismaClient } from '@generated/prisma';
+import { Prisma, PrismaClient } from '@generated/prisma';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { AppConfig, AppSettings } from '../app-settings.enum';
-import { idPrefixExtension } from './id-prefix.extension';
+import { createIdPrefixExtension } from './id-prefix.extension';
+
+const prefixMap: Record<Prisma.DMMF.Model['name'], string> = {
+  OAuthClient: 'oauth_client',
+  AuthorizationCode: 'auth_code',
+  OAuthSession: 'oauth_session',
+  UserProfile: 'user_profile',
+  Token: 'token',
+};
 
 @Injectable()
 export class PrismaProvider extends PrismaClient {
@@ -13,6 +21,6 @@ export class PrismaProvider extends PrismaClient {
   }
 
   public withExtensions() {
-    return this.$extends(idPrefixExtension);
+    return this.$extends(createIdPrefixExtension(prefixMap));
   }
 }
