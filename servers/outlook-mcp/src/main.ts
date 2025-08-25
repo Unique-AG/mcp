@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { AppConfig, AppSettings } from './app-settings.enum';
+import { initOpenTelemetry, runWithInstrumentation } from './instrumentation';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -26,4 +27,6 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Server is running on http://localhost:${port}`);
 }
-bootstrap();
+
+initOpenTelemetry();
+void runWithInstrumentation(bootstrap, 'outlook-mcp');

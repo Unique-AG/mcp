@@ -8,14 +8,15 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Cache } from 'cache-manager';
+import { OpenTelemetryModule } from 'nestjs-otel';
 import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
 import { MicrosoftOAuthProvider } from './auth/microsoft.provider';
+import { MailModule } from './mail/mail.module';
 import { ManifestController } from './manifest.controller';
 import { MsGraphModule } from './msgraph/msgraph.module';
-import { OutlookModule } from './outlook/outlook.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { serverInstructions } from './server.instructions';
@@ -40,6 +41,14 @@ import { serverInstructions } from './server.instructions';
     }),
     ProbeModule.forRoot({
       VERSION: packageJson.version,
+    }),
+    OpenTelemetryModule.forRoot({
+      metrics: {
+        hostMetrics: true,
+        apiMetrics: {
+          enable: true,
+        },
+      },
     }),
     McpOAuthModule.forRootAsync({
       imports: [ConfigModule, PrismaModule],
@@ -78,7 +87,7 @@ import { serverInstructions } from './server.instructions';
       mcpEndpoint: 'mcp',
     }),
     MsGraphModule,
-    OutlookModule,
+    MailModule,
   ],
   controllers: [ManifestController],
   providers: [
