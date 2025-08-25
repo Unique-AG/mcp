@@ -2,11 +2,13 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const SendMailInput = z.object({
   to: z
@@ -23,8 +25,12 @@ const SendMailInput = z.object({
 export class SendMailTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -46,16 +52,25 @@ export class SendMailTool extends BaseMsGraphTool {
         'This tool will immediately send the email. Consider using create_draft_email instead if you want to review the email before sending.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.RECIPIENT_COUNT]: Array.isArray(options.to) ? options.to.length : 1,
+      [OTEL_ATTRIBUTES.IS_HTML]: options.isHtml,
+    },
+  }))
   public async sendMail(
     { to, subject, body, isHtml, cc, bcc }: z.infer<typeof SendMailInput>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('send_mail');
 
     const toRecipients = Array.isArray(to) ? to : [to];
 
     try {
+      const startTime = Date.now();
+      const endpoint = '/me/sendMail';
       const message: Message = {
         subject: subject,
         body: {
@@ -79,13 +94,17 @@ export class SendMailTool extends BaseMsGraphTool {
         })),
       };
 
-      await graphClient.api('/me/sendMail').post({ message });
+      await graphClient.api(endpoint).post({ message });
+
+      const duration = Date.now() - startTime;
+      this.trackMsgraphRequest(endpoint, 'POST', 200, duration);
 
       return {
         success: true,
         message: `Email sent successfully to ${to}`,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('send_mail', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to send email via Outlook',
         error: serializeError(normalizeError(error)),

@@ -2,11 +2,13 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { MailFolder } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailFoldersInputSchema = z.object({
   includeChildFolders: z.boolean().default(false).describe('Whether to include child folders'),
@@ -17,8 +19,12 @@ const ListMailFoldersInputSchema = z.object({
 export class ListMailFoldersTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -40,19 +46,32 @@ export class ListMailFoldersTool extends BaseMsGraphTool {
         'Use this tool to discover available mail folders and their IDs. The folder IDs returned can be used with other tools like move_mail_message, search_email, and list_mail_folder_messages. Set includeChildFolders to true to see the complete folder hierarchy.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.OUTLOOK_LIMIT]: options.limit,
+      [OTEL_ATTRIBUTES.INCLUDE_ATTACHMENTS]: options.includeChildFolders,
+    },
+  }))
   public async listMailFolders(
     { includeChildFolders, limit }: z.infer<typeof ListMailFoldersInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('list_mail_folders');
 
     try {
+      const startTime = Date.now();
+      const endpoint = '/me/mailFolders';
+
       const response = await graphClient
-        .api('/me/mailFolders')
+        .api(endpoint)
         .select('id,displayName,parentFolderId,childFolderCount,unreadItemCount,totalItemCount')
         .top(limit)
         .get();
+
+      const duration = Date.now() - startTime;
+      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       let folders = response.value.map((folder: MailFolder) => ({
         id: folder.id,
@@ -68,12 +87,18 @@ export class ListMailFoldersTool extends BaseMsGraphTool {
           folders.map(async (folder: MailFolder) => {
             if (folder.childFolderCount && folder.childFolderCount > 0) {
               try {
+                const childStartTime = Date.now();
+                const childEndpoint = `/me/mailFolders/${folder.id}/childFolders`;
+
                 const childResponse = await graphClient
-                  .api(`/me/mailFolders/${folder.id}/childFolders`)
+                  .api(childEndpoint)
                   .select(
                     'id,displayName,parentFolderId,childFolderCount,unreadItemCount,totalItemCount',
                   )
                   .get();
+
+                const childDuration = Date.now() - childStartTime;
+                this.trackMsgraphRequest(childEndpoint, 'GET', 200, childDuration);
 
                 return {
                   ...folder,
@@ -107,6 +132,7 @@ export class ListMailFoldersTool extends BaseMsGraphTool {
         includeChildFolders,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('list_mail_folders', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to list mail folders from Outlook',
         error: serializeError(normalizeError(error)),

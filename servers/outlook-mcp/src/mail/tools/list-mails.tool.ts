@@ -2,7 +2,6 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import type { Counter } from '@opentelemetry/api';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
@@ -19,17 +18,13 @@ const ListMailsInputSchema = z.object({
 @Injectable()
 export class ListMailsTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
-  private readonly actionCounter: Counter;
 
   public constructor(
     graphClientFactory: GraphClientFactory,
-    private readonly metric: MetricService,
+    metricService: MetricService,
     private readonly traceService: TraceService,
   ) {
-    super(graphClientFactory);
-    this.actionCounter = this.metric.getCounter('outlook_actions_total', {
-      description: 'Total number of Outlook actions',
-    });
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -63,15 +58,21 @@ export class ListMailsTool extends BaseMsGraphTool {
     request: McpAuthenticatedRequest,
   ) {
     const graphClient = this.getGraphClient(request, this.traceService.getSpan());
-    this.actionCounter.add(1, { action: 'list_mails' });
+    this.incrementActionCounter('list_mails');
 
     try {
+      const startTime = Date.now();
+      const endpoint = `/me/mailFolders/${folder}/messages`;
+
       const messages = await graphClient
-        .api(`/me/mailFolders/${folder}/messages`)
+        .api(endpoint)
         .select('subject,from,receivedDateTime,bodyPreview,importance,isRead')
         .top(limit)
         .orderby('receivedDateTime desc')
         .get();
+
+      const duration = Date.now() - startTime;
+      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       return {
         emails: messages.value.map((email: Message) => ({
@@ -88,6 +89,7 @@ export class ListMailsTool extends BaseMsGraphTool {
         folder,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('list_mails', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to read emails from Outlook',
         error: serializeError(normalizeError(error)),

@@ -2,11 +2,13 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const CreateDraftEmailInputSchema = z.object({
   to: z
@@ -24,8 +26,12 @@ const CreateDraftEmailInputSchema = z.object({
 export class CreateDraftEmailTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -47,16 +53,25 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
         'Creates a draft email that will be saved in the Drafts folder. The email can be reviewed, edited, and sent manually later. Returns the draft message ID and a web link to view/edit the draft in Outlook.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.RECIPIENT_COUNT]: Array.isArray(options.to) ? options.to.length : 1,
+      [OTEL_ATTRIBUTES.IS_HTML]: options.isHtml,
+    },
+  }))
   public async createDraftEmail(
     { to, subject, body, isHtml, cc, bcc, importance }: z.infer<typeof CreateDraftEmailInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('create_draft_email');
 
     const toRecipients = Array.isArray(to) ? to : [to];
 
     try {
+      const startTime = Date.now();
+      const endpoint = '/me/messages';
       const draftMessage: Message = {
         subject: subject,
         body: {
@@ -82,7 +97,10 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
         isDraft: true,
       };
 
-      const createdMessage: Message = await graphClient.api('/me/messages').post(draftMessage);
+      const createdMessage: Message = await graphClient.api(endpoint).post(draftMessage);
+
+      const duration = Date.now() - startTime;
+      this.trackMsgraphRequest(endpoint, 'POST', 200, duration);
 
       this.logger.debug({
         msg: 'Draft email created',
@@ -102,6 +120,7 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
         webLink: createdMessage.webLink,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('create_draft_email', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to create draft email in Outlook',
         error: serializeError(normalizeError(error)),
