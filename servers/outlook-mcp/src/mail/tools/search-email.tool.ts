@@ -4,9 +4,9 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
 
 const SearchEmailInputSchema = z.object({
   query: z.string().optional().describe('Text to search for in subject, body, or sender'),
@@ -38,7 +38,7 @@ const SearchEmailInputSchema = z.object({
 });
 
 @Injectable()
-export class SearchEmailTool extends BaseOutlookTool {
+export class SearchEmailTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {

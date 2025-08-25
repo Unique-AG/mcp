@@ -4,9 +4,9 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
 
 const CreateDraftEmailInputSchema = z.object({
   to: z
@@ -21,7 +21,7 @@ const CreateDraftEmailInputSchema = z.object({
 });
 
 @Injectable()
-export class CreateDraftEmailTool extends BaseOutlookTool {
+export class CreateDraftEmailTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {

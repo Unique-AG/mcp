@@ -3,9 +3,9 @@ import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
 
 const DeleteMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to delete'),
@@ -16,7 +16,7 @@ const DeleteMailMessageInputSchema = z.object({
 });
 
 @Injectable()
-export class DeleteMailMessageTool extends BaseOutlookTool {
+export class DeleteMailMessageTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {

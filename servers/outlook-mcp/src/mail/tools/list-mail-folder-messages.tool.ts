@@ -4,9 +4,9 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
 
 const ListMailFolderMessagesInputSchema = z.object({
   folderId: z.string().describe('Mail folder ID to list messages from'),
@@ -23,7 +23,7 @@ const ListMailFolderMessagesInputSchema = z.object({
 });
 
 @Injectable()
-export class ListMailFolderMessagesTool extends BaseOutlookTool {
+export class ListMailFolderMessagesTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {

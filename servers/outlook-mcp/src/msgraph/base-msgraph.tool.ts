@@ -1,9 +1,9 @@
 import { McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { UnauthorizedException } from '@nestjs/common';
-import { GraphClientFactory } from '../../msgraph/graph-client.factory';
+import { GraphClientFactory } from './graph-client.factory';
 
-export abstract class BaseOutlookTool {
+export abstract class BaseMsGraphTool {
   protected constructor(protected readonly graphClientFactory: GraphClientFactory) {}
 
   /**

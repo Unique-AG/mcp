@@ -4,9 +4,9 @@ import { Attachment, Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
 
 const GetMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to retrieve'),
@@ -21,7 +21,7 @@ const GetMailMessageInputSchema = z.object({
 });
 
 @Injectable()
-export class GetMailMessageTool extends BaseOutlookTool {
+export class GetMailMessageTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
   public constructor(graphClientFactory: GraphClientFactory) {
