@@ -5,6 +5,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
+import type { Counter } from '@opentelemetry/api';
+import { MetricService } from 'nestjs-otel';
 import { HttpAdapterFactory } from '../adapters/http-adapter.factory';
 import { type McpOptions } from '../interfaces';
 import { HttpRequest, HttpResponse } from '../interfaces/http-adapter.interface';
@@ -21,14 +23,20 @@ export class McpStreamableHttpService {
   private readonly mcpServers: { [sessionId: string]: McpServer } = {};
   private readonly isStatelessMode: boolean;
 
+  private readonly requestCounter: Counter;
+
   public constructor(
     @Inject('MCP_OPTIONS') private readonly options: McpOptions,
     @Inject('MCP_MODULE_ID') private readonly mcpModuleId: string,
     private readonly moduleRef: ModuleRef,
     private readonly toolRegistry: McpRegistryService,
+    metricService: MetricService,
   ) {
     // Determine if we're in stateless mode
     this.isStatelessMode = !!options.streamableHttp?.statelessMode;
+    this.requestCounter = metricService.getCounter('mcp_requests_total', {
+      description: 'Total number of MCP requests',
+    });
   }
 
   /**
@@ -83,12 +91,16 @@ export class McpStreamableHttpService {
 
     try {
       if (this.isStatelessMode) {
-        return this.handleStatelessRequest(adaptedReq, adaptedRes, body);
+        await this.handleStatelessRequest(adaptedReq, adaptedRes, body);
+        this.requestCounter.add(1, { method: 'POST', status_class: '2xx' });
       } else {
-        return this.handleStatefulRequest(adaptedReq, adaptedRes, body);
+        await this.handleStatefulRequest(adaptedReq, adaptedRes, body);
+        // TODO: Track more detailed status codes
+        this.requestCounter.add(1, { method: 'POST', status_class: '2xx' });
       }
     } catch (error) {
       this.logger.error('Error handling MCP request:', error);
+      this.requestCounter.add(1, { method: 'POST', status_class: '5xx' });
       if (!adaptedRes.headersSent) {
         adaptedRes.status(500).json({
           jsonrpc: '2.0',

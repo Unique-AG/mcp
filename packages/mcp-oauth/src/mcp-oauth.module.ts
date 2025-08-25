@@ -15,11 +15,13 @@ import {
   MCP_OAUTH_MODULE_OPTIONS_TOKEN,
   type McpOAuthModuleOptions,
   type McpOAuthModuleOptionsInput,
+  METRIC_SERVICE_TOKEN,
   mcpOAuthModuleOptionsSchema,
   OAUTH_STORE_TOKEN,
 } from './mcp-oauth.module-definition';
 import { ClientService } from './services/client.service';
 import { McpOAuthService } from './services/mcp-oauth.service';
+import { MetricService } from './services/metric.service';
 import { OAuthStrategyService } from './services/oauth-strategy.service';
 import { OpaqueTokenService } from './services/opaque-token.service';
 
@@ -72,6 +74,7 @@ export class McpOAuthModule extends ConfigurableModuleClass {
       ClientService,
       OpaqueTokenService,
       OAuthStrategyService,
+      MetricService,
       McpAuthJwtGuard,
       {
         provide: APP_FILTER,
@@ -101,6 +104,13 @@ export class McpOAuthModule extends ConfigurableModuleClass {
         },
         inject: [MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN],
       },
+      {
+        provide: METRIC_SERVICE_TOKEN,
+        useFactory: (moduleOptions: McpOAuthModuleOptions) => {
+          return moduleOptions.metricService;
+        },
+        inject: [MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN],
+      },
     ];
 
     return {
@@ -124,6 +134,7 @@ export class McpOAuthModule extends ConfigurableModuleClass {
         McpAuthJwtGuard,
         OAUTH_STORE_TOKEN,
         ENCRYPTION_SERVICE_TOKEN,
+        METRIC_SERVICE_TOKEN,
         MCP_OAUTH_MODULE_OPTIONS_TOKEN,
         MCP_OAUTH_MODULE_OPTIONS_RESOLVED_TOKEN,
       ],

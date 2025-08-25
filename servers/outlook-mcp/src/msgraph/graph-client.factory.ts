@@ -2,9 +2,11 @@ import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
 import { Client, ClientOptions, MiddlewareFactory } from '@microsoft/microsoft-graph-client';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MetricService } from 'nestjs-otel';
 import { AppConfig, AppSettings } from '../app-settings.enum';
 import { SCOPES } from '../auth/microsoft.provider';
 import { PrismaService } from '../prisma/prisma.service';
+import { MetricsMiddleware } from './metrics.middleware';
 import { TokenProvider } from './token.provider';
 import { TokenRefreshMiddleware } from './token-refresh.middleware';
 
@@ -18,6 +20,7 @@ export class GraphClientFactory {
     private readonly configService: ConfigService<AppConfig, true>,
     private readonly prisma: PrismaService,
     private readonly encryptionService: AesGcmEncryptionService,
+    private readonly metricService: MetricService,
   ) {
     this.clientId = this.configService.get(AppSettings.MICROSOFT_CLIENT_ID);
     this.clientSecret = this.configService.get(AppSettings.MICROSOFT_CLIENT_SECRET);
@@ -41,12 +44,17 @@ export class GraphClientFactory {
     // Get the default middleware chain as an array
     const defaultMiddlewares = MiddlewareFactory.getDefaultMiddlewareChain(tokenProvider);
 
-    // Create our custom TokenRefreshMiddleware
+    // Create our custom middlewares
     const tokenRefreshMiddleware = new TokenRefreshMiddleware(tokenProvider, userProfileId);
+    const metricsMiddleware = new MetricsMiddleware(this.metricService);
 
     // Insert TokenRefreshMiddleware at position 1 (after AuthenticationHandler, before RetryHandler)
     // This ensures token refresh happens before the built-in retry logic
     defaultMiddlewares.splice(1, 0, tokenRefreshMiddleware);
+
+    // Insert MetricsMiddleware at the end to capture the final request/response
+    // This ensures metrics are recorded after all retries and transformations
+    defaultMiddlewares.push(metricsMiddleware);
 
     // Chain the middlewares together by setting next on each one
     for (let i = 0; i < defaultMiddlewares.length - 1; i++) {

@@ -2,11 +2,13 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailFolderMessagesInputSchema = z.object({
   folderId: z.string().describe('Mail folder ID to list messages from'),
@@ -23,11 +25,15 @@ const ListMailFolderMessagesInputSchema = z.object({
 });
 
 @Injectable()
-export class ListMailFolderMessagesTool extends BaseOutlookTool {
+export class ListMailFolderMessagesTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -49,6 +55,12 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
         'Requires a folderId parameter - use list_mail_folders first to get available folder IDs. Supports OData filters for advanced filtering (e.g., "isRead eq false" for unread emails, "hasAttachments eq true" for emails with attachments). Can sort by receivedDateTime, subject, from, or importance.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.OUTLOOK_FOLDER]: options.folderId,
+      [OTEL_ATTRIBUTES.OUTLOOK_LIMIT]: options.limit,
+    },
+  }))
   public async listMailFolderMessages(
     {
       folderId,
@@ -60,7 +72,8 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('list_mail_folder_messages');
 
     try {
       let query = graphClient
@@ -99,6 +112,7 @@ export class ListMailFolderMessagesTool extends BaseOutlookTool {
         filter: filter || null,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('list_mail_folder_messages', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to list messages from mail folder',
         folderId,

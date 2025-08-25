@@ -2,11 +2,13 @@ import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const SearchEmailInputSchema = z.object({
   query: z.string().optional().describe('Text to search for in subject, body, or sender'),
@@ -38,11 +40,15 @@ const SearchEmailInputSchema = z.object({
 });
 
 @Injectable()
-export class SearchEmailTool extends BaseOutlookTool {
+export class SearchEmailTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -64,6 +70,13 @@ export class SearchEmailTool extends BaseOutlookTool {
         'Use this tool to find specific emails. The query parameter searches across email content. You can combine multiple filters like sender, date range, attachment status, and importance. To search within a specific folder, first use list_mail_folders to get folder IDs, then pass the folderId parameter.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.SEARCH_QUERY]: options.query || '',
+      [OTEL_ATTRIBUTES.OUTLOOK_FOLDER]: options.folderId || 'all',
+      [OTEL_ATTRIBUTES.OUTLOOK_LIMIT]: options.limit,
+    },
+  }))
   public async searchEmail(
     {
       query,
@@ -82,7 +95,8 @@ export class SearchEmailTool extends BaseOutlookTool {
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('search_email');
 
     try {
       const endpoint = folderId ? `/me/mailFolders/${folderId}/messages` : '/me/messages';
@@ -138,27 +152,9 @@ export class SearchEmailTool extends BaseOutlookTool {
         parentFolderId: message.parentFolderId,
       }));
 
-      let folderName = null;
-      if (folderId) {
-        try {
-          const folder = await graphClient
-            .api(`/me/mailFolders/${folderId}`)
-            .select('displayName')
-            .get();
-          folderName = folder.displayName;
-        } catch (folderError) {
-          this.logger.debug({
-            msg: 'Could not retrieve folder name for search results',
-            folderId,
-            error: serializeError(normalizeError(folderError)),
-          });
-        }
-      }
-
       const searchCriteria = {
         query,
         folderId,
-        folderName,
         from,
         subject,
         hasAttachments,
@@ -183,6 +179,7 @@ export class SearchEmailTool extends BaseOutlookTool {
         message: `Found ${messages.length} email${messages.length !== 1 ? 's' : ''} matching your search criteria`,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('search_email', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to search emails in Outlook',
         query,

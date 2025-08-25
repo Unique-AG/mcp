@@ -116,6 +116,7 @@ export const mcpOAuthModuleOptionsSchema = z.object({
     .any()
     .describe('Encryption service instance implementing IEncryptionService'),
   oauthStore: z.any().describe('OAuth store instance implementing IOAuthStore'),
+  metricService: z.any().describe('Metric service instance implementing IMetricService'),
 });
 
 export type McpOAuthModuleOptionsInput = z.input<typeof mcpOAuthModuleOptionsSchema>;
@@ -124,6 +125,7 @@ export type McpOAuthModuleOptions = z.output<typeof mcpOAuthModuleOptionsSchema>
 // Export tokens for dependency injection
 export const ENCRYPTION_SERVICE_TOKEN = Symbol('ENCRYPTION_SERVICE');
 export const OAUTH_STORE_TOKEN = Symbol('OAUTH_STORE');
+export const METRIC_SERVICE_TOKEN = Symbol('METRIC_SERVICE');
 
 export const {
   ConfigurableModuleClass,

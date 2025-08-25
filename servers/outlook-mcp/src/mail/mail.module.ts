@@ -25,4 +25,4 @@ import { SendMailTool } from './tools/send-mail.tool';
   ],
   exports: [],
 })
-export class OutlookModule {}
+export class MailModule {}
