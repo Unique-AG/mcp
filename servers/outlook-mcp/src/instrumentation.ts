@@ -9,28 +9,28 @@ import {
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { addCleanupListener, exitAfterCleanup } from 'async-cleanup';
 import { z } from 'zod';
-
-
+import * as packageJson from '../package.json';
 
 const oltpOptionsSchema = z.object({
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url(),
-  OLTP_METRICS_EXPORTER_PORT: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(0).max(65535))
-    .default('8081'),
 });
 
 export function initOpenTelemetry() {
   const oltpOptions = oltpOptionsSchema.parse(process.env);
 
   const otelSDK = new NodeSDK({
+    resource: resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: 'outlook-mcp',
+      [ATTR_SERVICE_VERSION]: packageJson.version,
+    }),
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
         url: `${oltpOptions.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`,
@@ -53,7 +53,7 @@ export function initOpenTelemetry() {
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-pino': {
-          disableLogSending: process.env.NODE_ENV !== 'development',
+          disableLogSending: false, // Enable log sending to OTLP
         },
         '@opentelemetry/instrumentation-dns': { enabled: false },
         '@opentelemetry/instrumentation-net': { enabled: false },

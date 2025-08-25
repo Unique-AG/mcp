@@ -1,8 +1,8 @@
 import { join } from 'node:path';
-import { Logger } from '@unique-ag/logger';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AppConfig, AppSettings } from './app-settings.enum';
 import { initOpenTelemetry, runWithInstrumentation } from './instrumentation';

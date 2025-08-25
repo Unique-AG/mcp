@@ -1,5 +1,5 @@
 import { AesGcmEncryptionModule, AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
-import { LoggerModule } from '@unique-ag/logger';
+import { defaultLoggerOptions } from '@unique-ag/logger';
 import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
 import { McpModule } from '@unique-ag/mcp-server-module';
 import { ProbeModule } from '@unique-ag/probe';
@@ -7,8 +7,10 @@ import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { context, trace } from '@opentelemetry/api';
 import { Cache } from 'cache-manager';
 import { OpenTelemetryModule } from 'nestjs-otel';
+import { LoggerModule } from 'nestjs-pino';
 import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
@@ -27,7 +29,23 @@ import { serverInstructions } from './server.instructions';
       isGlobal: true,
       validate: validateConfig,
     }),
-    LoggerModule.forRootAsync({}),
+    LoggerModule.forRootAsync({
+      useFactory: (configService: ConfigService<AppConfig, true>) => {
+        return {
+          ...defaultLoggerOptions,
+          pinoHttp: {
+            ...defaultLoggerOptions.pinoHttp,
+            level: configService.get(AppSettings.LOG_LEVEL),
+            genReqId: () => {
+              const ctx = trace.getSpanContext(context.active());
+              if (!ctx) return typeid('trace').toString();
+              return ctx.traceId;
+            },
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
     AesGcmEncryptionModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],

@@ -1,4 +1,6 @@
 packages:
-  - "servers/*"
-  - "packages/*"
+  - servers/*
+  - packages/*
+
 injectWorkspacePackages: true
+
