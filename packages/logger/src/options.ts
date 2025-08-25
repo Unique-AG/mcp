@@ -12,6 +12,7 @@ export const developmentTarget = {
     destination: 1,
     all: true,
     translateTime: false,
+    colorize: true,
     prettyOptions: {
       ignore: 'pid,hostname,context,req',
       translateTime: 'yyyy-mm-dd HH:MM:ss o',

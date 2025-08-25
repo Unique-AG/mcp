@@ -9,7 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { context, trace } from '@opentelemetry/api';
 import { Cache } from 'cache-manager';
-import { OpenTelemetryModule } from 'nestjs-otel';
+import { MetricService, OpenTelemetryModule } from 'nestjs-otel';
 import { LoggerModule } from 'nestjs-pino';
 import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
@@ -75,6 +75,7 @@ import { serverInstructions } from './server.instructions';
         aesService: AesGcmEncryptionService,
         prisma: PrismaService,
         cacheManager: Cache,
+        metricService: MetricService,
       ) => ({
         provider: MicrosoftOAuthProvider,
 
@@ -90,8 +91,9 @@ import { serverInstructions } from './server.instructions';
 
         oauthStore: new McpOAuthStore(prisma, aesService, cacheManager),
         encryptionService: aesService,
+        metricService,
       }),
-      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER],
+      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER, MetricService],
     }),
     McpModule.forRoot({
       name: 'outlook-mcp',
