@@ -26,6 +26,7 @@ import {
 } from '../mcp-oauth.module-definition';
 import { ClientService } from '../services/client.service';
 import { McpOAuthService } from '../services/mcp-oauth.service';
+import { MetricService } from '../services/metric.service';
 import { PassportUser, STRATEGY_NAME } from '../services/oauth-strategy.service';
 import { normalizeError } from '../utils/normalize-error';
 
@@ -40,6 +41,7 @@ export class OAuthController {
     private readonly authService: McpOAuthService,
     private readonly clientService: ClientService,
     @Inject(OAUTH_STORE_TOKEN) private readonly store: IOAuthStore,
+    private readonly metricService: MetricService,
   ) {}
 
   @Get(OAUTH_ENDPOINTS.authorize)
@@ -66,6 +68,8 @@ export class OAuthController {
 
     if (responseType !== 'code') throw new BadRequestException('Invalid response type');
     if (!clientId) throw new BadRequestException('Missing client_id parameter');
+
+    this.metricService.incrementFlowsStarted();
 
     // Validate resource parameter according to RFC 8707
     // The resource parameter MUST identify the MCP server that the client intends to use the token with

@@ -48,27 +48,14 @@ export abstract class BaseMsGraphTool {
     return this.graphClientFactory.createClientForUser(userProfileId);
   }
 
-  /**
-   * Increment action counter with action name
-   */
   protected incrementActionCounter(action: string) {
-    if (this.actionCounter) {
-      this.actionCounter.add(1, { action });
-    }
+    if (this.actionCounter) this.actionCounter.add(1, { action });
   }
 
-  /**
-   * Increment action failure counter with action name and reason
-   */
   protected incrementActionFailureCounter(action: string, reason: string) {
-    if (this.actionFailureCounter) {
-      this.actionFailureCounter.add(1, { action, reason });
-    }
+    if (this.actionFailureCounter) this.actionFailureCounter.add(1, { action, reason });
   }
 
-  /**
-   * Track Microsoft Graph request metrics
-   */
   protected trackMsgraphRequest(
     endpoint: string,
     method: string,
@@ -82,18 +69,12 @@ export abstract class BaseMsGraphTool {
     }
   }
 
-  /**
-   * Track Microsoft Graph throttling events
-   */
   protected trackMsgraphThrottle(policy: string) {
     if (this.msgraphThrottleCounter) {
       this.msgraphThrottleCounter.add(1, { policy });
     }
   }
 
-  /**
-   * Convert HTTP status code to status class
-   */
   private getStatusClass(statusCode: number): string {
     if (statusCode >= 200 && statusCode < 300) return '2xx';
     if (statusCode >= 300 && statusCode < 400) return '3xx';
