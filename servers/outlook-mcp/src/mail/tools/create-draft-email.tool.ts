@@ -70,8 +70,6 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
     const toRecipients = Array.isArray(to) ? to : [to];
 
     try {
-      const startTime = Date.now();
-      const endpoint = '/me/messages';
       const draftMessage: Message = {
         subject: subject,
         body: {
@@ -97,10 +95,7 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
         isDraft: true,
       };
 
-      const createdMessage: Message = await graphClient.api(endpoint).post(draftMessage);
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'POST', 200, duration);
+      const createdMessage: Message = await graphClient.api('/me/messages').post(draftMessage);
 
       this.logger.debug({
         msg: 'Draft email created',

@@ -99,7 +99,6 @@ export class SearchEmailTool extends BaseMsGraphTool {
     this.incrementActionCounter('search_email');
 
     try {
-      const startTime = Date.now();
       const endpoint = folderId ? `/me/mailFolders/${folderId}/messages` : '/me/messages';
 
       const filterConditions: string[] = [];
@@ -135,9 +134,6 @@ export class SearchEmailTool extends BaseMsGraphTool {
       }
 
       const response = await graphQuery.get();
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       const messages = response.value.map((message: Message) => ({
         id: message.id,

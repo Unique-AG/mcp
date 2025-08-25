@@ -69,8 +69,6 @@ export class GetMailMessageTool extends BaseMsGraphTool {
     this.incrementActionCounter('get_mail_message');
 
     try {
-      const startTime = Date.now();
-      const endpoint = `/me/messages/${messageId}`;
       const selectFields = [
         'id',
         'subject',
@@ -93,10 +91,10 @@ export class GetMailMessageTool extends BaseMsGraphTool {
         'webLink',
       ];
 
-      const message: Message = await graphClient.api(endpoint).select(selectFields.join(',')).get();
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
+      const message: Message = await graphClient
+        .api(`/me/messages/${messageId}`)
+        .select(selectFields.join(','))
+        .get();
 
       const result = {
         id: message.id,
@@ -140,16 +138,10 @@ export class GetMailMessageTool extends BaseMsGraphTool {
       // TODO: find a way to allow Attachment download or inline base64 attachment value
       if (includeAttachments && message.hasAttachments) {
         try {
-          const attachmentStartTime = Date.now();
-          const attachmentEndpoint = `/me/messages/${messageId}/attachments`;
-
           const attachmentsResponse = await graphClient
-            .api(attachmentEndpoint)
+            .api(`/me/messages/${messageId}/attachments`)
             .select('id,name,contentType,size,isInline')
             .get();
-
-          const attachmentDuration = Date.now() - attachmentStartTime;
-          this.trackMsgraphRequest(attachmentEndpoint, 'GET', 200, attachmentDuration);
 
           result.attachments = attachmentsResponse.value.map((attachment: Attachment) => ({
             id: attachment.id,

@@ -8,7 +8,7 @@ import {
 } from '@opentelemetry/core';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -48,6 +48,9 @@ export function initOpenTelemetry() {
         new W3CTraceContextPropagator(),
         new W3CBaggagePropagator(),
         new B3Propagator(),
+        new B3Propagator({
+          injectEncoding: B3InjectEncoding.MULTI_HEADER,
+        }),
       ],
     }),
     instrumentations: [

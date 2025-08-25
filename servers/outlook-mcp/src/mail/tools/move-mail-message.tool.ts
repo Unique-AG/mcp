@@ -64,36 +64,21 @@ export class MoveMailMessageTool extends BaseMsGraphTool {
     this.incrementActionCounter('move_mail_message');
 
     try {
-      const startTime = Date.now();
-      const getEndpoint = `/me/messages/${messageId}`;
-
       const originalMessage = await graphClient
-        .api(getEndpoint)
+        .api(`/me/messages/${messageId}`)
         .select('id,subject,parentFolderId')
         .get();
 
-      const getDuration = Date.now() - startTime;
-      this.trackMsgraphRequest(getEndpoint, 'GET', 200, getDuration);
-
-      const moveStartTime = Date.now();
-      const moveEndpoint = `/me/messages/${messageId}/move`;
-
-      const movedMessage = await graphClient.api(moveEndpoint).post({
+      const movedMessage = await graphClient.api(`/me/messages/${messageId}/move`).post({
         destinationId: destinationFolderId,
       });
 
-      const moveDuration = Date.now() - moveStartTime;
-      this.trackMsgraphRequest(moveEndpoint, 'POST', 200, moveDuration);
-
       let destinationFolderName = destinationFolderId;
       try {
-        const folderStartTime = Date.now();
-        const folderEndpoint = `/me/mailFolders/${destinationFolderId}`;
-
-        const destinationFolder = await graphClient.api(folderEndpoint).select('displayName').get();
-
-        const folderDuration = Date.now() - folderStartTime;
-        this.trackMsgraphRequest(folderEndpoint, 'GET', 200, folderDuration);
+        const destinationFolder = await graphClient
+          .api(`/me/mailFolders/${destinationFolderId}`)
+          .select('displayName')
+          .get();
 
         destinationFolderName = destinationFolder.displayName || destinationFolderId;
       } catch (folderError) {

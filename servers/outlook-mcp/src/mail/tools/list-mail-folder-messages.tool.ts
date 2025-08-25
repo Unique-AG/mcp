@@ -76,10 +76,8 @@ export class ListMailFolderMessagesTool extends BaseMsGraphTool {
     this.incrementActionCounter('list_mail_folder_messages');
 
     try {
-      const startTime = Date.now();
-      const endpoint = `/me/mailFolders/${folderId}/messages`;
       let query = graphClient
-        .api(endpoint)
+        .api(`/me/mailFolders/${folderId}/messages`)
         .select(
           'id,subject,from,receivedDateTime,bodyPreview,importance,isRead,hasAttachments,internetMessageId',
         )
@@ -91,9 +89,6 @@ export class ListMailFolderMessagesTool extends BaseMsGraphTool {
       }
 
       const response = await query.get();
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       const messages = response.value.map((message: Message) => ({
         id: message.id,

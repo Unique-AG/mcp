@@ -69,8 +69,6 @@ export class SendMailTool extends BaseMsGraphTool {
     const toRecipients = Array.isArray(to) ? to : [to];
 
     try {
-      const startTime = Date.now();
-      const endpoint = '/me/sendMail';
       const message: Message = {
         subject: subject,
         body: {
@@ -94,10 +92,7 @@ export class SendMailTool extends BaseMsGraphTool {
         })),
       };
 
-      await graphClient.api(endpoint).post({ message });
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'POST', 200, duration);
+      await graphClient.api('/me/sendMail').post({ message });
 
       return {
         success: true,

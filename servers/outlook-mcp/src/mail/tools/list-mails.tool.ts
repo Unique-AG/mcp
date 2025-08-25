@@ -61,18 +61,12 @@ export class ListMailsTool extends BaseMsGraphTool {
     this.incrementActionCounter('list_mails');
 
     try {
-      const startTime = Date.now();
-      const endpoint = `/me/mailFolders/${folder}/messages`;
-
       const messages = await graphClient
-        .api(endpoint)
+        .api(`/me/mailFolders/${folder}/messages`)
         .select('subject,from,receivedDateTime,bodyPreview,importance,isRead')
         .top(limit)
         .orderby('receivedDateTime desc')
         .get();
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       return {
         emails: messages.value.map((email: Message) => ({

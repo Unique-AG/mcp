@@ -61,17 +61,11 @@ export class ListMailFoldersTool extends BaseMsGraphTool {
     this.incrementActionCounter('list_mail_folders');
 
     try {
-      const startTime = Date.now();
-      const endpoint = '/me/mailFolders';
-
       const response = await graphClient
-        .api(endpoint)
+        .api('/me/mailFolders')
         .select('id,displayName,parentFolderId,childFolderCount,unreadItemCount,totalItemCount')
         .top(limit)
         .get();
-
-      const duration = Date.now() - startTime;
-      this.trackMsgraphRequest(endpoint, 'GET', 200, duration);
 
       let folders = response.value.map((folder: MailFolder) => ({
         id: folder.id,
@@ -87,18 +81,12 @@ export class ListMailFoldersTool extends BaseMsGraphTool {
           folders.map(async (folder: MailFolder) => {
             if (folder.childFolderCount && folder.childFolderCount > 0) {
               try {
-                const childStartTime = Date.now();
-                const childEndpoint = `/me/mailFolders/${folder.id}/childFolders`;
-
                 const childResponse = await graphClient
-                  .api(childEndpoint)
+                  .api(`/me/mailFolders/${folder.id}/childFolders`)
                   .select(
                     'id,displayName,parentFolderId,childFolderCount,unreadItemCount,totalItemCount',
                   )
                   .get();
-
-                const childDuration = Date.now() - childStartTime;
-                this.trackMsgraphRequest(childEndpoint, 'GET', 200, childDuration);
 
                 return {
                   ...folder,

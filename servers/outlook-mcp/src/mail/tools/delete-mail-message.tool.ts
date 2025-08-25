@@ -65,42 +65,26 @@ export class DeleteMailMessageTool extends BaseMsGraphTool {
     this.incrementActionCounter('delete_mail_message');
 
     try {
-      const startTime = Date.now();
-
       if (permanent) {
-        const endpoint = `/me/messages/${messageId}`;
-        await graphClient.api(endpoint).delete();
-
-        const duration = Date.now() - startTime;
-        this.trackMsgraphRequest(endpoint, 'DELETE', 200, duration);
+        await graphClient.api(`/me/messages/${messageId}`).delete();
       } else {
-        const folderEndpoint = '/me/mailFolders';
         const deletedItemsResponse = await graphClient
-          .api(folderEndpoint)
+          .api('/me/mailFolders')
           .filter("displayName eq 'Deleted Items'")
           .select('id')
           .get();
 
-        const folderDuration = Date.now() - startTime;
-        this.trackMsgraphRequest(folderEndpoint, 'GET', 200, folderDuration);
-
-        const moveStartTime = Date.now();
-        const moveEndpoint = `/me/messages/${messageId}/move`;
-
         if (deletedItemsResponse.value.length === 0) {
           const deletedItemsFolderId = 'deleteditems';
-          await graphClient.api(moveEndpoint).post({
+          await graphClient.api(`/me/messages/${messageId}/move`).post({
             destinationId: deletedItemsFolderId,
           });
         } else {
           const deletedItemsFolderId = deletedItemsResponse.value[0].id;
-          await graphClient.api(moveEndpoint).post({
+          await graphClient.api(`/me/messages/${messageId}/move`).post({
             destinationId: deletedItemsFolderId,
           });
         }
-
-        const moveDuration = Date.now() - moveStartTime;
-        this.trackMsgraphRequest(moveEndpoint, 'POST', 200, moveDuration);
       }
 
       this.logger.debug({

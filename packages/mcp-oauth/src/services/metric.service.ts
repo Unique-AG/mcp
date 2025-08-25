@@ -6,7 +6,7 @@ import { METRIC_SERVICE_TOKEN } from '../mcp-oauth.module-definition';
 @Injectable()
 export class MetricService {
   private readonly logger = new Logger(this.constructor.name);
-  
+
   private readonly oauthClientsRegisteredCounter: Counter | null = null;
   private readonly oauthFlowsStartedCounter: Counter | null = null;
 
