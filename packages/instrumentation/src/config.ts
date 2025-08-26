@@ -20,8 +20,8 @@ export const otelConfigSchema = z.object({
   OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: z.string().url().optional(),
 
   // Prometheus configuration
-  OTEL_EXPORTER_PROMETHEUS_PORT: z.coerce.number().optional().default(8081),
   OTEL_EXPORTER_PROMETHEUS_HOST: z.string().optional().default('localhost'),
+  OTEL_EXPORTER_PROMETHEUS_PORT: z.coerce.number().optional().default(8081),
 
   // Export intervals
   OTEL_METRIC_EXPORT_INTERVAL: z.coerce.number().optional().default(30000),
