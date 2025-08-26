@@ -63,6 +63,4 @@ server:
       folder: "MCP Servers"
   prometheus:
     enabled: true
-    serviceMonitor:
-      port: metrics
   # routes: can not use since that uses the JWT middleware, see extraRoutes
