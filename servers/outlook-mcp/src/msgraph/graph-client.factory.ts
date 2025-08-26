@@ -1,5 +1,16 @@
 import { AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
-import { Client, ClientOptions, MiddlewareFactory } from '@microsoft/microsoft-graph-client';
+import {
+  AuthenticationHandler,
+  Client,
+  ClientOptions,
+  HTTPMessageHandler,
+  type Middleware,
+  RedirectHandler,
+  RedirectHandlerOptions,
+  RetryHandler,
+  RetryHandlerOptions,
+  TelemetryHandler,
+} from '@microsoft/microsoft-graph-client';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MetricService } from 'nestjs-otel';
@@ -41,32 +52,41 @@ export class GraphClientFactory {
       },
     );
 
-    // Get the default middleware chain as an array
-    const defaultMiddlewares = MiddlewareFactory.getDefaultMiddlewareChain(tokenProvider);
+    // We replicate the default middleware chain from the Microsoft Graph SDK
+    // https://github.com/microsoftgraph/msgraph-sdk-javascript/blob/dev/src/middleware/MiddlewareFactory.ts#L43
+    const authenticationHandler = new AuthenticationHandler(tokenProvider);
+    const retryHandler = new RetryHandler(new RetryHandlerOptions());
+    const redirectHandler = new RedirectHandler(new RedirectHandlerOptions());
+    const telemetryHandler = new TelemetryHandler();
+    const httpMessageHandler = new HTTPMessageHandler();
 
     // Create our custom middlewares
     const tokenRefreshMiddleware = new TokenRefreshMiddleware(tokenProvider, userProfileId);
     const metricsMiddleware = new MetricsMiddleware(this.metricService);
 
-    // Insert TokenRefreshMiddleware at position 1 (after AuthenticationHandler, before RetryHandler)
-    // This ensures token refresh happens before the built-in retry logic
-    defaultMiddlewares.splice(1, 0, tokenRefreshMiddleware);
-
-    // Insert MetricsMiddleware at the end to capture the final request/response
-    // This ensures metrics are recorded after all retries and transformations
-    defaultMiddlewares.push(metricsMiddleware);
+    // !The order of the middlewares is important.
+    // The httpMessageHandler must be the last middleware in the chain as it does not call setNext.
+    const middlewares: Middleware[] = [
+      authenticationHandler,
+      tokenRefreshMiddleware,
+      retryHandler,
+      redirectHandler,
+      telemetryHandler,
+      metricsMiddleware,
+      httpMessageHandler,
+    ];
 
     // Chain the middlewares together by setting next on each one
-    for (let i = 0; i < defaultMiddlewares.length - 1; i++) {
-      const currentMiddleware = defaultMiddlewares[i];
-      const nextMiddleware = defaultMiddlewares[i + 1];
+    for (let i = 0; i < middlewares.length - 1; i++) {
+      const currentMiddleware = middlewares[i];
+      const nextMiddleware = middlewares[i + 1];
 
       if (currentMiddleware?.setNext && nextMiddleware) currentMiddleware.setNext(nextMiddleware);
     }
 
     // Pass the first middleware in the chain to initialize the client
     const clientOptions: ClientOptions = {
-      middleware: defaultMiddlewares[0],
+      middleware: middlewares[0],
       debugLogging: this.configService.get(AppSettings.LOG_LEVEL, { infer: true }) === 'debug',
     };
 
