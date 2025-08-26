@@ -1,5 +1,5 @@
 import { AesGcmEncryptionModule, AesGcmEncryptionService } from '@unique-ag/aes-gcm-encryption';
-import { LoggerModule } from '@unique-ag/logger';
+import { defaultLoggerOptions } from '@unique-ag/logger';
 import { McpAuthJwtGuard, McpOAuthModule } from '@unique-ag/mcp-oauth';
 import { McpModule } from '@unique-ag/mcp-server-module';
 import { ProbeModule } from '@unique-ag/probe';
@@ -7,15 +7,18 @@ import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { context, trace } from '@opentelemetry/api';
 import { Cache } from 'cache-manager';
+import { MetricService, OpenTelemetryModule } from 'nestjs-otel';
+import { LoggerModule } from 'nestjs-pino';
 import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
 import { MicrosoftOAuthProvider } from './auth/microsoft.provider';
+import { MailModule } from './mail/mail.module';
 import { ManifestController } from './manifest.controller';
 import { MsGraphModule } from './msgraph/msgraph.module';
-import { OutlookModule } from './outlook/outlook.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { serverInstructions } from './server.instructions';
@@ -26,7 +29,23 @@ import { serverInstructions } from './server.instructions';
       isGlobal: true,
       validate: validateConfig,
     }),
-    LoggerModule.forRootAsync({}),
+    LoggerModule.forRootAsync({
+      useFactory: (configService: ConfigService<AppConfig, true>) => {
+        return {
+          ...defaultLoggerOptions,
+          pinoHttp: {
+            ...defaultLoggerOptions.pinoHttp,
+            level: configService.get(AppSettings.LOG_LEVEL),
+            genReqId: () => {
+              const ctx = trace.getSpanContext(context.active());
+              if (!ctx) return typeid('trace').toString();
+              return ctx.traceId;
+            },
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
     AesGcmEncryptionModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -41,6 +60,14 @@ import { serverInstructions } from './server.instructions';
     ProbeModule.forRoot({
       VERSION: packageJson.version,
     }),
+    OpenTelemetryModule.forRoot({
+      metrics: {
+        hostMetrics: true,
+        apiMetrics: {
+          enable: true,
+        },
+      },
+    }),
     McpOAuthModule.forRootAsync({
       imports: [ConfigModule, PrismaModule],
       useFactory: async (
@@ -48,6 +75,7 @@ import { serverInstructions } from './server.instructions';
         aesService: AesGcmEncryptionService,
         prisma: PrismaService,
         cacheManager: Cache,
+        metricService: MetricService,
       ) => ({
         provider: MicrosoftOAuthProvider,
 
@@ -63,8 +91,9 @@ import { serverInstructions } from './server.instructions';
 
         oauthStore: new McpOAuthStore(prisma, aesService, cacheManager),
         encryptionService: aesService,
+        metricService,
       }),
-      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER],
+      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER, MetricService],
     }),
     McpModule.forRoot({
       name: 'outlook-mcp',
@@ -78,7 +107,7 @@ import { serverInstructions } from './server.instructions';
       mcpEndpoint: 'mcp',
     }),
     MsGraphModule,
-    OutlookModule,
+    MailModule,
   ],
   controllers: [ManifestController],
   providers: [

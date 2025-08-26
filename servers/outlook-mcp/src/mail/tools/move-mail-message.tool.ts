@@ -1,11 +1,13 @@
 import { type McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
 import { z } from 'zod';
+import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
-import { BaseOutlookTool } from './base-outlook.tool';
+import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const MoveMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to move'),
@@ -17,11 +19,15 @@ const MoveMailMessageInputSchema = z.object({
 });
 
 @Injectable()
-export class MoveMailMessageTool extends BaseOutlookTool {
+export class MoveMailMessageTool extends BaseMsGraphTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(graphClientFactory: GraphClientFactory) {
-    super(graphClientFactory);
+  public constructor(
+    graphClientFactory: GraphClientFactory,
+    metricService: MetricService,
+    private readonly traceService: TraceService,
+  ) {
+    super(graphClientFactory, metricService);
   }
 
   @Tool({
@@ -43,12 +49,19 @@ export class MoveMailMessageTool extends BaseOutlookTool {
         'To move emails to custom folders, first use list_mail_folders to discover available folder IDs. You can use well-known names like "inbox", "deleteditems", "drafts", "sentitems" for standard folders, or specific folder IDs for custom folders. The messageId can be obtained from search_email, list_mails, or other email listing tools.',
     },
   })
+  @Span((options, _context, _request) => ({
+    attributes: {
+      [OTEL_ATTRIBUTES.MESSAGE_ID]: options.messageId,
+      [OTEL_ATTRIBUTES.DESTINATION_FOLDER]: options.destinationFolderId,
+    },
+  }))
   public async moveMailMessage(
     { messageId, destinationFolderId }: z.infer<typeof MoveMailMessageInputSchema>,
     _context: Context,
     request: McpAuthenticatedRequest,
   ) {
-    const graphClient = this.getGraphClient(request);
+    const graphClient = this.getGraphClient(request, this.traceService.getSpan());
+    this.incrementActionCounter('move_mail_message');
 
     try {
       const originalMessage = await graphClient
@@ -66,6 +79,7 @@ export class MoveMailMessageTool extends BaseOutlookTool {
           .api(`/me/mailFolders/${destinationFolderId}`)
           .select('displayName')
           .get();
+
         destinationFolderName = destinationFolder.displayName || destinationFolderId;
       } catch (folderError) {
         this.logger.debug({
@@ -94,6 +108,7 @@ export class MoveMailMessageTool extends BaseOutlookTool {
         message: `Message moved to "${destinationFolderName}" folder successfully`,
       };
     } catch (error) {
+      this.incrementActionFailureCounter('move_mail_message', 'graph_api_error');
       this.logger.error({
         msg: 'Failed to move mail message in Outlook',
         messageId,
