@@ -57,7 +57,10 @@ server:
       mountPath: /tmp
   prometheus:
     enabled: true
-  # routes: can not use since that uses the JWT middleware, see extraRoutes
+  routes:
+    paths:
+      default:
+        enabled: false
 
 grafana:
   dashboard:
