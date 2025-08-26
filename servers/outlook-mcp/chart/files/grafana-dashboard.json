@@ -1236,7 +1236,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (http_response_status_code) (rate(http_client_request_duration_seconds_count{job=\"apps-mcp-server-outlook\"}[5m]))",
+          "expr": "sum by (http_response_status_code) (rate(http_client_request_duration_count{job=\"apps-mcp-server-outlook\"}[5m]))",
           "legendFormat": "HTTP {{http_response_status_code}}",
           "refId": "A"
         }
@@ -1333,7 +1333,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum(rate(http_client_request_duration_seconds_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(http_client_request_duration_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
           "legendFormat": "p50 - {{http_route}}",
           "refId": "A"
         },
@@ -1342,7 +1342,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
           "legendFormat": "p95 - {{http_route}}",
           "refId": "B"
         },
@@ -1351,7 +1351,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum(rate(http_client_request_duration_seconds_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(http_client_request_duration_bucket{job=\"apps-mcp-server-outlook\"}[5m])) by (http_route, le)) * 1000",
           "legendFormat": "p99 - {{http_route}}",
           "refId": "C"
         }
@@ -1461,7 +1461,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "process_cpu_time_seconds_total{job=\"apps-mcp-server-outlook\", process_cpu_state=\"user\"}",
+          "expr": "process_cpu_time_total{job=\"apps-mcp-server-outlook\", process_cpu_state=\"user\"}",
           "legendFormat": "CPU User Time",
           "refId": "A"
         },
@@ -1470,7 +1470,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "process_cpu_time_seconds_total{job=\"apps-mcp-server-outlook\", process_cpu_state=\"system\"}",
+          "expr": "process_cpu_time_total{job=\"apps-mcp-server-outlook\", process_cpu_state=\"system\"}",
           "legendFormat": "CPU System Time",
           "refId": "B"
         }
@@ -1568,7 +1568,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "v8js_memory_heap_used_bytes{job=\"apps-mcp-server-outlook\"}",
+          "expr": "v8js_memory_heap_used{job=\"apps-mcp-server-outlook\"}",
           "legendFormat": "V8 Heap Used",
           "refId": "B"
         },
@@ -1577,7 +1577,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "v8js_memory_heap_limit_bytes{job=\"apps-mcp-server-outlook\"}",
+          "expr": "v8js_memory_heap_limit{job=\"apps-mcp-server-outlook\"}",
           "legendFormat": "V8 Heap Limit",
           "refId": "C"
         },
@@ -1586,7 +1586,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "v8js_memory_heap_space_physical_size_bytes{job=\"apps-mcp-server-outlook\"}",
+          "expr": "v8js_memory_heap_space_physical_size{job=\"apps-mcp-server-outlook\"}",
           "legendFormat": "V8 Heap Physical Size",
           "refId": "D"
         },
@@ -1595,7 +1595,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "v8js_memory_heap_space_available_size_bytes{job=\"apps-mcp-server-outlook\"}",
+          "expr": "v8js_memory_heap_space_available_size{job=\"apps-mcp-server-outlook\"}",
           "legendFormat": "V8 Heap Available",
           "refId": "E"
         },
@@ -1760,7 +1760,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "rate(v8js_gc_duration_seconds_sum{job=\"apps-mcp-server-outlook\"}[5m]) / rate(v8js_gc_duration_seconds_count{job=\"apps-mcp-server-outlook\"}[5m]) * 1000",
+          "expr": "rate(v8js_gc_duration_sum{job=\"apps-mcp-server-outlook\"}[5m]) / rate(v8js_gc_duration_count{job=\"apps-mcp-server-outlook\"}[5m]) * 1000",
           "legendFormat": "GC Duration - {{kind}}",
           "refId": "A"
         }
@@ -1849,8 +1849,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "nodejs_active_handles_total{job=\"apps-mcp-server-outlook\"}",
-          "legendFormat": "Active Handles",
+          "expr": "nodejs_eventloop_utilization{job=\"apps-mcp-server-outlook\"}",
+          "legendFormat": "Event Loop Utilization",
           "refId": "A"
         },
         {
@@ -1858,9 +1858,27 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "nodejs_active_requests_total{job=\"apps-mcp-server-outlook\"}",
-          "legendFormat": "Active Requests",
+          "expr": "nodejs_eventloop_delay_mean{job=\"apps-mcp-server-outlook\"} * 1000",
+          "legendFormat": "Mean Delay (ms)",
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "nodejs_eventloop_delay_p99{job=\"apps-mcp-server-outlook\"} * 1000",
+          "legendFormat": "P99 Delay (ms)",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "rate(nodejs_eventloop_time_total{job=\"apps-mcp-server-outlook\",nodejs_eventloop_state=\"active\"}[5m])",
+          "legendFormat": "Active Time Rate",
+          "refId": "D"
         }
       ],
       "title": "Node.js Event Loop",
