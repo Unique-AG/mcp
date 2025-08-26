@@ -65,4 +65,4 @@ server:
 grafana:
   dashboard:
     enabled: true
-    folder: "MCP Servers"
+    folder: "mcp-servers"
