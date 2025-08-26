@@ -57,10 +57,11 @@ server:
   volumeMounts:
     - name: tmp
       mountPath: /tmp
-  grafana:
-    dashboard:
-      enabled: true
-      folder: "MCP Servers"
   prometheus:
     enabled: true
   # routes: can not use since that uses the JWT middleware, see extraRoutes
+
+grafana:
+  dashboard:
+    enabled: true
+    folder: "MCP Servers"
