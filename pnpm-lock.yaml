@@ -229,6 +229,148 @@ importers:
         specifier: ^5.8.3
         version: 5.9.2
 
+  servers/factset-mcp:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.17.2
+        version: 1.17.4
+      '@nestjs/cache-manager':
+        specifier: ^3.0.1
+        version: 3.0.1(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(cache-manager@7.1.1)(keyv@5.5.0)(rxjs@7.8.2)
+      '@nestjs/common':
+        specifier: ^11.0.1
+        version: 11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^4.0.2
+        version: 4.0.2(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.6)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)
+      '@nestjs/swagger':
+        specifier: ^11.2.0
+        version: 11.2.0(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(reflect-metadata@0.2.2)
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.0
+      '@prisma/adapter-pg':
+        specifier: ^6.14.0
+        version: 6.14.0
+      '@prisma/client':
+        specifier: 6.14.0
+        version: 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+      '@prisma/engines':
+        specifier: 6.14.0
+        version: 6.14.0
+      '@prisma/instrumentation':
+        specifier: ^6.14.0
+        version: 6.14.0(@opentelemetry/api@1.9.0)
+      '@proventuslabs/nestjs-zod':
+        specifier: ^1.1.0
+        version: 1.1.0(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/config@4.0.2(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2))(zod@3.25.76)
+      '@unique-ag/aes-gcm-encryption':
+        specifier: workspace:*
+        version: link:../../packages/aes-gcm-encryption
+      '@unique-ag/instrumentation':
+        specifier: workspace:*
+        version: link:../../packages/instrumentation
+      '@unique-ag/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@unique-ag/mcp-oauth':
+        specifier: workspace:*
+        version: link:../../packages/mcp-oauth
+      '@unique-ag/mcp-server-module':
+        specifier: workspace:*
+        version: file:packages/mcp-server-module(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(@opentelemetry/api@1.9.0)(nestjs-otel@7.0.1(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6))
+      '@unique-ag/probe':
+        specifier: workspace:*
+        version: link:../../packages/probe
+      cache-manager:
+        specifier: ^7.1.1
+        version: 7.1.1
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.2
+      nestjs-otel:
+        specifier: ^7.0.1
+        version: 7.0.1(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)
+      nestjs-pino:
+        specifier: ^4.4.0
+        version: 4.4.0(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@10.5.0)(pino@9.8.0)(rxjs@7.8.2)
+      nestjs-zod:
+        specifier: ^4.3.1
+        version: 4.3.1(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(@nestjs/swagger@11.2.0(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(reflect-metadata@0.2.2))(zod@3.25.76)
+      passport:
+        specifier: ^0.7.0
+        version: 0.7.0
+      pino-http:
+        specifier: ^10.5.0
+        version: 10.5.0
+      prisma:
+        specifier: ^6.14.0
+        version: 6.14.0(typescript@5.9.2)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      serialize-error-cjs:
+        specifier: ^0.2.0
+        version: 0.2.0
+      typeid-js:
+        specifier: ^1.2.0
+        version: 1.2.0
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^11.0.0
+        version: 11.0.10(@swc/cli@0.7.8(@swc/core@1.13.3)(chokidar@4.0.3))(@swc/core@1.13.3)(@types/node@22.16.5)
+      '@nestjs/schematics':
+        specifier: ^11.0.0
+        version: 11.0.7(chokidar@4.0.3)(typescript@5.9.2)
+      '@nestjs/testing':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(@nestjs/platform-express@11.1.6)
+      '@swc/cli':
+        specifier: ^0.7.8
+        version: 0.7.8(@swc/core@1.13.3)(chokidar@4.0.3)
+      '@swc/core':
+        specifier: ^1.13.3
+        version: 1.13.3
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.3
+      '@types/jsonwebtoken':
+        specifier: ^9.0.10
+        version: 9.0.10
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.16.5
+      '@types/passport':
+        specifier: ^1.0.17
+        version: 1.0.17
+      globals:
+        specifier: ^16.0.0
+        version: 16.3.0
+      nodemon:
+        specifier: ^3.1.10
+        version: 3.1.10
+      pino-http-print:
+        specifier: ^3.1.0
+        version: 3.1.0
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   servers/outlook-mcp:
     dependencies:
       '@microsoft/microsoft-graph-client':
@@ -278,7 +420,7 @@ importers:
         version: link:../../packages/aes-gcm-encryption
       '@unique-ag/instrumentation':
         specifier: workspace:*
-        version: file:packages/instrumentation(@prisma/instrumentation@6.14.0(@opentelemetry/api@1.9.0))
+        version: link:../../packages/instrumentation
       '@unique-ag/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -1676,11 +1818,6 @@ packages:
 
   '@types/tedious@4.0.14':
     resolution: {integrity: sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==}
-
-  '@unique-ag/instrumentation@file:packages/instrumentation':
-    resolution: {directory: packages/instrumentation, type: directory}
-    peerDependencies:
-      '@prisma/instrumentation': ^6.14.0
 
   '@unique-ag/mcp-server-module@file:packages/mcp-server-module':
     resolution: {directory: packages/mcp-server-module, type: directory}
@@ -5386,28 +5523,6 @@ snapshots:
   '@types/tedious@4.0.14':
     dependencies:
       '@types/node': 22.16.5
-
-  '@unique-ag/instrumentation@file:packages/instrumentation(@prisma/instrumentation@6.14.0(@opentelemetry/api@1.9.0))':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/auto-instrumentations-node': 0.62.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))
-      '@opentelemetry/context-async-hooks': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/core': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-metrics-otlp-proto': 0.203.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-prometheus': 0.203.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-http': 0.203.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/propagator-b3': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-metrics': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.203.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.36.0
-      '@prisma/instrumentation': 6.14.0(@opentelemetry/api@1.9.0)
-      async-cleanup: 1.0.0
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
 
   '@unique-ag/mcp-server-module@file:packages/mcp-server-module(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6)(@opentelemetry/api@1.9.0)(nestjs-otel@7.0.1(@nestjs/common@11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.6))':
     dependencies:
