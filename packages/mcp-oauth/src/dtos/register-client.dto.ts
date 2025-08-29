@@ -1,5 +1,5 @@
-import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod/dto';
+import * as z from 'zod';
 
 export const RegisterClientSchema = z.object({
   client_name: z.string().describe('The name of the client'),
@@ -12,18 +12,18 @@ export const RegisterClientSchema = z.object({
   grant_types: z
     .array(z.string())
     .describe('The grant types of the client')
-    .default(['authorization_code', 'refresh_token']),
+    .prefault(['authorization_code', 'refresh_token']),
   response_types: z
     .array(z.string())
     .describe('The response types of the client')
-    .default(['code']),
+    .prefault(['code']),
   token_endpoint_auth_method: z
     .string()
     .refine((val) => ['client_secret_basic', 'client_secret_post', 'none'].includes(val), {
-      message: 'Invalid token endpoint auth method',
+        error: 'Invalid token endpoint auth method'
     })
     .describe('The token endpoint auth method of the client')
-    .default('none'),
+    .prefault('none'),
 });
 
 export class RegisterClientDto extends createZodDto(RegisterClientSchema) {}

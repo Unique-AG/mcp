@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /**
  * Token Revocation Request DTO as defined in RFC 7009 Section 2.1

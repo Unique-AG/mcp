@@ -1,13 +1,13 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const TokenRequestSchema = z
   .object({
     grant_type: z
       .string()
       .refine((val) => ['authorization_code', 'refresh_token'].includes(val), {
-        message: 'Invalid grant type. Only authorization_code and refresh_token are supported.',
-      })
+          error: 'Invalid grant type. Only authorization_code and refresh_token are supported.'
+    })
       .describe('The grant type for the token request'),
 
     // Authorization Code Grant fields
@@ -16,9 +16,7 @@ export const TokenRequestSchema = z
       .min(1)
       .describe('The authorization code received from the authorization server')
       .optional(),
-    redirect_uri: z
-      .string()
-      .url()
+    redirect_uri: z.url()
       .describe('The redirect URI used in the authorization request')
       .optional(),
     code_verifier: z
@@ -45,8 +43,7 @@ export const TokenRequestSchema = z
     client_secret: z.string().min(1).describe('The client secret').optional(),
 
     // Additional fields
-    resource: z
-      .string()
+    resource: z.url()
       .optional()
       .transform((val) => {
         // Handle cases where JavaScript sends "undefined" as a string
@@ -55,9 +52,9 @@ export const TokenRequestSchema = z
         }
         return val;
       })
-      .refine((val) => val === undefined || z.string().url().safeParse(val).success, {
-        message: 'Resource must be a valid URL',
-      })
+      .refine((val) => val === undefined || z.url().safeParse(val).success, {
+          error: 'Resource must be a valid URL'
+    })
       .describe(
         'The logical name of the target service where the client intends to use the requested security token',
       ),
@@ -88,8 +85,8 @@ export const TokenRequestSchema = z
       }
     },
     {
-      message: 'Required fields missing for the specified grant type',
       path: ['grant_type'],
+        error: 'Required fields missing for the specified grant type'
     },
   );
 

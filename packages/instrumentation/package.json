@@ -11,7 +11,7 @@
     "lint:fix": "biome check . --write",
     "format": "biome format .",
     "format:fix": "biome format . --write",
-    "typecheck": "tsc --noEmit"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
