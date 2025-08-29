@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "concurrently --kill-others \"turbo watch build --filter='./packages/*'\" \"turbo dev\"",
+    "dev": "concurrently --kill-others -P \"turbo watch build --filter='./packages/*'\" \"turbo dev {@}\"",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format .",

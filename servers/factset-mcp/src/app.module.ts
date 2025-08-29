@@ -15,6 +15,7 @@ import { typeid } from 'typeid-js';
 import * as packageJson from '../package.json';
 import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
+import { FundamentalsModule } from './fundamentals/fundamentals.module';
 import { ManifestController } from './manifest.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
@@ -65,33 +66,33 @@ import { serverInstructions } from './server.instructions';
         },
       },
     }),
-    McpOAuthModule.forRootAsync({
-      imports: [ConfigModule, PrismaModule],
-      useFactory: async (
-        configService: ConfigService<AppConfig, true>,
-        aesService: AesGcmEncryptionService,
-        prisma: PrismaService,
-        cacheManager: Cache,
-        metricService: MetricService,
-      ) => ({
-        provider: undefined,
+    // McpOAuthModule.forRootAsync({
+    //   imports: [ConfigModule, PrismaModule],
+    //   useFactory: async (
+    //     configService: ConfigService<AppConfig, true>,
+    //     aesService: AesGcmEncryptionService,
+    //     prisma: PrismaService,
+    //     cacheManager: Cache,
+    //     metricService: MetricService,
+    //   ) => ({
+    //     provider: undefined,
 
-        clientId: undefined,
-        clientSecret: undefined,
-        hmacSecret: configService.get(AppSettings.HMAC_SECRET),
+    //     clientId: undefined,
+    //     clientSecret: undefined,
+    //     hmacSecret: configService.get(AppSettings.HMAC_SECRET),
 
-        serverUrl: configService.get(AppSettings.SELF_URL),
-        resource: `${configService.get(AppSettings.SELF_URL)}/mcp`,
+    //     serverUrl: configService.get(AppSettings.SELF_URL),
+    //     resource: `${configService.get(AppSettings.SELF_URL)}/mcp`,
 
-        accessTokenExpiresIn: configService.get(AppSettings.ACCESS_TOKEN_EXPIRES_IN_SECONDS),
-        refreshTokenExpiresIn: configService.get(AppSettings.REFRESH_TOKEN_EXPIRES_IN_SECONDS),
+    //     accessTokenExpiresIn: configService.get(AppSettings.ACCESS_TOKEN_EXPIRES_IN_SECONDS),
+    //     refreshTokenExpiresIn: configService.get(AppSettings.REFRESH_TOKEN_EXPIRES_IN_SECONDS),
 
-        oauthStore: new McpOAuthStore(prisma, aesService, cacheManager),
-        encryptionService: aesService,
-        metricService,
-      }),
-      inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER, MetricService],
-    }),
+    //     oauthStore: new McpOAuthStore(prisma, aesService, cacheManager),
+    //     encryptionService: aesService,
+    //     metricService,
+    //   }),
+    //   inject: [ConfigService, AesGcmEncryptionService, PrismaService, CACHE_MANAGER, MetricService],
+    // }),
     McpModule.forRoot({
       name: 'factset-mcp',
       version: packageJson.version,
@@ -103,13 +104,14 @@ import { serverInstructions } from './server.instructions';
       },
       mcpEndpoint: 'mcp',
     }),
+    FundamentalsModule,
   ],
   controllers: [ManifestController],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: McpAuthJwtGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: McpAuthJwtGuard,
+    // },
   ],
 })
 export class AppModule {}
