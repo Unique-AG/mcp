@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { MetricsTool } from "./tools/metrics.tool";
+import { HelloWorldPrompt } from "./prompts/hello-world.prompt";
 
 @Module({
   imports: [],
   controllers: [],
-  providers: [MetricsTool],
+  providers: [HelloWorldPrompt],
 })
 export class FundamentalsModule {}

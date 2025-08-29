@@ -5,11 +5,11 @@ import {
   ErrorCode,
   ListToolsRequestSchema,
   McpError,
+  Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
-import { ZodTypeAny } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import * as z from 'zod';
 import { HttpRequest } from '../../interfaces/http-adapter.interface';
 import { McpRegistryService } from '../mcp-registry.service';
 import { McpHandlerBase } from './mcp-handler.base';
@@ -33,7 +33,7 @@ export class McpToolsHandler extends McpHandlerBase {
     ];
   }
 
-  private formatToolResult(result: any, outputSchema?: ZodTypeAny): any {
+  private formatToolResult(result: any, outputSchema?: z.ZodTypeAny): any {
     if (result && typeof result === 'object' && Array.isArray(result.content)) {
       return result;
     }
@@ -65,30 +65,17 @@ export class McpToolsHandler extends McpHandlerBase {
 
     mcpServer.server.setRequestHandler(ListToolsRequestSchema, () => {
       const tools = this.registry.getTools(this.mcpModuleId).map((tool) => {
-        // Create base schema
-        const toolSchema = {
+        const toolSchema: Tool = {
           name: tool.metadata.name,
           description: tool.metadata.description,
           annotations: tool.metadata.annotations,
+          // Zod's toJSONSchema does not correctly infer the 'type' field for the schema. Hence the type assertion.
+          inputSchema: z.toJSONSchema(tool.metadata.parameters, { io: 'input' }) as Tool['inputSchema'],
         };
 
-        if (tool.metadata.title) (toolSchema as any).title = tool.metadata.title;
-        if (tool.metadata.parameters)
-          (toolSchema as any).inputSchema = zodToJsonSchema(tool.metadata.parameters);
-        if (tool.metadata._meta) (toolSchema as any)._meta = tool.metadata._meta;
-
-        // Add output schema if defined, ensuring it has type: 'object'
-        if (tool.metadata.outputSchema) {
-          const outputSchema = zodToJsonSchema(tool.metadata.outputSchema);
-
-          // Create a new object that explicitly includes type: 'object'
-          const jsonSchema = {
-            ...outputSchema,
-            type: 'object',
-          };
-
-          (toolSchema as any).outputSchema = jsonSchema;
-        }
+        if (tool.metadata.title) toolSchema.title = tool.metadata.title;
+        if (tool.metadata._meta) toolSchema._meta = tool.metadata._meta;
+        if (tool.metadata.outputSchema) toolSchema.outputSchema = z.toJSONSchema(tool.metadata.outputSchema) as Tool['outputSchema'];
 
         return toolSchema;
       });
