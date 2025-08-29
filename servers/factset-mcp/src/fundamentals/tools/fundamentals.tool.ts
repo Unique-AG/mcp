@@ -22,12 +22,12 @@ export class FundamentalsTool extends BaseFactsetTool {
 
   @Tool({
     name: 'fundamentals_fundamentals',
-    title: '[Fundamentals API] Fundamentals',
+    title: '[Fundamentals API] Fundamentals Data',
     description:
-      'Retrieves FactSet Fundamental standardized data for specified securities. Use the fundamentals_metrics tool to retrieve a full list of valid metrics or data items.',
+      'Retrieves FactSet Fundamental standardized data for specified securities. Returns specific fundamental data items (metrics) for multiple securities across requested date ranges. Use the fundamentals_metrics tool first to discover available FF_* metrics.',
     parameters: customFdsFundamentalsQueryParams,
     annotations: {
-      title: '[Fundamentals API] Fundamentals',
+      title: '[Fundamentals API] Fundamentals Data',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
@@ -35,11 +35,13 @@ export class FundamentalsTool extends BaseFactsetTool {
     },
     _meta: {
       'unique.app/icon': 'chart-line',
+      'unique.app/system-prompt':
+        'Use this tool to retrieve specific FactSet Fundamental data items (FF_* metrics) for securities. You must specify valid metric codes which can be discovered using the fundamentals_metrics tool. Supports multiple securities (up to 250 without batching) and various periodicities (annual, quarterly, semi-annual with original or restated data). Can retrieve point-in-time data using fiscalPeriodStart/End or specific dates using date parameter. Results include the requested metric values along with metadata like currency, frequency, and fiscal period information. This is the primary tool for accessing standardized fundamental data across companies.',
     },
   })
   @Span()
   public async getFundamentals(params: z.infer<typeof customFdsFundamentalsQueryParams>) {
-    this.incrementActionCounter('get_fundamentals');
+    this.incrementActionCounter('fundamentals_fundamentals');
 
     try {
       const { data, status } = await getFdsFundamentals(
@@ -52,7 +54,7 @@ export class FundamentalsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('get_fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter('fundamentals_fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet fundamentals',
         error: serializeError(normalizeError(error)),

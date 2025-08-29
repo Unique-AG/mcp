@@ -22,12 +22,12 @@ export class MetricsTool extends BaseFactsetTool {
 
   @Tool({
     name: 'fundamentals_metrics',
-    title: '[Fundamentals API] Metrics',
+    title: '[Fundamentals API] Available Metrics',
     description:
-      'Returns available FactSet Fundamental metrics and ratios. Returns list of available FF_* metrics that can be used in the metrics parameter of related tools. These are related to FactSet Fundamentals standardized data. Leave Category and Subcategory blank to request all available items. For methodology definitions, reference the OApageID or OAurl response items.',
+      'Discovers available FactSet Fundamental metrics and ratios. Returns a comprehensive list of FF_* metric codes that can be used with the fundamentals_fundamentals tool. Filter by category and subcategory to find specific types of metrics (e.g., Income Statement, Balance Sheet, Ratios, etc.).',
     parameters: getFdsFundamentalsMetricsQueryParams,
     annotations: {
-      title: '[Fundamentals API] Metrics',
+      title: '[Fundamentals API] Available Metrics',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
@@ -36,12 +36,12 @@ export class MetricsTool extends BaseFactsetTool {
     _meta: {
       'unique.app/icon': 'box',
       'unique.app/system-prompt':
-        'Retrieves the available fundamental metrics from FactSet that can be used for the fundamentals_fundamentals tool. Filter by category and subcategory to narrow down the results. Returns metric identifiers, names, descriptions, and methodology references.',
+        'Use this tool to discover available FactSet Fundamental metric codes (FF_* identifiers) that can be used with the fundamentals_fundamentals tool. Returns metric metadata including the metric code, name, description, category, subcategory, and methodology references (OApageID/OAurl for detailed definitions). Filter by category (e.g., INCOME_STATEMENT, BALANCE_SHEET, CASH_FLOW, RATIOS) and subcategory to find specific metrics. This is essential for finding the correct metric codes before querying fundamental data.',
     },
   })
   @Span()
   public async getMetrics(params: z.infer<typeof getFdsFundamentalsMetricsQueryParams>) {
-    this.incrementActionCounter('get_metrics');
+    this.incrementActionCounter('fundamentals_metrics');
 
     try {  
       const { data, status } = await getFdsFundamentalsMetrics(params, await this.getFactsetRequestOptions());
@@ -51,7 +51,7 @@ export class MetricsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('get_metrics', 'factset_api_error');
+      this.incrementActionFailureCounter('fundamentals_metrics', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet metrics',
         error: serializeError(normalizeError(error)),

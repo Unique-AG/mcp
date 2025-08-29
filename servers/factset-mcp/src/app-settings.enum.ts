@@ -53,7 +53,7 @@ const appSettingsSchema = z.object({
       'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',
     ),
   FACTSET_AUTH_CONFIG: z
-    .string()
+    .base64()
     .describe('The Factset auth config base64 encoded.')
     .transform((val) => {
       try {
