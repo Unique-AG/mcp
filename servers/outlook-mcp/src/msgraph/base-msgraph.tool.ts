@@ -1,8 +1,7 @@
 import { McpAuthenticatedRequest } from '@unique-ag/mcp-oauth';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { UnauthorizedException } from '@nestjs/common';
-import type { Counter } from '@opentelemetry/api';
-import { Span } from '@opentelemetry/api';
+import type { Counter, Span } from '@opentelemetry/api';
 import { MetricService } from 'nestjs-otel';
 import { OTEL_ATTRIBUTES } from '../utils/otel-attributes';
 import { GraphClientFactory } from './graph-client.factory';

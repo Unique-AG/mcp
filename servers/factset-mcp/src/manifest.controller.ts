@@ -20,11 +20,7 @@ export class ManifestController {
         manifest: '/site.webmanifest',
         icons: '/icons/',
       },
-      features: [
-        'Factset integration',
-        'OAuth2 authentication',
-        'Secure token handling',
-      ],
+      features: ['Factset integration', 'OAuth2 authentication', 'Secure token handling'],
       documentation: {
         readme: 'https://github.com/Unique-AG/mcp/blob/main/servers/factset-mcp/README.md',
         mcp: 'https://modelcontextprotocol.io/',

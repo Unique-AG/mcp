@@ -10,6 +10,10 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "codegen": {
+      "dependsOn": ["^codegen"],
+      "inputs": ["$TURBO_DEFAULT$"]
+    },
     "dev": {
       "cache": false,
       "persistent": true,

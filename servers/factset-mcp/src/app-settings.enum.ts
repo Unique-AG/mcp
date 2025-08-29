@@ -1,35 +1,34 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 const appSettingsSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production']).default('development'),
-  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  NODE_ENV: z.enum(['development', 'production']).prefault('development'),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).prefault('info'),
   PORT: z
     .string()
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int().min(0).max(65535))
-    .default('3000')
+    .prefault('3000')
     .describe('The port that the MCP Server will listen on.'),
   DATABASE_URL: z
-    .string()
     .url()
     .startsWith('postgresql://')
     .describe('The prisma database url for Postgres. Must start with "postgresql://".'),
   ACCESS_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
     .optional()
-    .default('60')
+    .prefault('60')
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int())
     .describe('The expiration time of the access token in seconds. Default is 60 seconds.'),
   REFRESH_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
     .optional()
-    .default('2592000')
+    .prefault('2592000')
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int())
     .describe('The expiration time of the refresh token in seconds. Default is 30 days.'),
   HMAC_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign HMAC tokens.'),
-  SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
+  SELF_URL: z.url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
     .union([z.string(), z.instanceof(Buffer)])
     .transform((key) => {
@@ -53,6 +52,17 @@ const appSettingsSchema = z.object({
     .describe(
       'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',
     ),
+  FACTSET_AUTH_CONFIG: z
+    .string()
+    .describe('The Factset auth config base64 encoded.')
+    .transform((val) => {
+      try {
+        const decoded = Buffer.from(val, 'base64').toString('utf-8');
+        return JSON.parse(decoded);
+      } catch (_error) {
+        throw new Error('FACTSET_AUTH_CONFIG must contain valid base64 encoded JSON data');
+      }
+    }),
 });
 
 export const AppSettings = appSettingsSchema.keyof().enum;
