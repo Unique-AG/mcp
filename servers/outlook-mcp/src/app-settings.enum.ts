@@ -1,32 +1,30 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 const appSettingsSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production']).default('development'),
-  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  NODE_ENV: z.enum(['development', 'production']).prefault('development'),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).prefault('info'),
   PORT: z
     .string()
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().min(0).max(65535))
-    .default('3000')
+    .pipe(z.int().min(0).max(65535))
+    .prefault('3000')
     .describe('The port that the MCP Server will listen on.'),
-  DATABASE_URL: z
-    .string()
-    .url()
+  DATABASE_URL: z.url()
     .startsWith('postgresql://')
     .describe('The prisma database url for Postgres. Must start with "postgresql://".'),
   ACCESS_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
     .optional()
-    .default('60')
+    .prefault('60')
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int())
+    .pipe(z.int())
     .describe('The expiration time of the access token in seconds. Default is 60 seconds.'),
   REFRESH_TOKEN_EXPIRES_IN_SECONDS: z
     .string()
     .optional()
-    .default('2592000')
+    .prefault('2592000')
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int())
+    .pipe(z.int())
     .describe('The expiration time of the refresh token in seconds. Default is 30 days.'),
   MICROSOFT_CLIENT_ID: z
     .string()
@@ -37,7 +35,7 @@ const appSettingsSchema = z.object({
     .min(1)
     .describe('The client secret of the Microsoft App Registration that the MCP Server will use.'),
   HMAC_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign HMAC tokens.'),
-  SELF_URL: z.string().url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
+  SELF_URL: z.url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
     .union([z.string(), z.instanceof(Buffer)])
     .transform((key) => {
@@ -55,8 +53,7 @@ const appSettingsSchema = z.object({
       return Buffer.from(key, 'base64');
     })
     .refine((buffer) => buffer.length === 32, {
-      message:
-        "Key must be 32 bytes (AES-256). Ensure its generated in a suitable way like 'openssl rand -hex 32' or terraform 'random_id'.",
+        error: "Key must be 32 bytes (AES-256). Ensure its generated in a suitable way like 'openssl rand -hex 32' or terraform 'random_id'."
     })
     .describe(
       'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',

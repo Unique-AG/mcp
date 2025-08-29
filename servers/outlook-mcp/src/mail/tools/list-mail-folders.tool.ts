@@ -4,15 +4,15 @@ import { MailFolder } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailFoldersInputSchema = z.object({
-  includeChildFolders: z.boolean().default(false).describe('Whether to include child folders'),
-  limit: z.number().min(1).max(100).default(20).describe('Number of folders to retrieve'),
+  includeChildFolders: z.boolean().prefault(false).describe('Whether to include child folders'),
+  limit: z.number().min(1).max(100).prefault(20).describe('Number of folders to retrieve'),
 });
 
 @Injectable()
