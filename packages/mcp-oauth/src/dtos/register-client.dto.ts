@@ -20,7 +20,7 @@ export const RegisterClientSchema = z.object({
   token_endpoint_auth_method: z
     .string()
     .refine((val) => ['client_secret_basic', 'client_secret_post', 'none'].includes(val), {
-        error: 'Invalid token endpoint auth method'
+      error: 'Invalid token endpoint auth method',
     })
     .describe('The token endpoint auth method of the client')
     .prefault('none'),

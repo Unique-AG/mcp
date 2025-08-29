@@ -9,7 +9,8 @@ const appSettingsSchema = z.object({
     .pipe(z.int().min(0).max(65535))
     .prefault('3000')
     .describe('The port that the MCP Server will listen on.'),
-  DATABASE_URL: z.url()
+  DATABASE_URL: z
+    .url()
     .startsWith('postgresql://')
     .describe('The prisma database url for Postgres. Must start with "postgresql://".'),
   ACCESS_TOKEN_EXPIRES_IN_SECONDS: z
@@ -53,7 +54,8 @@ const appSettingsSchema = z.object({
       return Buffer.from(key, 'base64');
     })
     .refine((buffer) => buffer.length === 32, {
-        error: "Key must be 32 bytes (AES-256). Ensure its generated in a suitable way like 'openssl rand -hex 32' or terraform 'random_id'."
+      error:
+        "Key must be 32 bytes (AES-256). Ensure its generated in a suitable way like 'openssl rand -hex 32' or terraform 'random_id'.",
     })
     .describe(
       'The secret key for the MCP Server to encrypt and decrypt data. Needs to be a 32-byte (256-bit) secret.',

@@ -70,12 +70,17 @@ export class McpToolsHandler extends McpHandlerBase {
           description: tool.metadata.description,
           annotations: tool.metadata.annotations,
           // Zod's toJSONSchema does not correctly infer the 'type' field for the schema. Hence the type assertion.
-          inputSchema: z.toJSONSchema(tool.metadata.parameters, { io: 'input' }) as Tool['inputSchema'],
+          inputSchema: z.toJSONSchema(tool.metadata.parameters, {
+            io: 'input',
+          }) as Tool['inputSchema'],
         };
 
         if (tool.metadata.title) toolSchema.title = tool.metadata.title;
         if (tool.metadata._meta) toolSchema._meta = tool.metadata._meta;
-        if (tool.metadata.outputSchema) toolSchema.outputSchema = z.toJSONSchema(tool.metadata.outputSchema) as Tool['outputSchema'];
+        if (tool.metadata.outputSchema)
+          toolSchema.outputSchema = z.toJSONSchema(
+            tool.metadata.outputSchema,
+          ) as Tool['outputSchema'];
 
         return toolSchema;
       });

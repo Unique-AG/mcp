@@ -11,9 +11,7 @@ import { normalizeError } from '../../utils/normalize-error';
 import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const CreateDraftEmailInputSchema = z.object({
-  to: z
-    .union([z.email(), z.array(z.email())])
-    .describe('Recipient email address(es)'),
+  to: z.union([z.email(), z.array(z.email())]).describe('Recipient email address(es)'),
   subject: z.string().describe('Email subject'),
   body: z.string().describe('Email body content'),
   isHtml: z.boolean().prefault(false).describe('Whether the body is HTML'),
