@@ -1,5 +1,13 @@
 import * as z from 'zod';
 
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    require('dotenv').config();
+  } catch (_error) {
+    console.debug('dotenv not available, skipping .env file loading');
+  }
+}
+
 export const TracesExporterType = z.enum(['otlp', 'console', 'none']).prefault('otlp');
 export const MetricsExporterType = z
   .enum(['otlp', 'prometheus', 'console', 'none'])
