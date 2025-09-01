@@ -41,17 +41,22 @@ export class MetricsTool extends BaseFactsetTool {
   })
   @Span()
   public async getMetrics(params: z.infer<typeof getFdsFundamentalsMetricsQueryParams>) {
-    this.incrementActionCounter('fundamentals_metrics');
+    this.incrementActionCounter('metrics', 'fundamentals');
 
     try {  
-      const { data, status } = await getFdsFundamentalsMetrics(params, await this.getFactsetRequestOptions());
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'metrics',
+        'fundamentals',
+        getFdsFundamentalsMetrics,
+        params,
+      );
       this.logger.log({
         msg: 'FactSet Metrics HTTP Response',
         status,
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_metrics', 'factset_api_error');
+      this.incrementActionFailureCounter('metrics', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet metrics',
         error: serializeError(normalizeError(error)),

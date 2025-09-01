@@ -41,12 +41,14 @@ export class FundamentalsTool extends BaseFactsetTool {
   })
   @Span()
   public async getFundamentals(params: z.infer<typeof customFdsFundamentalsQueryParams>) {
-    this.incrementActionCounter('fundamentals_fundamentals');
+    this.incrementActionCounter('fundamentals', 'fundamentals');
 
     try {
-      const { data, status } = await getFdsFundamentals(
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'fundamentals',
+        'fundamentals',
+        getFdsFundamentals,
         params,
-        await this.getFactsetRequestOptions(),
       );
       this.logger.log({
         msg: 'FactSet Fundamentals HTTP Response',
@@ -54,7 +56,7 @@ export class FundamentalsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter('fundamentals', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet fundamentals',
         error: serializeError(normalizeError(error)),

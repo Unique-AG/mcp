@@ -41,12 +41,14 @@ export class SegmentsTool extends BaseFactsetTool {
   })
   @Span()
   public async getSegments(params: z.infer<typeof customSegmentsQueryParams>) {
-    this.incrementActionCounter('fundamentals_segments');
+    this.incrementActionCounter('segments', 'fundamentals');
 
     try {
-      const { data, status } = await getFdsSegments(
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'segments',
+        'fundamentals',
+        getFdsSegments,
         params,
-        await this.getFactsetRequestOptions(),
       );
       this.logger.log({
         msg: 'FactSet Segments HTTP Response',
@@ -54,7 +56,7 @@ export class SegmentsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_segments', 'factset_api_error');
+      this.incrementActionFailureCounter('segments', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet segments',
         error: serializeError(normalizeError(error)),

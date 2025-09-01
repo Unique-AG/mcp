@@ -38,12 +38,14 @@ export class FinancialStatementsTool extends BaseFactsetTool {
   })
   @Span()
   public async getFinancialStatements(params: z.infer<typeof getFinancialsQueryParams>) {
-    this.incrementActionCounter('fundamentals_company_reports_financial_statements');
+    this.incrementActionCounter('company-reports/financial_statements', 'fundamentals');
 
     try {
-      const { data, status } = await getFinancials(
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'company-reports/financial_statements',
+        'fundamentals',
+        getFinancials,
         params,
-        await this.getFactsetRequestOptions(),
       );
       this.logger.log({
         msg: 'FactSet Financial Statements HTTP Response',
@@ -51,7 +53,7 @@ export class FinancialStatementsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_company_reports_financial_statements', 'factset_api_error');
+      this.incrementActionFailureCounter('company-reports/financial_statements', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet financial statements',
         error: serializeError(normalizeError(error)),

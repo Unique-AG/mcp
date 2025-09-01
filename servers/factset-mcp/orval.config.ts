@@ -9,7 +9,9 @@ export default defineConfig({
       client: 'fetch',
       mode: 'tags-split',
       target: './src/fundamentals/@generated',
-      baseUrl: 'https://api.factset.com/content/factset-fundamentals/v2',
+      baseUrl: {
+        getBaseUrlFromSpecification: true,
+      },
     },
   },
   fundametalsZod: {

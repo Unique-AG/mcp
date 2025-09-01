@@ -38,20 +38,23 @@ export class CompanyFundamentalsTool extends BaseFactsetTool {
   })
   @Span()
   public async getCompanyFundamentals(params: z.infer<typeof getFundamentalsQueryParams>) {
-    this.incrementActionCounter('fundamentals_company_reports_fundamentals');
+    this.incrementActionCounter('company-reports/fundamentals', 'fundamentals');
 
     try {
-      const { data, status } = await getFundamentals(
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'company-reports/fundamentals',
+        'fundamentals',
+        getFundamentals,
         params,
-        await this.getFactsetRequestOptions(),
       );
+
       this.logger.log({
         msg: 'FactSet Company Fundamentals HTTP Response',
         status,
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_company_reports_fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter('company-reports/fundamentals', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet company fundamentals',
         error: serializeError(normalizeError(error)),

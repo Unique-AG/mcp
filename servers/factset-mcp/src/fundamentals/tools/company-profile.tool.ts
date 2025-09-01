@@ -38,12 +38,14 @@ export class CompanyProfileTool extends BaseFactsetTool {
   })
   @Span()
   public async getCompanyProfile(params: z.infer<typeof getFdsProfilesQueryParams>) {
-    this.incrementActionCounter('fundamentals_company_reports_profile');
+    this.incrementActionCounter('company-reports/profile', 'fundamentals');
 
     try {
-      const { data, status } = await getFdsProfiles(
+      const { data, status } = await this.callFactsetApiWithMetrics(
+        'company-reports/profile',
+        'fundamentals',
+        getFdsProfiles,
         params,
-        await this.getFactsetRequestOptions(),
       );
       this.logger.log({
         msg: 'FactSet Company Profile HTTP Response',
@@ -51,7 +53,7 @@ export class CompanyProfileTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('fundamentals_company_reports_profile', 'factset_api_error');
+      this.incrementActionFailureCounter('company-reports/profile', 'fundamentals', 'factset_api_error');
       this.logger.error({
         msg: 'Failed to get FactSet company profile',
         error: serializeError(normalizeError(error)),
