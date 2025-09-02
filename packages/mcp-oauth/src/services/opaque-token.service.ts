@@ -231,7 +231,7 @@ export class OpaqueTokenService {
 
     try {
       const deletedCount = await this.store.cleanupExpiredTokens(7);
-      
+
       if (deletedCount > 0) {
         this.logger.log(`Cleaned up ${deletedCount} expired tokens older than 7 days`);
       } else {
