@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { typeid } from 'typeid-js';
 import type { IOAuthStore, RefreshTokenMetadata } from '../interfaces/io-auth-store.interface';
 import {
@@ -218,6 +219,26 @@ export class OpaqueTokenService {
         error,
       });
       return false;
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  private async cleanupExpiredTokens(): Promise<void> {
+    if (!this.store.cleanupExpiredTokens) {
+      this.logger.debug('Token cleanup not supported by the store implementation');
+      return;
+    }
+
+    try {
+      const deletedCount = await this.store.cleanupExpiredTokens(7);
+      
+      if (deletedCount > 0) {
+        this.logger.log(`Cleaned up ${deletedCount} expired tokens older than 7 days`);
+      } else {
+        this.logger.debug('No expired tokens found to cleanup');
+      }
+    } catch (error) {
+      this.logger.error('Failed to cleanup expired tokens', error);
     }
   }
 }

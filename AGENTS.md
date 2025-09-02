@@ -11,3 +11,6 @@
 - Write clean, readable code that minimizes the need for comments
 - Use descriptive naming conventions
 - Keep functions focused and single-purpose
+
+## Generated Files
+- Don't create README files for generated code

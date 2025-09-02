@@ -383,4 +383,45 @@ export class McpOAuthStore implements IOAuthStore {
     const cacheKey = this.getRefreshTokenCacheKey(token);
     await this.cacheManager.del(cacheKey);
   }
+
+  public async cleanupExpiredTokens(olderThanDays: number): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+
+    this.logger.debug(`Cleaning up tokens expired before ${cutoffDate.toISOString()}`);
+
+    const deletedTokens = await this.prisma.token.deleteMany({
+      where: {
+        expiresAt: {
+          lt: cutoffDate,
+        },
+      },
+    });
+
+    const deletedAuthCodes = await this.prisma.authorizationCode.deleteMany({
+      where: {
+        expiresAt: {
+          lt: cutoffDate,
+        },
+      },
+    });
+
+    const deletedSessions = await this.prisma.oAuthSession.deleteMany({
+      where: {
+        expiresAt: {
+          lt: cutoffDate,
+        },
+      },
+    });
+
+    const totalDeleted = deletedTokens.count + deletedAuthCodes.count + deletedSessions.count;
+
+    if (totalDeleted > 0) {
+      this.logger.log(
+        `Cleanup completed: ${deletedTokens.count} tokens, ${deletedAuthCodes.count} auth codes, ${deletedSessions.count} sessions deleted`,
+      );
+    }
+
+    return totalDeleted;
+  }
 }

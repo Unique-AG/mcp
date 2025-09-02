@@ -64,4 +64,7 @@ export interface IOAuthStore {
   getUserProfileById(
     profileId: string,
   ): Promise<(OAuthUserProfile & { profile_id: string; provider: string }) | undefined>;
+
+  // Token cleanup
+  cleanupExpiredTokens?(olderThanDays: number): Promise<number>;
 }
