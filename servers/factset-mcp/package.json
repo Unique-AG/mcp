@@ -9,7 +9,7 @@
     "build": "nest build",
     "dev": "nodemon",
     "debug": "nest start --debug --watch",
-    "codegen": "orval --config orval.config.ts",
+    "codegen": "orval --config orval.config.ts && rm src/street-account-news/@generated/filters/filters.zod.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",

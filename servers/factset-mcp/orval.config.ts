@@ -90,6 +90,8 @@ export default defineConfig({
     input: {
       target: './src/street-account-news/streetaccount_news_api-v1.yml',
     },
+    // FIXME: The street-account-news/filters.zod.ts file is generated with an incompatible zod property 'max'.
+    // We need to remove the file (in the codegen script) and cannot use it.
     output: {
       client: 'zod',
       mode: 'tags-split',
