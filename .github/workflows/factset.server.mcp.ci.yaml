@@ -1,4 +1,4 @@
-name: "[mcp/server/outlook] Validate"
+name: "[mcp/server/factset] Validate"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -9,8 +9,8 @@ on:
     branches:
       - main
     paths:
-      - "**/servers/outlook-mcp/**"
-      - .github/workflows/outlook.server.mcp.ci.yaml
+      - "**/servers/factset-mcp/**"
+      - .github/workflows/factset.server.mcp.ci.yaml
 
 jobs:
   validate:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      SERVER_PATH: servers/outlook-mcp
+      SERVER_PATH: servers/factset-mcp
     steps:
       - uses: actions/checkout@v4
       

@@ -1,12 +1,12 @@
-name: "[mcp/server/outlook] Publish"
+name: "[mcp/server/factset] Publish"
 
 on:
   push:
     branches:
       - main
     paths:
-      - servers/outlook-mcp/**
-      - .github/workflows/outlook.server.mcp.cd.yaml
+      - servers/factset-mcp/**
+      - .github/workflows/factset.server.mcp.cd.yaml
   workflow_dispatch:
 
 jobs:
@@ -16,9 +16,9 @@ jobs:
     permissions:
       packages: write
     env:
-      SERVER_PATH: servers/outlook-mcp
-      CHART_REPO: ghcr.io/unique-ag/mcp/server/outlook-mcp
-      GHA_CACHE_SCOPE: outlook-mcp
+      SERVER_PATH: servers/factset-mcp
+      CHART_REPO: ghcr.io/unique-ag/mcp/server/factset-mcp
+      GHA_CACHE_SCOPE: factset-mcp
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -44,7 +44,7 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          file: ./servers/outlook-mcp/Dockerfile
+          file: ./Dockerfile
           context: .
           platforms: linux/amd64
           push: true
@@ -55,7 +55,7 @@ jobs:
           cache-to: |
             type=registry,ref=${{ env.CHART_REPO }}:cache,mode=min
           build-args: |
-            APP_NAME=outlook-mcp
+            APP_NAME=factset-mcp
             PNPM_VERSION=${{ steps.pnpm-version.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

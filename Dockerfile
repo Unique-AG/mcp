@@ -3,7 +3,7 @@
 FROM node:22-bookworm AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ARG PNPM_VERSION=10.15.0
+ARG PNPM_VERSION=10.15.1
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 FROM base AS pruner
