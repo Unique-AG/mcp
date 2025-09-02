@@ -1,5 +1,13 @@
 {
   "$schema": "./node_modules/syncpack/schema.json",
+  "versionGroups": [
+    {
+      "label": "Peer Dependencies - Allow range patterns",
+      "packages": ["**"],
+      "dependencyTypes": ["peer"],
+      "policy": "sameRange"
+    }
+  ],
   "sortFirst": [
     "name",
     "description",
