@@ -1,5 +1,6 @@
 import { type DynamicModule, Module, type Provider } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { seconds, ThrottlerModule } from '@nestjs/throttler';
 import { ClientController } from './controllers/client.controller';
 import { DiscoveryController } from './controllers/discovery.controller';
@@ -118,6 +119,7 @@ export class McpOAuthModule extends ConfigurableModuleClass {
       module: McpOAuthModule,
       imports: [
         ...(baseModule.imports || []),
+        ScheduleModule.forRoot(),
         ThrottlerModule.forRoot({
           throttlers: [
             {

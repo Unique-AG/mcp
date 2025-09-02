@@ -1,16 +1,19 @@
-import { ToolAnnotations as SdkToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import {
+  Tool as SdkTool,
+  ToolAnnotations as SdkToolAnnotations,
+} from '@modelcontextprotocol/sdk/types.js';
 import { SetMetadata } from '@nestjs/common';
-import { z } from 'zod';
+import * as z from 'zod';
 import { MCP_TOOL_METADATA_KEY } from './constants';
 
 export interface ToolMetadata {
   name: string;
   title?: string;
   description: string;
-  parameters?: z.ZodTypeAny;
-  outputSchema?: z.ZodTypeAny;
+  parameters: z.ZodObject;
+  outputSchema?: z.ZodObject;
   annotations?: SdkToolAnnotations;
-  _meta?: z.ZodTypeAny;
+  _meta?: SdkTool['_meta'];
 }
 
 export interface ToolAnnotations extends SdkToolAnnotations {}
@@ -19,10 +22,10 @@ export interface ToolOptions {
   name?: string;
   title?: string;
   description?: string;
-  parameters?: z.ZodTypeAny;
-  outputSchema?: z.ZodTypeAny;
+  parameters: z.ZodObject;
+  outputSchema?: z.ZodObject;
   annotations?: ToolAnnotations;
-  _meta?: { [key: string]: unknown };
+  _meta?: SdkTool['_meta'];
 }
 
 /**
@@ -30,8 +33,10 @@ export interface ToolOptions {
  * @param {Object} options - The options for the decorator
  * @param {string} options.name - The name of the tool
  * @param {string} options.description - The description of the tool
- * @param {z.ZodTypeAny} [options.parameters] - The parameters of the tool
- * @param {z.ZodTypeAny} [options.outputSchema] - The output schema of the tool
+ * @param {z.ZodObject} [options.parameters] - The parameters of the tool
+ * @param {z.ZodObject} [options.outputSchema] - The output schema of the tool
+ * @param {ToolAnnotations} [options.annotations] - The annotations of the tool
+ * @param {SdkTool['_meta']} [options._meta] - The metadata of the tool
  * @returns {MethodDecorator} - The decorator
  */
 export const Tool = (options: ToolOptions) => {

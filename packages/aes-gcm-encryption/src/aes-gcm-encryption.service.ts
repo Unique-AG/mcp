@@ -1,15 +1,15 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
-import { z } from 'zod';
+import * as z from 'zod';
 import {
   AES_GCM_ENCRYPTION_MODULE_OPTIONS_RESOLVED_TOKEN,
   type ResolvedEncryptionOptions,
 } from './aes-gcm-encryption.module-definition';
 
 const CipherPayloadSchema = z.object({
-  iv: z.string().base64(),
-  tag: z.string().base64(),
-  data: z.string().base64(),
+  iv: z.base64(),
+  tag: z.base64(),
+  data: z.base64(),
 });
 
 type CipherPayload = z.infer<typeof CipherPayloadSchema>;

@@ -4,7 +4,7 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
@@ -12,12 +12,12 @@ import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailFolderMessagesInputSchema = z.object({
   folderId: z.string().describe('Mail folder ID to list messages from'),
-  limit: z.number().min(1).max(100).default(20).describe('Number of messages to retrieve'),
+  limit: z.number().min(1).max(100).prefault(20).describe('Number of messages to retrieve'),
   orderBy: z
     .enum(['receivedDateTime', 'subject', 'from', 'importance'])
-    .default('receivedDateTime')
+    .prefault('receivedDateTime')
     .describe('Field to order messages by'),
-  orderDirection: z.enum(['asc', 'desc']).default('desc').describe('Order direction'),
+  orderDirection: z.enum(['asc', 'desc']).prefault('desc').describe('Order direction'),
   filter: z
     .string()
     .optional()

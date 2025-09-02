@@ -4,15 +4,15 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const ListMailsInputSchema = z.object({
-  folder: z.string().default('inbox').describe('Mail folder to read mails from'),
-  limit: z.number().min(1).max(50).default(10).describe('Number of emails to retrieve'),
+  folder: z.string().prefault('inbox').describe('Mail folder to read mails from'),
+  limit: z.number().min(1).max(50).prefault(10).describe('Number of emails to retrieve'),
 });
 
 @Injectable()

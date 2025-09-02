@@ -4,7 +4,6 @@ import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
   McpError,
-  PromptArgument,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
@@ -34,13 +33,12 @@ export class McpPromptsHandler extends McpHandlerBase {
         name: prompt.metadata.name,
         description: prompt.metadata.description,
         arguments: prompt.metadata.parameters
-          ? Object.entries(prompt.metadata.parameters.shape).map(
-              ([name, field]): PromptArgument => ({
-                name,
-                description: field.description,
-                required: !field.isOptional(),
-              }),
-            )
+          ? Object.entries(prompt.metadata.parameters.shape).map(([name, definition]) => ({
+              name,
+              description: definition.meta().description,
+              required: !definition.isOptional(),
+              title: definition.meta().title,
+            }))
           : [],
       }));
 
@@ -76,7 +74,9 @@ export class McpPromptsHandler extends McpHandlerBase {
 
         const result = await promptInstance[methodName].call(
           promptInstance,
-          request.params.arguments,
+          promptInfo.metadata.parameters
+            ? promptInfo.metadata.parameters.parse(request.params.arguments)
+            : {},
           context,
           httpRequest.raw,
         );

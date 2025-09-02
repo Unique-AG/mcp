@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /**
  * Token Introspection Request DTO as defined in RFC 7662 Section 2.1

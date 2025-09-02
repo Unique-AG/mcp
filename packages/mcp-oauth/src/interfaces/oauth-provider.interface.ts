@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import { mcpOAuthModuleOptionsSchema } from '../mcp-oauth.module-definition';
 
 export type OAuthProviderConfig = z.infer<typeof mcpOAuthModuleOptionsSchema>['provider'];
@@ -6,7 +6,7 @@ export type OAuthProviderConfig = z.infer<typeof mcpOAuthModuleOptionsSchema>['p
 export const oauthUserProfileSchema = z.object({
   id: z.string(),
   username: z.string(),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
   displayName: z.string().optional(),
   avatarUrl: z.string().optional(),
   raw: z.any().optional(),

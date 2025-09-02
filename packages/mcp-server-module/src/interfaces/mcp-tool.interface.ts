@@ -1,11 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
-  CallToolRequestSchema,
-  GetPromptRequestSchema,
+  CallToolRequest,
+  GetPromptRequest,
   Progress,
-  ReadResourceRequestSchema,
+  ReadResourceRequest,
 } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
 
 export type Literal = boolean | null | number | string | undefined;
 
@@ -14,12 +13,7 @@ export type SerializableValue =
   | SerializableValue[]
   | { [key: string]: SerializableValue };
 
-export type McpRequestSchema =
-  | typeof CallToolRequestSchema
-  | typeof ReadResourceRequestSchema
-  | typeof GetPromptRequestSchema;
-
-export type McpRequest = z.infer<McpRequestSchema>;
+export type McpRequest = CallToolRequest | ReadResourceRequest | GetPromptRequest;
 
 /**
  * Enhanced execution context that includes user information

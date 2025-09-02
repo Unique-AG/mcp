@@ -4,7 +4,7 @@ import { Attachment, Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
@@ -14,11 +14,11 @@ const GetMailMessageInputSchema = z.object({
   messageId: z.string().describe('The ID of the message to retrieve'),
   includeAttachments: z
     .boolean()
-    .default(false)
+    .prefault(false)
     .describe('Whether to include attachment information'),
   bodyFormat: z
     .enum(['text', 'html'])
-    .default('text')
+    .prefault('text')
     .describe('Format of the message body to return'),
 });
 

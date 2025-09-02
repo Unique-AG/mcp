@@ -1,0 +1,17 @@
+name: "[mcp/server/factset] Publish"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - servers/factset-mcp/**
+      - .github/workflows/factset.server.mcp.cd.yaml
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: ./.github/workflows/_template-mcp-cd.yaml
+    with:
+      server-name: factset
+      server-path: servers/factset-mcp

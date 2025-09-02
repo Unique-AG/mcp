@@ -3,7 +3,7 @@ import { type Context, Tool } from '@unique-ag/mcp-server-module';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';

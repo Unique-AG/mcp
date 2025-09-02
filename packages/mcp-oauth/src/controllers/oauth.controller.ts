@@ -139,17 +139,26 @@ export class OAuthController {
     const authMiddleware = passport.authenticate(
       STRATEGY_NAME,
       { session: false },
-      async (error: unknown, user: PassportUser) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Any is the official type for the info parameter.
+      async (error: unknown, user: PassportUser, info: any) => {
         try {
           if (error) {
             this.logger.error({
               msg: 'Failed to authenticate user',
               error: serializeError(normalizeError(error)),
             });
-            throw new UnauthorizedException('Authentication failed');
+            const errorMessage =
+              typeof error === 'object' && error !== null && 'message' in error
+                ? (error as { message: string }).message
+                : 'Authentication failed';
+            throw new UnauthorizedException(errorMessage);
           }
 
-          if (!user) throw new UnauthorizedException('Authentication failed');
+          if (!user) {
+            // When strategy calls fail(), the error info is passed in the info parameter
+            const failureMessage = info?.message || 'Authentication failed';
+            throw new UnauthorizedException(failureMessage);
+          }
           if (!state) throw new UnauthorizedException('Authentication failed');
           const decodedState = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'));
           const { sessionId, sessionNonce, sessionHmac } = decodedState;

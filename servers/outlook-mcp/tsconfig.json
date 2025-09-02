@@ -9,11 +9,6 @@
     "removeComments": true,
     "incremental": true,
     "baseUrl": "./",
-    // "strict": false,
-    // "noImplicitAny": false,
-    // "strictBindCallApply": false,
-    // "noFallthroughCasesInSwitch": false,
-    // "noUncheckedIndexedAccess": false
     "paths": {
       "@generated/*": ["./@generated/*"]
     }

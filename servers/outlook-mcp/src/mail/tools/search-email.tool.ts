@@ -4,7 +4,7 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
@@ -26,16 +26,16 @@ const SearchEmailInputSchema = z.object({
     .optional()
     .describe('Start date for date range filter (ISO format: YYYY-MM-DD)'),
   dateTo: z.string().optional().describe('End date for date range filter (ISO format: YYYY-MM-DD)'),
-  limit: z.number().min(1).max(100).default(25).describe('Number of messages to retrieve'),
+  limit: z.number().min(1).max(100).prefault(25).describe('Number of messages to retrieve'),
   orderBy: z
     .enum(['receivedDateTime', 'sentDateTime', 'subject', 'from', 'importance'])
-    .default('receivedDateTime')
+    .prefault('receivedDateTime')
     .describe(
       'Field to order results by (only used when not searching - search results are ordered by relevance)',
     ),
   orderDirection: z
     .enum(['asc', 'desc'])
-    .default('desc')
+    .prefault('desc')
     .describe('Order direction (only used when not searching)'),
 });
 

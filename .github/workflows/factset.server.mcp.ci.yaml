@@ -1,0 +1,16 @@
+name: "[mcp/server/factset] Validate"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/servers/factset-mcp/**"
+      - .github/workflows/factset.server.mcp.ci.yaml
+
+jobs:
+  validate:
+    uses: ./.github/workflows/_template-mcp-ci.yaml
+    with:
+      server-name: factset
+      server-path: servers/factset-mcp

@@ -1,0 +1,87 @@
+name: "[TEMPLATE] MCP Server CI"
+
+on:
+  workflow_call:
+    inputs:
+      server-name:
+        description: "Name of the MCP server (e.g., factset, outlook)"
+        required: true
+        type: string
+      server-path:
+        description: "Path to the server directory (e.g., servers/factset-mcp)"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    permissions:
+      packages: write # cache needs write access
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVER_PATH: ${{ inputs.server-path }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Extract PNPM version from package.json
+        id: pnpm-version
+        run: |
+          PNPM_VERSION=$(jq -r '.packageManager | split("@")[1]' package.json)
+          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+          
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma client
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm db:generate
+
+      - name: Run codegen
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm codegen
+
+      - name: Sync pack format and lint
+        working-directory: .
+        run: pnpm syncpack format --check && pnpm syncpack lint
+
+      - name: Run lint
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm lint
+        
+      - name: Check formatting
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm format
+        
+      - name: Type check
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm check-types
+        
+      - name: Build project
+        working-directory: ${{ env.SERVER_PATH }}
+        run: pnpm build

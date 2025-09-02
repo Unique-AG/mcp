@@ -3,7 +3,7 @@
 FROM node:22-bookworm AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ARG PNPM_VERSION=10.15.0
+ARG PNPM_VERSION=10.15.1
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 FROM base AS pruner
@@ -34,7 +34,8 @@ COPY ./servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
 
 RUN pnpm --filter=@unique-ag/${APP_NAME} db:generate && \
     # This triggers Prisma to download the engines, so we can stash them in the image.
-    pnpm --filter=@unique-ag/${APP_NAME} exec prisma --version
+    pnpm --filter=@unique-ag/${APP_NAME} exec prisma --version && \
+    pnpm --filter=@unique-ag/${APP_NAME} codegen
 RUN --mount=type=cache,target=/root/.cache/turbo \
     pnpm turbo build --filter=@unique-ag/${APP_NAME}... && \
     pnpm --filter=@unique-ag/${APP_NAME} deploy out

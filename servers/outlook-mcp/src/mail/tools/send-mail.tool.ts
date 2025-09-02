@@ -4,21 +4,19 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span, TraceService } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
-import { z } from 'zod';
+import * as z from 'zod';
 import { BaseMsGraphTool } from '../../msgraph/base-msgraph.tool';
 import { GraphClientFactory } from '../../msgraph/graph-client.factory';
 import { normalizeError } from '../../utils/normalize-error';
 import { OTEL_ATTRIBUTES } from '../../utils/otel-attributes';
 
 const SendMailInput = z.object({
-  to: z
-    .union([z.string().email(), z.array(z.string().email())])
-    .describe('Recipient email address'),
+  to: z.union([z.email(), z.array(z.email())]).describe('Recipient email address'),
   subject: z.string().describe('Email subject'),
   body: z.string().describe('Email body content'),
-  isHtml: z.boolean().default(false).describe('Whether the body is HTML'),
-  cc: z.array(z.string().email()).optional().describe('Carbon copy recipients'),
-  bcc: z.array(z.string().email()).optional().describe('Blind carbon copy recipients'),
+  isHtml: z.boolean().prefault(false).describe('Whether the body is HTML'),
+  cc: z.array(z.email()).optional().describe('Carbon copy recipients'),
+  bcc: z.array(z.email()).optional().describe('Blind carbon copy recipients'),
 });
 
 @Injectable()
