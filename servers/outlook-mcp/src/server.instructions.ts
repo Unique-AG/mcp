@@ -28,7 +28,7 @@ export const serverInstructions = `
 When showing multiple emails (from list_mails, search_email, or list_mail_folder_messages), format each email like this:
 \`\`\`markdown
 - **[SUBJECT](mailto:FROM_ADDRESS)** 
-  From: **FROM_NAME** \<FROM_ADDRESS\> • [RECEIVED_DATE]
+  From: **FROM_NAME** <FROM_ADDRESS> • [RECEIVED_DATE]
   [PREVIEW - truncated to ~120 chars]
   Status: [READ_EMOJI][ATTACHMENT_EMOJI]
   <details><summary>Meta</summary>
@@ -54,7 +54,7 @@ When showing a single email (from get_mail_message), format like this:
 \`\`\`markdown
 # 📧 [SUBJECT]
 
-**From:** [FROM_NAME] \<[FROM_ADDRESS]\>  
+**From:** [FROM_NAME] <[FROM_ADDRESS]>  
 **To:** [TO_RECIPIENTS]  
 **Date:** [RECEIVED_DATE] • **Sent:** [SENT_DATE]  
 **Status:** [READ_STATUS]
