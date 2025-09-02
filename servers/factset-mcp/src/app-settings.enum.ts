@@ -27,6 +27,21 @@ const appSettingsSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int())
     .describe('The expiration time of the refresh token in seconds. Default is 30 days.'),
+  ZITADEL_CLIENT_ID: z
+    .string()
+    .min(1)
+    .describe('The client ID of the Zitadel App Registration that the MCP Server will use.'),
+  ZITADEL_CLIENT_SECRET: z
+    .string()
+    .min(1)
+    .describe('The client secret of the Zitadel App Registration that the MCP Server will use.'),
+  ZITADEL_ISSUER: z
+    .url()
+    .describe('The issuer of the Zitadel App Registration that the MCP Server will use.'),
+  ZITADEL_REQUIRED_ROLE: z
+    .string()
+    .optional()
+    .describe('The required role that users must have in Zitadel to authenticate (optional).'),
   HMAC_SECRET: z.string().min(1).describe('The secret key for the MCP Server to sign HMAC tokens.'),
   SELF_URL: z.url().describe('The URL of the MCP Server. Used for oAuth callbacks.'),
   ENCRYPTION_KEY: z
