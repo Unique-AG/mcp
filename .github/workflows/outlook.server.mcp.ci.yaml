@@ -1,9 +1,5 @@
 name: "[mcp/server/outlook] Validate"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 on:
   pull_request:
     branches:
@@ -14,62 +10,7 @@ on:
 
 jobs:
   validate:
-    permissions:
-      packages: write # cache needs write access
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      SERVER_PATH: servers/outlook-mcp
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          
-      - name: Extract PNPM version from package.json
-        id: pnpm-version
-        run: |
-          PNPM_VERSION=$(jq -r '.packageManager | split("@")[1]' package.json)
-          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
-          
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ steps.pnpm-version.outputs.version }}
-          run_install: false
-          
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        
-      - name: Generate Prisma client
-        working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run db:generate
-        
-      - name: Run lint
-        working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run lint
-        
-      - name: Check formatting
-        working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run format
-        
-      - name: Type check
-        working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run check-types
-        
-      - name: Build project
-        working-directory: ${{ env.SERVER_PATH }}
-        run: pnpm run build
+    uses: ./.github/workflows/_template-mcp-ci.yaml
+    with:
+      server-name: outlook
+      server-path: servers/outlook-mcp

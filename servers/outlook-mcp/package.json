@@ -9,6 +9,7 @@
     "build": "nest build",
     "dev": "nodemon",
     "debug": "nest start --debug --watch",
+    "codegen": "echo \"No codegen for this server\"",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
