@@ -53,7 +53,11 @@ export class FinancialStatementsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('company-reports/financial_statements', 'fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'company-reports/financial_statements',
+        'fundamentals',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet financial statements',
         error: serializeError(normalizeError(error)),

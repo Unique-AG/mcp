@@ -7,7 +7,10 @@ import { FactsetClientCredentials } from '../../auth/factset.client-credentials'
 import { BaseFactsetTool } from '../../base-factset.tool';
 import { normalizeError } from '../../utils/normalize-error';
 import { getFixedConsensus, getRollingConsensus } from '../@generated/consensus/consensus';
-import { getFixedConsensusQueryParams, getRollingConsensusQueryParams } from '../@generated/consensus/consensus.zod';
+import {
+  getFixedConsensusQueryParams,
+  getRollingConsensusQueryParams,
+} from '../@generated/consensus/consensus.zod';
 
 @Injectable()
 export class ConsensusTool extends BaseFactsetTool {

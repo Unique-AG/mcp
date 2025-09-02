@@ -13,10 +13,7 @@ import { getFdsFundamentalsMetricsQueryParams } from '../@generated/metrics/metr
 export class MetricsTool extends BaseFactsetTool {
   private readonly logger = new Logger(this.constructor.name);
 
-  public constructor(
-    factsetCredentials: FactsetClientCredentials,
-    metricService: MetricService,
-  ) {
+  public constructor(factsetCredentials: FactsetClientCredentials, metricService: MetricService) {
     super(factsetCredentials, metricService);
   }
 
@@ -43,7 +40,7 @@ export class MetricsTool extends BaseFactsetTool {
   public async getMetrics(params: z.infer<typeof getFdsFundamentalsMetricsQueryParams>) {
     this.incrementActionCounter('metrics', 'fundamentals');
 
-    try {  
+    try {
       const { data, status } = await this.callFactsetApiWithMetrics(
         'metrics',
         'fundamentals',

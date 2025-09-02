@@ -57,7 +57,11 @@ export class SharesOutstandingTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('shares-outstanding', 'global-prices', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'shares-outstanding',
+        'global-prices',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet shares outstanding',
         error: serializeError(normalizeError(error)),

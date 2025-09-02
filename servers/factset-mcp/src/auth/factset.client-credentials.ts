@@ -43,14 +43,19 @@ export class FactsetClientCredentials implements OnModuleInit {
   public async onModuleInit(): Promise<void> {
     try {
       const issuer = await Issuer.discover(this.config.wellKnownUri);
-      this.oauthClient = new issuer.Client({
-        client_id: this.config.clientId,
-        token_endpoint_auth_method: 'private_key_jwt',
-      }, {
-        keys: [this.config.jwk],
-      });
+      this.oauthClient = new issuer.Client(
+        {
+          client_id: this.config.clientId,
+          token_endpoint_auth_method: 'private_key_jwt',
+        },
+        {
+          keys: [this.config.jwk],
+        },
+      );
     } catch (_error) {
-      throw new Error(`Failed to discover FactSet OAuth2 issuer from well-known URL: ${this.config.wellKnownUri}`);
+      throw new Error(
+        `Failed to discover FactSet OAuth2 issuer from well-known URL: ${this.config.wellKnownUri}`,
+      );
     }
 
     // Eagerly fetch the access token to avoid delay when it's needed
@@ -78,7 +83,7 @@ export class FactsetClientCredentials implements OnModuleInit {
     this.logger.debug({
       msg: 'No Factset token or token is expired. Fetching new one.',
       expiredAt: this.tokenSet?.expires_at,
-    })
+    });
 
     await this.fetchAccessToken();
     // biome-ignore lint/style/noNonNullAssertion: We check for the presence of tokenSet and access token in the fetchAccessToken method
@@ -98,9 +103,12 @@ export class FactsetClientCredentials implements OnModuleInit {
       grant_type: 'client_credentials',
     });
 
-    if (!tokenSet.access_token || typeof tokenSet.access_token !== 'string') throw new Error('No access token returned from FactSet');
-    if (!tokenSet.expires_at || typeof tokenSet.expires_at !== 'number') throw new Error('No expires_at returned from FactSet');
-    if (!tokenSet.token_type || (tokenSet.token_type !== 'Bearer')) throw new Error('Invalid token type returned from FactSet');
+    if (!tokenSet.access_token || typeof tokenSet.access_token !== 'string')
+      throw new Error('No access token returned from FactSet');
+    if (!tokenSet.expires_at || typeof tokenSet.expires_at !== 'number')
+      throw new Error('No expires_at returned from FactSet');
+    if (!tokenSet.token_type || tokenSet.token_type !== 'Bearer')
+      throw new Error('Invalid token type returned from FactSet');
 
     this.tokenSet = tokenSet;
   }

@@ -7,7 +7,10 @@ import { FactsetClientCredentials } from '../../auth/factset.client-credentials'
 import { BaseFactsetTool } from '../../base-factset.tool';
 import { normalizeError } from '../../utils/normalize-error';
 import { getConsensusRatings, getDetailRatings } from '../@generated/ratings/ratings';
-import { getConsensusRatingsQueryParams, getDetailRatingsQueryParams } from '../@generated/ratings/ratings.zod';
+import {
+  getConsensusRatingsQueryParams,
+  getDetailRatingsQueryParams,
+} from '../@generated/ratings/ratings.zod';
 
 @Injectable()
 export class RatingsTool extends BaseFactsetTool {

@@ -54,7 +54,11 @@ export class CompanyFundamentalsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('company-reports/fundamentals', 'fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'company-reports/fundamentals',
+        'fundamentals',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet company fundamentals',
         error: serializeError(normalizeError(error)),

@@ -7,7 +7,10 @@ import { FactsetClientCredentials } from '../../auth/factset.client-credentials'
 import { BaseFactsetTool } from '../../base-factset.tool';
 import { normalizeError } from '../../utils/normalize-error';
 import { getFixedDetail, getRollingDetail } from '../@generated/broker-detail/broker-detail';
-import { getFixedDetailQueryParams, getRollingDetailQueryParams } from '../@generated/broker-detail/broker-detail.zod';
+import {
+  getFixedDetailQueryParams,
+  getRollingDetailQueryParams,
+} from '../@generated/broker-detail/broker-detail.zod';
 
 @Injectable()
 export class BrokerDetailTool extends BaseFactsetTool {

@@ -6,8 +6,14 @@ import * as z from 'zod';
 import { FactsetClientCredentials } from '../../auth/factset.client-credentials';
 import { BaseFactsetTool } from '../../base-factset.tool';
 import { normalizeError } from '../../utils/normalize-error';
-import { getStreetAccountHeadlines, getStreetAccountHeadlinesByView } from '../@generated/headlines/headlines';
-import { getStreetAccountHeadlinesBody, getStreetAccountHeadlinesByViewBody } from '../@generated/headlines/headlines.zod';
+import {
+  getStreetAccountHeadlines,
+  getStreetAccountHeadlinesByView,
+} from '../@generated/headlines/headlines';
+import {
+  getStreetAccountHeadlinesBody,
+  getStreetAccountHeadlinesByViewBody,
+} from '../@generated/headlines/headlines.zod';
 
 @Injectable()
 export class HeadlinesTool extends BaseFactsetTool {
@@ -100,7 +106,11 @@ export class HeadlinesTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('headlines/by-view', 'street-account-news', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'headlines/by-view',
+        'street-account-news',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet street account headlines by view',
         error: serializeError(normalizeError(error)),

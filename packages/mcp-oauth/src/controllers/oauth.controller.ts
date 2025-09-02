@@ -147,9 +147,10 @@ export class OAuthController {
               msg: 'Failed to authenticate user',
               error: serializeError(normalizeError(error)),
             });
-            const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
-              ? (error as { message: string }).message 
-              : 'Authentication failed';
+            const errorMessage =
+              typeof error === 'object' && error !== null && 'message' in error
+                ? (error as { message: string }).message
+                : 'Authentication failed';
             throw new UnauthorizedException(errorMessage);
           }
 

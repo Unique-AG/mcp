@@ -1,4 +1,3 @@
-
 import { IncomingMessage } from 'node:http';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
@@ -84,9 +83,10 @@ export class ZitadelOIDCStrategy extends Strategy {
           const authState = options?.state;
           return this.redirectToAuth(authState);
         }
-        
+
         if (typeof code !== 'string') return this.fail({ message: 'Invalid code parameter' }, 401);
-        if (typeof state !== 'string') return this.fail({ message: 'Invalid state parameter' }, 401);
+        if (typeof state !== 'string')
+          return this.fail({ message: 'Invalid state parameter' }, 401);
 
         this.handleCallback(req, code, state).catch((err) => {
           this.error(err as Error);

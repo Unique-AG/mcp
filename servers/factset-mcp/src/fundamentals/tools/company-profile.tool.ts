@@ -53,7 +53,11 @@ export class CompanyProfileTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('company-reports/profile', 'fundamentals', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'company-reports/profile',
+        'fundamentals',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet company profile',
         error: serializeError(normalizeError(error)),

@@ -7,10 +7,6 @@ import { ViewsTool } from './tools/views.tool';
 @Module({
   imports: [FactsetAuthModule],
   controllers: [],
-  providers: [
-    FiltersTool,
-    HeadlinesTool,
-    ViewsTool,
-  ],
+  providers: [FiltersTool, HeadlinesTool, ViewsTool],
 })
 export class StreetAccountNewsModule {}

@@ -1,5 +1,5 @@
-import { Module } from "@nestjs/common";
-import { FactsetClientCredentials } from "./factset.client-credentials";
+import { Module } from '@nestjs/common';
+import { FactsetClientCredentials } from './factset.client-credentials';
 
 @Module({
   imports: [],

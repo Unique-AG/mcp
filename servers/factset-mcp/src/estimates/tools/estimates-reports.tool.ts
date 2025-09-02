@@ -6,16 +6,16 @@ import * as z from 'zod';
 import { FactsetClientCredentials } from '../../auth/factset.client-credentials';
 import { BaseFactsetTool } from '../../base-factset.tool';
 import { normalizeError } from '../../utils/normalize-error';
-import { 
-  getAnalystRatings, 
-  getEstimates, 
-  getEstimateTypes, 
-  getSurpriseHistory
+import {
+  getAnalystRatings,
+  getEstimates,
+  getEstimateTypes,
+  getSurpriseHistory,
 } from '../@generated/estimates-and-ratings-reports/estimates-and-ratings-reports';
-import { 
-  getAnalystRatingsQueryParams, 
-  getEstimatesQueryParams, 
-  getSurpriseHistoryQueryParams 
+import {
+  getAnalystRatingsQueryParams,
+  getEstimatesQueryParams,
+  getSurpriseHistoryQueryParams,
 } from '../@generated/estimates-and-ratings-reports/estimates-and-ratings-reports.zod';
 
 @Injectable()
@@ -63,7 +63,11 @@ export class EstimatesReportsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('reports/analyst-ratings', 'estimates', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'reports/analyst-ratings',
+        'estimates',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet analyst ratings report',
         error: serializeError(normalizeError(error)),
@@ -155,7 +159,11 @@ export class EstimatesReportsTool extends BaseFactsetTool {
       });
       return data;
     } catch (error) {
-      this.incrementActionFailureCounter('reports/surprise-history', 'estimates', 'factset_api_error');
+      this.incrementActionFailureCounter(
+        'reports/surprise-history',
+        'estimates',
+        'factset_api_error',
+      );
       this.logger.error({
         msg: 'Failed to get FactSet surprise history report',
         error: serializeError(normalizeError(error)),

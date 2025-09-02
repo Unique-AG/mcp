@@ -1,4 +1,4 @@
-  import { Tool } from '@unique-ag/mcp-server-module';
+import { Tool } from '@unique-ag/mcp-server-module';
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { MetricService, Span } from 'nestjs-otel';
 import { serializeError } from 'serialize-error-cjs';
