@@ -16,11 +16,14 @@ import { AppConfig, AppSettings, validateConfig } from './app-settings.enum';
 import { FactsetAuthModule } from './auth/factset-auth.module';
 import { McpOAuthStore } from './auth/mcp-oauth.store';
 import { createZitadelOAuthProvider } from './auth/zitadel.provider';
+import { EstimatesModule } from './estimates/estimates.module';
 import { FundamentalsModule } from './fundamentals/fundamentals.module';
+import { GlobalPricesModule } from './global-prices/global-prices.module';
 import { ManifestController } from './manifest.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { serverInstructions } from './server.instructions';
+import { StreetAccountNewsModule } from './street-account-news/street-account-news.module';
 
 @Module({
   imports: [
@@ -109,7 +112,10 @@ import { serverInstructions } from './server.instructions';
       mcpEndpoint: 'mcp',
     }),
     FactsetAuthModule,
+    EstimatesModule,
     FundamentalsModule,
+    GlobalPricesModule,
+    StreetAccountNewsModule,
   ],
   controllers: [ManifestController],
   providers: [
