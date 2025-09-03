@@ -513,7 +513,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (endpoint) (rate(factset_requests_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "expr": "sum by (endpoint) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -602,7 +602,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (status_class) (rate(factset_request__total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "expr": "sum by (status_class) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
           "legendFormat": "{{status_class}}",
           "refId": "A"
         }
