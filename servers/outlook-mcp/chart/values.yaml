@@ -1,8 +1,8 @@
 server:
-  deployment:
-    metadata:
-      annotations:
-        reloader.stakater.com/auto: "true"
+  # deployment:
+  #   metadata:
+  #     annotations:
+  #       reloader.stakater.com/auto: "true"
   hooks:
     migration:
       enabled: true
