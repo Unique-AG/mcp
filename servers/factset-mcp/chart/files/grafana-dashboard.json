@@ -97,7 +97,7 @@
           "refId": "A"
         }
       ],
-      "title": "factset Actions/min",
+      "title": "Factset Actions/min",
       "type": "stat"
     },
     {
@@ -221,77 +221,11 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(msgraph_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (le)) * 1000",
           "refId": "A"
         }
       ],
-      "title": "MS Graph P95 Latency",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 10
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 1
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum(rate(msgraph_throttle_events_total{job=\"apps-mcp-server-factset\"}[5m])) * 60",
-          "refId": "A"
-        }
-      ],
-      "title": "Throttle Events/min",
+      "title": "Factset P95 Latency",
       "type": "stat"
     },
     {
@@ -304,7 +238,7 @@
       },
       "id": 101,
       "panels": [],
-      "title": "factset Operations",
+      "title": "Factset Operations",
       "type": "row"
     },
     {
@@ -393,7 +327,7 @@
           "refId": "A"
         }
       ],
-      "title": "factset Actions by Type",
+      "title": "Factset Actions by Type",
       "type": "timeseries"
     },
     {
@@ -482,7 +416,7 @@
           "refId": "A"
         }
       ],
-      "title": "factset Action Failures",
+      "title": "Factset Action Failures",
       "type": "timeseries"
     },
     {
@@ -495,7 +429,7 @@
       },
       "id": 102,
       "panels": [],
-      "title": "Microsoft Graph API Performance",
+      "title": "Factset API Performance",
       "type": "row"
     },
     {
@@ -579,12 +513,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (endpoint) (rate(msgraph_requests_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "expr": "sum by (endpoint) (rate(factset_requests_total{job=\"apps-mcp-server-factset\"}[5m]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
       ],
-      "title": "MS Graph Requests by Endpoint",
+      "title": "Factset Requests by Endpoint",
       "type": "timeseries"
     },
     {
@@ -668,12 +602,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (status_class) (rate(msgraph_requests_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "expr": "sum by (status_class) (rate(factset_request__total{job=\"apps-mcp-server-factset\"}[5m]))",
           "legendFormat": "{{status_class}}",
           "refId": "A"
         }
       ],
-      "title": "MS Graph Response Status Classes",
+      "title": "Factset Response Status Classes",
       "type": "timeseries"
     },
     {
@@ -765,7 +699,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum(rate(msgraph_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
           "legendFormat": "p50 - {{endpoint}}",
           "refId": "A"
         },
@@ -774,7 +708,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(msgraph_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
           "legendFormat": "p95 - {{endpoint}}",
           "refId": "B"
         },
@@ -783,105 +717,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum(rate(msgraph_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
           "legendFormat": "p99 - {{endpoint}}",
           "refId": "C"
         }
       ],
-      "title": "MS Graph Request Latency Percentiles",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 10
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 23
-      },
-      "id": 23,
-      "options": {
-        "legend": {
-          "calcs": ["sum"],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (policy) (rate(msgraph_throttle_events_total{job=\"apps-mcp-server-factset\"}[5m]))",
-          "legendFormat": "{{policy}}",
-          "refId": "A"
-        }
-      ],
-      "title": "MS Graph Throttling Events",
+      "title": "Factset Request Latency Percentiles",
       "type": "timeseries"
     },
     {
