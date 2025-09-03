@@ -117,6 +117,64 @@
               {
                 "color": "green",
                 "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(factset_actions_total{job=\"apps-mcp-server-factset\"}[$__range]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Actions (Period)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -322,13 +380,91 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (action) (rate(factset_actions_total{job=\"apps-mcp-server-factset\"}[5m]))",
-          "legendFormat": "{{action}}",
+          "expr": "sum by (action, api) (rate(factset_actions_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "legendFormat": "{{action}} - {{api}}",
           "refId": "A"
         }
       ],
-      "title": "Factset Actions by Type",
+      "title": "Factset Actions by Type & API",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "displayMode": "table",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 12,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Total"
+          }
+        ]
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (action, api) (increase(factset_actions_total{job=\"apps-mcp-server-factset\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{action}} - {{api}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Actions by Type & API (Period)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Value": "Total"
+            }
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -411,12 +547,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (action, reason) (rate(factset_action_failures_total{job=\"apps-mcp-server-factset\"}[5m]))",
-          "legendFormat": "{{action}} - {{reason}}",
+          "expr": "sum by (action, api, reason) (rate(factset_action_failures_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "legendFormat": "{{action}} ({{api}}) - {{reason}}",
           "refId": "A"
         }
       ],
-      "title": "Factset Action Failures",
+      "title": "Factset Action Failures by API",
       "type": "timeseries"
     },
     {
@@ -425,7 +561,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 22
       },
       "id": 102,
       "panels": [],
@@ -491,7 +627,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "id": 20,
       "options": {
@@ -513,12 +649,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (endpoint) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
-          "legendFormat": "{{endpoint}}",
+          "expr": "sum by (endpoint, api) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "legendFormat": "{{endpoint}} ({{api}})",
           "refId": "A"
         }
       ],
-      "title": "Factset Requests by Endpoint",
+      "title": "Factset Requests by Endpoint & API",
       "type": "timeseries"
     },
     {
@@ -580,7 +716,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 23
       },
       "id": 21,
       "options": {
@@ -602,12 +738,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (status_class) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
-          "legendFormat": "{{status_class}}",
+          "expr": "sum by (status_class, api) (rate(factset_request_total{job=\"apps-mcp-server-factset\"}[5m]))",
+          "legendFormat": "{{status_class}} ({{api}})",
           "refId": "A"
         }
       ],
-      "title": "Factset Response Status Classes",
+      "title": "Factset Response Status Classes by API",
       "type": "timeseries"
     },
     {
@@ -677,7 +813,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 31
       },
       "id": 22,
       "options": {
@@ -699,8 +835,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.50, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
-          "legendFormat": "p50 - {{endpoint}}",
+          "expr": "histogram_quantile(0.50, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, api, le)) * 1000",
+          "legendFormat": "p50 - {{endpoint}} ({{api}})",
           "refId": "A"
         },
         {
@@ -708,8 +844,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
-          "legendFormat": "p95 - {{endpoint}}",
+          "expr": "histogram_quantile(0.95, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, api, le)) * 1000",
+          "legendFormat": "p95 - {{endpoint}} ({{api}})",
           "refId": "B"
         },
         {
@@ -717,12 +853,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.99, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, le)) * 1000",
-          "legendFormat": "p99 - {{endpoint}}",
+          "expr": "histogram_quantile(0.99, sum(rate(factset_request_duration_seconds_bucket{job=\"apps-mcp-server-factset\"}[5m])) by (endpoint, api, le)) * 1000",
+          "legendFormat": "p99 - {{endpoint}} ({{api}})",
           "refId": "C"
         }
       ],
-      "title": "Factset Request Latency Percentiles",
+      "title": "Factset Request Latency Percentiles by API",
       "type": "timeseries"
     },
     {
@@ -731,7 +867,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 39
       },
       "id": 103,
       "panels": [],
@@ -797,7 +933,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 40
       },
       "id": 30,
       "options": {
@@ -864,7 +1000,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 40
       },
       "id": 31,
       "options": {
@@ -900,7 +1036,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 48
       },
       "id": 104,
       "panels": [],
@@ -966,7 +1102,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 41
+        "y": 49
       },
       "id": 40,
       "options": {
@@ -1055,7 +1191,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 41
+        "y": 49
       },
       "id": 41,
       "options": {
@@ -1152,7 +1288,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 57
       },
       "id": 42,
       "options": {
@@ -1206,7 +1342,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 65
       },
       "id": 105,
       "panels": [],
@@ -1280,7 +1416,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 66
       },
       "id": 50,
       "options": {
@@ -1378,7 +1514,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 66
       },
       "id": 51,
       "options": {
@@ -1491,7 +1627,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 66
+        "y": 74
       },
       "id": 54,
       "options": {
@@ -1579,7 +1715,7 @@
         "h": 8,
         "w": 12,
         "x": 6,
-        "y": 66
+        "y": 74
       },
       "id": 52,
       "options": {
@@ -1668,7 +1804,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 66
+        "y": 74
       },
       "id": 53,
       "options": {
