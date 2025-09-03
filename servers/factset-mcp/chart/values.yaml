@@ -1,4 +1,8 @@
 server:
+  deployment:
+    metadata:
+      annotations:
+        reloader.stakater.com/auto: "true"
   hooks:
     migration:
       enabled: true
@@ -32,7 +36,7 @@ server:
                         number: 80
   image:
     repository: ghcr.io/unique-ag/mcp/server/factset-mcp # FIXME: Naming is not consistent, must be fixed before BETA (mcp is mentioned twice, mcp/servers/xxx-mcp)
-    tag: 0.1.0 # TODO: Tag must be auto-injected via release process from package.json
+    tag: 0.1.1 # TODO: Tag must be auto-injected via release process from package.json
   networkPolicy:
     enabled: false # TODO: Policies must be defined as good practice, living documentation and as enterprise software and standard (ingress- and egress-policies)
   ports:
@@ -44,6 +48,7 @@ server:
     OTEL_METRICS_EXPORTER: "prometheus"
     OTEL_EXPORTER_PROMETHEUS_PORT: "51346"
     OTEL_EXPORTER_PROMETHEUS_HOST: "0.0.0.0"
+    ZITADEL_REQUIRED_ROLE: mcp.factset.write
   resources:
     limits:
       memory: 1Gi

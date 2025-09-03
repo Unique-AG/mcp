@@ -104,6 +104,69 @@ export class McpOAuthService {
     };
   }
 
+  public async processAuthenticationError({
+    error,
+    state,
+  }: {
+    error: unknown;
+    state?: string;
+  }): Promise<{ redirectUrl: string | null; errorMessage: string }> {
+    this.logger.debug({
+      msg: 'Processing authentication error',
+      hasState: !!state,
+    });
+
+    const errorMessage =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : 'Authentication failed';
+
+    if (!state) return { redirectUrl: null, errorMessage };
+
+    let redirectUri: string | null = null;
+    let oauthState: string | null = null;
+
+    try {
+      const decodedState = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'));
+      const { sessionId } = decodedState;
+
+      if (sessionId) {
+        const session = await this.store.getOAuthSession(sessionId);
+        if (session?.redirectUri) {
+          redirectUri = session.redirectUri;
+          oauthState = session.oauthState || null;
+
+          // Clean up the session since we're handling the error
+          await this.store.removeOAuthSession(sessionId);
+
+          this.logger.debug({
+            msg: 'Session found and cleaned up for error redirect',
+            sessionId,
+            redirectUri,
+          });
+        }
+      }
+    } catch (sessionError) {
+      this.logger.debug({
+        msg: 'Could not extract session info for error redirect',
+        error: sessionError instanceof Error ? sessionError.message : 'Unknown error',
+      });
+    }
+
+    if (!redirectUri) return { redirectUrl: null, errorMessage };
+
+    const errorRedirectUrl = new URL(redirectUri);
+    errorRedirectUrl.searchParams.set('error', 'access_denied');
+    errorRedirectUrl.searchParams.set('error_description', errorMessage);
+
+    if (oauthState) errorRedirectUrl.searchParams.set('state', oauthState);
+
+    return {
+      redirectUrl: errorRedirectUrl.toString(),
+      errorMessage,
+    };
+  }
+
   public async exchangeAuthorizationCodeForToken(tokenDto: TokenRequestDto) {
     const { code, client_id, client_secret, code_verifier, resource } = tokenDto;
 
