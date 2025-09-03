@@ -9,7 +9,7 @@ import { normalizeError } from '../../utils/normalize-error';
 import { getStreetAccountFilters } from '../@generated/filters/filters';
 
 const filtersQueryParams = z.object({
-  _attributes: z.array(z.enum(['structured', 'flattened'])).optional(),
+  attributes: z.array(z.enum(['structured', 'flattened'])).optional(),
 });
 
 @Injectable()
@@ -48,7 +48,9 @@ export class FiltersTool extends BaseFactsetTool {
         'filters',
         'street-account-news',
         getStreetAccountFilters,
-        params,
+        {
+          _attributes: params.attributes,
+        },
       );
 
       this.logger.log({

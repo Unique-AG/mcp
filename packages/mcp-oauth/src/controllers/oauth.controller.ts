@@ -185,9 +185,24 @@ export class OAuthController {
             error: serializeError(normalizeError(error)),
           });
 
+          const { redirectUrl, errorMessage } = await this.authService.processAuthenticationError({
+            error,
+            state,
+          });
+
+          if (redirectUrl) {
+            this.logger.debug({
+              msg: 'Redirecting user to client with error parameters',
+              redirectUrl,
+            });
+
+            return response.redirect(redirectUrl);
+          }
+
+          // Fallback to JSON response if we can't redirect
           return response.status(HttpStatus.UNAUTHORIZED).json({
             error: 'Authentication failed',
-            error_description: 'Authentication failed',
+            error_description: errorMessage,
           });
         }
       },

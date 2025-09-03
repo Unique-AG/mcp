@@ -1,0 +1,73 @@
+name: "[packages] Validate"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "tsconfig.json"
+      - "biome.json"
+      - .github/workflows/packages.ci.yaml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    permissions:
+      packages: write # cache needs write access
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Extract PNPM version from package.json
+        id: pnpm-version
+        run: |
+          PNPM_VERSION=$(jq -r '.packageManager | split("@")[1]' package.json)
+          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+          
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ steps.pnpm-version.outputs.version }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync pack format and lint
+        run: pnpm syncpack format --check && pnpm syncpack lint
+
+      - name: Run lint (all packages)
+        run: pnpm lint
+        
+      - name: Check formatting (all packages)
+        run: pnpm format
+        
+      - name: Type check (all packages)
+        run: pnpm check-types --filter='./packages/*'
+        
+      - name: Build packages
+        run: pnpm build --filter='./packages/*'
