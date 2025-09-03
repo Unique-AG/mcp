@@ -61,13 +61,13 @@ jobs:
         run: pnpm syncpack format --check && pnpm syncpack lint
 
       - name: Run lint (all packages)
-        run: turbo lint --filter='./packages/*'
+        run: pnpm lint --filter='./packages/*'
         
       - name: Check formatting (all packages)
-        run: turbo format --filter='./packages/*'
+        run: pnpm format --filter='./packages/*'
         
       - name: Type check (all packages)
-        run: turbo check-types --filter='./packages/*'
+        run: pnpm check-types --filter='./packages/*'
         
       - name: Build packages
-        run: turbo build --filter='./packages/*'
+        run: pnpm build --filter='./packages/*'
