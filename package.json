@@ -5,6 +5,8 @@
     "build": "turbo build",
     "dev": "concurrently --kill-others -P \"turbo watch build --filter='./packages/*'\" \"turbo dev {@}\"",
     "codegen": "turbo codegen",
+    "test": "turbo test",
+    "test:watch": "turbo test:watch",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format .",

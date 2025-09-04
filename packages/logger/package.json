@@ -6,7 +6,7 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo 'No test specified'",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format .",

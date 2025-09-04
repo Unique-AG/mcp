@@ -17,7 +17,8 @@ const prefixMap: Record<Prisma.DMMF.Model['name'], string> = {
 export class PrismaProvider extends PrismaClient {
   public constructor(config: ConfigService<AppConfig, true>) {
     const adapter = new PrismaPg({ connectionString: config.get(AppSettings.DATABASE_URL) });
-    super({ adapter });
+    // biome-ignore lint/suspicious/noExplicitAny: moduleResolution: node cannot find the correct type
+    super({ adapter: adapter as any });
   }
 
   public withExtensions() {
