@@ -1,7 +1,9 @@
 import type { OAuthProviderConfig } from '../../src/interfaces/oauth-provider.interface';
 import { MockPassportStrategy } from './mock-passport-strategy';
 
-export const createMockOAuthProvider = (overrides: Partial<OAuthProviderConfig> = {}): OAuthProviderConfig => ({
+export const createMockOAuthProvider = (
+  overrides: Partial<OAuthProviderConfig> = {},
+): OAuthProviderConfig => ({
   name: 'test-provider',
   strategy: MockPassportStrategy,
   strategyOptions: (config) => ({

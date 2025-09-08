@@ -13,7 +13,10 @@ export class MockOAuthStore implements IOAuthStore {
   private authCodes = new Map<string, AuthorizationCode>();
   private accessTokens = new Map<string, AccessTokenMetadata>();
   private refreshTokens = new Map<string, RefreshTokenMetadata>();
-  private userProfiles = new Map<string, OAuthUserProfile & { profile_id: string; provider: string }>();
+  private userProfiles = new Map<
+    string,
+    OAuthUserProfile & { profile_id: string; provider: string }
+  >();
   private usedRefreshTokens = new Set<string>();
 
   public generateClientId(_client: OAuthClient): string {
@@ -109,7 +112,7 @@ export class MockOAuthStore implements IOAuthStore {
 
   public async upsertUserProfile(user: PassportUser): Promise<string> {
     const profileId = `profile-${user.profile.id}-${user.provider}`;
-    
+
     const profile = {
       profile_id: profileId,
       provider: user.provider,
@@ -126,7 +129,7 @@ export class MockOAuthStore implements IOAuthStore {
   }
 
   public async getUserProfileById(
-    profileId: string
+    profileId: string,
   ): Promise<(OAuthUserProfile & { profile_id: string; provider: string }) | undefined> {
     return this.userProfiles.get(profileId);
   }

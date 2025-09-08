@@ -66,7 +66,10 @@ export class MockMetricService implements IMetricService {
     return createMockObservableGauge();
   }
 
-  public getObservableUpDownCounter(_name: string, _options?: OtelMetricOptions): ObservableUpDownCounter {
+  public getObservableUpDownCounter(
+    _name: string,
+    _options?: OtelMetricOptions,
+  ): ObservableUpDownCounter {
     return createMockObservableUpDownCounter();
   }
 }

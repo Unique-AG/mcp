@@ -1,4 +1,7 @@
-import type { AccessTokenMetadata, RefreshTokenMetadata } from '../../src/interfaces/io-auth-store.interface';
+import type {
+  AccessTokenMetadata,
+  RefreshTokenMetadata,
+} from '../../src/interfaces/io-auth-store.interface';
 import type { AuthorizationCode, OAuthClient } from '../../src/interfaces/oauth-client.interface';
 
 /**
@@ -17,7 +20,9 @@ export const createTestClient = (overrides: Partial<OAuthClient> = {}): OAuthCli
   ...overrides,
 });
 
-export const createTestAuthCode = (overrides: Partial<AuthorizationCode> = {}): AuthorizationCode => ({
+export const createTestAuthCode = (
+  overrides: Partial<AuthorizationCode> = {},
+): AuthorizationCode => ({
   code: 'test-auth-code-123',
   user_id: 'user-123',
   client_id: 'test-client-123',
@@ -30,7 +35,9 @@ export const createTestAuthCode = (overrides: Partial<AuthorizationCode> = {}): 
   ...overrides,
 });
 
-export const createTestAccessToken = (overrides: Partial<AccessTokenMetadata> = {}): AccessTokenMetadata => ({
+export const createTestAccessToken = (
+  overrides: Partial<AccessTokenMetadata> = {},
+): AccessTokenMetadata => ({
   userId: 'user-123',
   clientId: 'test-client-123',
   scope: 'offline_access',
@@ -40,7 +47,9 @@ export const createTestAccessToken = (overrides: Partial<AccessTokenMetadata> = 
   ...overrides,
 });
 
-export const createTestRefreshToken = (overrides: Partial<RefreshTokenMetadata> = {}): RefreshTokenMetadata => ({
+export const createTestRefreshToken = (
+  overrides: Partial<RefreshTokenMetadata> = {},
+): RefreshTokenMetadata => ({
   userId: 'user-123',
   clientId: 'test-client-123',
   scope: 'offline_access',

@@ -121,11 +121,19 @@ describe('DiscoveryController', () => {
     it('constructs correct endpoint URLs', () => {
       const metadata = controller.getAuthorizationServerMetadata();
 
-      expect(metadata.authorization_endpoint).toBe(`https://auth.example.com${OAUTH_ENDPOINTS.authorize}`);
+      expect(metadata.authorization_endpoint).toBe(
+        `https://auth.example.com${OAUTH_ENDPOINTS.authorize}`,
+      );
       expect(metadata.token_endpoint).toBe(`https://auth.example.com${OAUTH_ENDPOINTS.token}`);
-      expect(metadata.registration_endpoint).toBe(`https://auth.example.com${OAUTH_ENDPOINTS.register}`);
-      expect(metadata.revocation_endpoint).toBe(`https://auth.example.com${OAUTH_ENDPOINTS.revoke}`);
-      expect(metadata.introspection_endpoint).toBe(`https://auth.example.com${OAUTH_ENDPOINTS.introspect}`);
+      expect(metadata.registration_endpoint).toBe(
+        `https://auth.example.com${OAUTH_ENDPOINTS.register}`,
+      );
+      expect(metadata.revocation_endpoint).toBe(
+        `https://auth.example.com${OAUTH_ENDPOINTS.revoke}`,
+      );
+      expect(metadata.introspection_endpoint).toBe(
+        `https://auth.example.com${OAUTH_ENDPOINTS.introspect}`,
+      );
     });
 
     it('filters out undefined optional fields', async () => {
@@ -145,7 +153,8 @@ describe('DiscoveryController', () => {
           serviceDocumentation: undefined,
           opPolicyUri: undefined,
           opTosUri: undefined,
-          dpopSigningAlgValuesSupported: undefined,        },
+          dpopSigningAlgValuesSupported: undefined,
+        },
       };
 
       const { unit: minimalController } = await TestBed.solitary(DiscoveryController)
@@ -165,10 +174,10 @@ describe('DiscoveryController', () => {
       const metadata = controller.getAuthorizationServerMetadata();
 
       expect(metadata.introspection_endpoint_auth_methods_supported).toEqual(
-        metadata.token_endpoint_auth_methods_supported
+        metadata.token_endpoint_auth_methods_supported,
       );
       expect(metadata.revocation_endpoint_auth_methods_supported).toEqual(
-        metadata.token_endpoint_auth_methods_supported
+        metadata.token_endpoint_auth_methods_supported,
       );
     });
   });

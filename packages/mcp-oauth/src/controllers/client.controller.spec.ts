@@ -73,7 +73,7 @@ describe('ClientController', () => {
       clientService.registerClient.mockRejectedValue(error);
 
       await expect(controller.registerClient(mockRegisterDto)).rejects.toThrow(
-        'Database connection failed'
+        'Database connection failed',
       );
 
       expect(metricService.incrementClientsRegistered).toHaveBeenCalled();

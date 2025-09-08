@@ -147,7 +147,9 @@ describe('McpAuthJwtGuard', () => {
       vi.mocked(tokenService.validateAccessToken).mockResolvedValue(invalidResourceResult);
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        new UnauthorizedException('Token not valid for this resource. Token was issued for a different resource.'),
+        new UnauthorizedException(
+          'Token not valid for this resource. Token was issued for a different resource.',
+        ),
       );
 
       expect(tokenService.validateAccessToken).toHaveBeenCalledWith('valid-token');
