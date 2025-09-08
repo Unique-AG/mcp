@@ -1,3 +1,4 @@
+name: mcp-monorepo
 services:
   postgres:
     image: postgres:17

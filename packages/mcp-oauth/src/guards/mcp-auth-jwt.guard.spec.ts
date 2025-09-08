@@ -237,7 +237,7 @@ describe('McpAuthJwtGuard', () => {
 
     it('returns undefined when authorization header is not Bearer type', () => {
       const request = {
-        headers: { authorization: 'Basic dGVzdDp0ZXN0' },
+        headers: { authorization: 'Basic wrongCredentials123' },
       };
 
       // biome-ignore lint/suspicious/noExplicitAny: Testing private method

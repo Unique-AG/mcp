@@ -45,6 +45,9 @@ if [ ! -f "$PACKAGE_JSON" ]; then
     exit 1
 fi
 
+echo "Run tests & code coverage"
+pnpm test:coverage --filter=@unique-ag/$SERVER_NAME
+
 echo "Updating version to $NEW_VERSION for server: $SERVER_NAME"
 
 # Update package.json
