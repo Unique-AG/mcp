@@ -165,7 +165,7 @@ describe('McpOAuthService', () => {
       tokenService.generateTokenPair.mockResolvedValue({
         access_token: 'access-token',
         refresh_token: 'refresh-token',
-        token_type: 'bearer',
+        token_type: 'Bearer',
         expires_in: 3600,
         scope: 'read write',
       });

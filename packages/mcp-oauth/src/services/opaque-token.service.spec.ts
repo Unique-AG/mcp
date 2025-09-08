@@ -49,7 +49,7 @@ describe('OpaqueTokenService', () => {
 
       expect(result).toHaveProperty('access_token');
       expect(result).toHaveProperty('refresh_token');
-      expect(result.token_type).toBe('bearer');
+      expect(result.token_type).toBe('Bearer');
       expect(result.expires_in).toBe(3600);
       expect(result.scope).toBe('read write');
 

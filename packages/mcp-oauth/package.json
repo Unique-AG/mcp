@@ -9,6 +9,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest watch",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e:watch": "vitest watch --config vitest.e2e.config.ts",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format .",
@@ -39,6 +41,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.13.14",
     "@types/passport": "^1.0.17",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
     "typescript": "^5.9.2",
     "unplugin-swc": "^1.5.7",
     "vitest": "^3.2.4"

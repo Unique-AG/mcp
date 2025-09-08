@@ -88,6 +88,33 @@ export class OAuthController {
     const validRedirectUri = await this.clientService.validateRedirectUri(clientId, redirectUri);
     if (!validRedirectUri) throw new BadRequestException('Invalid redirect_uri parameter');
 
+    // OAuth 2.1 compliance: PKCE is mandatory for all clients
+    if (!codeChallenge) {
+      this.logger.error({
+        msg: 'PKCE code_challenge is required for OAuth 2.1 compliance',
+        clientId,
+      });
+      throw new BadRequestException('code_challenge parameter is required');
+    }
+
+    if (!codeChallengeMethod) {
+      this.logger.error({
+        msg: 'PKCE code_challenge_method is required for OAuth 2.1 compliance',
+        clientId,
+      });
+      throw new BadRequestException('code_challenge_method parameter is required');
+    }
+
+    // Validate code_challenge_method
+    if (codeChallengeMethod !== 'S256') {
+      this.logger.error({
+        msg: 'Only S256 code_challenge_method is supported for OAuth 2.1 compliance',
+        clientId,
+        codeChallengeMethod,
+      });
+      throw new BadRequestException('code_challenge_method must be S256');
+    }
+
     const sessionId = randomBytes(32).toString('base64url');
     // This state is used to validate the callback between the MCP server and the third-party provider.
     // We bind it to the session using HMAC to prevent CSRF attacks
