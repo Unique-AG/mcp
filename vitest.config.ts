@@ -1,6 +1,7 @@
 import swc from 'unplugin-swc';
+import type { ViteUserConfig } from 'vitest/config';
 
-export const globalConfig = {
+export const globalConfig: ViteUserConfig = {
   test: {
     globals: true,
     environment: 'node',
