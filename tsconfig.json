@@ -5,14 +5,15 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     /* Modules */
-    "module": "NodeNext",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     /* Emit */
-    "target": "ES2022",
+    "target": "ES2023",
     "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,

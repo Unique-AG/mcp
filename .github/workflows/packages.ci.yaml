@@ -71,3 +71,9 @@ jobs:
         
       - name: Build packages
         run: pnpm build --filter='./packages/*'
+
+      - name: Run tests (all packages)
+        run: pnpm test --filter='./packages/*'
+
+      - name: Run tests:e2e (all packages)
+        run: pnpm test:e2e --filter='./packages/*'

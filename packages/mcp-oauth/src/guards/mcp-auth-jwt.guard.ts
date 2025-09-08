@@ -29,7 +29,7 @@ export class McpAuthJwtGuard implements CanActivate {
 
     // This is a global guard, as we cannot inject it into the McpModule
     // To not interfere with authentication and other routes, we only authenticate requests to /mcp endpoints
-    if (!request.url.startsWith('/mcp')) return true;
+    if (!request.url.startsWith('/mcp/') && request.url !== '/mcp') return true;
 
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException('Access token required');

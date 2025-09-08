@@ -235,7 +235,7 @@ export class McpOAuthService {
         msg: 'Invalid client credentials',
         client_id,
       });
-      throw new BadRequestException('Invalid client credentials');
+      throw new UnauthorizedException('Invalid client credentials');
     }
 
     // 3. Validate the PKCE (mandatory!)
@@ -274,7 +274,7 @@ export class McpOAuthService {
   }
 
   public async exchangeRefreshTokenForToken(tokenDto: TokenRequestDto) {
-    const { refresh_token, client_id, client_secret } = tokenDto;
+    const { refresh_token, client_id, client_secret, scope } = tokenDto;
 
     if (!refresh_token) throw new BadRequestException('Missing refresh_token parameter');
 
@@ -283,12 +283,24 @@ export class McpOAuthService {
       client_id,
       client_secret,
     );
-    if (!isValidClient) {
-      throw new BadRequestException('Invalid client credentials');
-    }
+    if (!isValidClient) throw new BadRequestException('Invalid client credentials');
 
-    const tokenPair = await this.tokenService.refreshAccessToken(refresh_token, client_id);
-    if (!tokenPair) throw new BadRequestException('Invalid or expired refresh token');
+    const tokenPair = await this.tokenService.refreshAccessToken(refresh_token, client_id, scope);
+    if (!tokenPair) {
+      // Check if this was due to scope validation failure
+      const refreshTokenMetadata = await this.tokenService.validateRefreshToken(refresh_token);
+      if (refreshTokenMetadata && refreshTokenMetadata.clientId === client_id && scope) {
+        // Token is valid but scope validation failed
+        throw new BadRequestException({
+          error: 'invalid_scope',
+          error_description: 'The requested scope exceeds the scope granted by the resource owner',
+        });
+      }
+      throw new BadRequestException({
+        error: 'invalid_grant',
+        error_description: 'Invalid or expired refresh token',
+      });
+    }
 
     return tokenPair;
   }

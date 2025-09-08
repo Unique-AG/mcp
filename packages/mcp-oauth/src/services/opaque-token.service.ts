@@ -12,7 +12,7 @@ import {
 export interface TokenPair {
   access_token: string;
   refresh_token: string;
-  token_type: 'bearer';
+  token_type: 'Bearer';
   expires_in: number;
   scope?: string;
 }
@@ -41,6 +41,35 @@ export class OpaqueTokenService {
 
   private generateSecureToken(bytes: number): string {
     return randomBytes(bytes).toString('base64url');
+  }
+
+  /**
+   * Validates the requested scope against the originally granted scope.
+   * According to OAuth 2.0 RFC 6749, the requested scope must not exceed
+   * the scope originally granted by the resource owner.
+   *
+   * @param originalScope - The scope originally granted during authorization
+   * @param requestedScope - The scope requested during token refresh (optional)
+   * @returns The final scope to use, or null if invalid
+   */
+  private validateAndDetermineScope(originalScope: string, requestedScope?: string): string | null {
+    if (!requestedScope) return originalScope;
+
+    const originalScopes = originalScope.split(' ').filter((s) => s.length > 0);
+    const requestedScopes = requestedScope.split(' ').filter((s) => s.length > 0);
+
+    for (const scope of requestedScopes) {
+      if (!originalScopes.includes(scope)) {
+        this.logger.warn({
+          msg: 'Scope validation failed: requested scope not in original grant',
+          originalScopes,
+          requestedScope: scope,
+        });
+        return null;
+      }
+    }
+
+    return requestedScope;
   }
 
   public async generateTokenPair(
@@ -90,7 +119,7 @@ export class OpaqueTokenService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      token_type: 'bearer',
+      token_type: 'Bearer',
       expires_in: this.options.accessTokenExpiresIn,
       scope,
     };
@@ -148,6 +177,7 @@ export class OpaqueTokenService {
   public async refreshAccessToken(
     refreshToken: string,
     clientId: string,
+    requestedScope?: string,
   ): Promise<TokenPair | null> {
     if (this.store.isRefreshTokenUsed) {
       const wasUsed = await this.store.isRefreshTokenUsed(refreshToken);
@@ -179,6 +209,17 @@ export class OpaqueTokenService {
       return null;
     }
 
+    // Validate requested scope against originally granted scope
+    const finalScope = this.validateAndDetermineScope(metadata.scope, requestedScope);
+    if (!finalScope) {
+      this.logger.warn({
+        msg: 'Invalid scope requested during token refresh',
+        originalScope: metadata.scope,
+        requestedScope,
+      });
+      return null;
+    }
+
     if (this.store.markRefreshTokenAsUsed) await this.store.markRefreshTokenAsUsed(refreshToken);
 
     // Rotate refresh token with same family but incremented generation
@@ -186,7 +227,7 @@ export class OpaqueTokenService {
     return this.generateTokenPair(
       metadata.userId,
       metadata.clientId,
-      metadata.scope,
+      finalScope,
       metadata.resource,
       metadata.userProfileId,
       metadata.familyId,
