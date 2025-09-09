@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Test mock */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MockEncryptionService, MockPrismaService } from '../../test/__mocks__';
+import { MockEncryptionService, MockPrismaService } from '../__mocks__';
 import { TokenProvider } from './token.provider';
 
 // Mock fetch globally

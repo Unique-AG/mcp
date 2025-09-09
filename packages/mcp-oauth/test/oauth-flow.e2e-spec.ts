@@ -3,8 +3,8 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { OAUTH_ENDPOINTS } from '../src';
+import { createMockModuleConfig, MockOAuthStore } from '../src/__mocks__';
 import { McpOAuthModule } from '../src/mcp-oauth.module';
-import { createMockModuleConfig, MockOAuthStore } from './__mocks__';
 
 describe('OAuth Authorization Code Flow (E2E)', () => {
   let app: INestApplication;
