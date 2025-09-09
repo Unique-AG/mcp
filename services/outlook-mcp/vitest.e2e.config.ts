@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { globalConfig } from '../../vitest.config';
 
@@ -8,5 +9,10 @@ export default defineConfig({
     root: './',
     include: ['test/**/*.e2e-spec.ts'],
     setupFiles: ['./test/setup.ts'],
+  },
+  resolve: {
+    alias: {
+      '@generated': resolve(__dirname, './@generated'),
+    },
   },
 });

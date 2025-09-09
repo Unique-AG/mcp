@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 const appSettingsSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production']).prefault('development'),
+  NODE_ENV: z.enum(['development', 'test', 'production']).prefault('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).prefault('info'),
   PORT: z
     .string()
