@@ -137,4 +137,8 @@ MCP server implementations:
 
 ## License
 
-Refer to [LICENSE.md](./LICENSE.md).
+Refer to [`LICENSE.md`](./LICENSE.md).
+
+## Security
+
+Refer to [`SECURITY.md`](./SECURITY.md).
