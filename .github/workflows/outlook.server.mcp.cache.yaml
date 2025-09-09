@@ -9,5 +9,5 @@ jobs:
   warm:
     uses: ./.github/workflows/_template-mcp-cache.yaml
     with:
-      server-name: outlook
-      server-path: servers/outlook-mcp
+      service-name: outlook
+      service-path: services/outlook-mcp

@@ -1,6 +1,6 @@
 # MCP Monorepo
 
-A monorepo containing Model Context Protocol (MCP) servers and shared packages.
+A monorepo containing Model Context Protocol (MCP) servers, Unique ingestion connectorsand shared packages.
 
 ## Quick Start
 
@@ -39,8 +39,8 @@ pnpm remove <package> --filter=@unique-ag/<package-name>
 ### Development
 
 ```bash
-# Start development server for a specific server
-pnpm dev -- --filter=@unique-ag/<server-name>
+# Start development server for a specific service
+pnpm dev -- --filter=@unique-ag/<service-name>
 
 # Examples:
 pnpm dev -- --filter=@unique-ag/factset-mcp
@@ -50,10 +50,10 @@ pnpm dev -- --filter=@unique-ag/outlook-mcp
 ### Building
 
 ```bash
-# Build all packages and servers
+# Build all packages and services
 pnpm build
 
-# Build specific package/server
+# Build specific package/service
 pnpm build --filter=@unique-ag/<package-name>
 ```
 
@@ -99,7 +99,7 @@ pnpm check-types
 
 ```bash
 # Bump version and create release
-./version-bump.sh <server-name> <new-version>
+./version-bump.sh <service-name> <new-version>
 
 # Example:
 ./version-bump.sh outlook-mcp 0.0.3
@@ -109,7 +109,7 @@ pnpm check-types
 
 ### Packages
 
-Shared packages used across MCP servers:
+Shared packages used across services:
 
 - **[aes-gcm-encryption](./packages/aes-gcm-encryption/)** - AES-GCM encryption utilities
 - **[instrumentation](./packages/instrumentation/)** - OpenTelemetry instrumentation setup
@@ -118,12 +118,12 @@ Shared packages used across MCP servers:
 - **[mcp-server-module](./packages/mcp-server-module/README.md)** - NestJS module for creating MCP servers
 - **[probe](./packages/probe/)** - Health check and monitoring utilities
 
-### Servers
+### Services
 
 MCP server implementations:
 
-- **[factset-mcp](./servers/factset-mcp/README.md)** - FactSet financial data MCP server
-- **[outlook-mcp](./servers/outlook-mcp/README.md)** - Microsoft Outlook MCP server
+- **[factset-mcp](./services/factset-mcp/README.md)** - FactSet financial data MCP server
+- **[outlook-mcp](./services/outlook-mcp/README.md)** - Microsoft Outlook MCP server
 
 ## Contributing
 
@@ -132,7 +132,7 @@ MCP server implementations:
 3. Make your changes
 4. Run tests: `pnpm test`
 5. Check code quality: `pnpm lint` and `pnpm check-types`
-6. Bump version: `./version-bump.sh <server-name> <new-version>`
+6. Bump version: `./version-bump.sh <service-name> <new-version>`
 7. Create a pull request
 
 ## License

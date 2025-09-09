@@ -22,7 +22,7 @@ export class ManifestController {
       },
       features: ['Factset integration', 'OAuth2 authentication', 'Secure token handling'],
       documentation: {
-        readme: 'https://github.com/Unique-AG/mcp/blob/main/servers/factset-mcp/README.md',
+        readme: 'https://github.com/Unique-AG/connectors/blob/main/services/factset-mcp/README.md',
         mcp: 'https://modelcontextprotocol.io/',
       },
       timestamp: new Date().toISOString(),

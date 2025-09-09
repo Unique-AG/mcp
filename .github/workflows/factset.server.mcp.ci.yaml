@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "**/servers/factset-mcp/**"
+      - "**/services/factset-mcp/**"
       - .github/workflows/factset.server.mcp.ci.yaml
 
 jobs:
   validate:
     uses: ./.github/workflows/_template-mcp-ci.yaml
     with:
-      server-name: factset
-      server-path: servers/factset-mcp
+      service-name: factset
+      service-path: services/factset-mcp

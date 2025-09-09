@@ -3,12 +3,12 @@ name: "[TEMPLATE] MCP Server Cache Warming"
 on:
   workflow_call:
     inputs:
-      server-name:
+      service-name:
         description: "Name of the MCP server (e.g., factset, outlook)"
         required: true
         type: string
-      server-path:
-        description: "Path to the server directory (e.g., servers/factset-mcp)"
+      service-path:
+        description: "Path to the server directory (e.g., services/factset-mcp)"
         required: true
         type: string
 
@@ -18,9 +18,9 @@ permissions:
   actions: read
 
 env:
-  SERVER_PATH: ${{ inputs.server-path }}
-  CHART_REPO: ghcr.io/unique-ag/mcp/server/${{ inputs.server-name }}-mcp
-  GHA_CACHE_SCOPE: ${{ inputs.server-name }}-mcp
+  SERVICE_PATH: ${{ inputs.service-path }}
+  CHART_REPO: ghcr.io/unique-ag/mcp/server/${{ inputs.service-name }}-mcp
+  GHA_CACHE_SCOPE: ${{ inputs.service-name }}-mcp
 
 jobs:
   warm:
@@ -35,9 +35,9 @@ jobs:
           PNPM_VERSION=$(jq -r '.packageManager | split("@")[1]' package.json)
           echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Skip if no changes in last 3 days under ${{ inputs.server-path }}
+      - name: Skip if no changes in last 3 days under ${{ inputs.service-path }}
         run: |
-          if ! git log --since="3 days ago" --name-only --pretty=format: | grep -q '^${{ inputs.server-path }}/'; then
+          if ! git log --since="3 days ago" --name-only --pretty=format: | grep -q '^${{ inputs.service-path }}/'; then
             echo "No recent changes; skipping warm."
             exit 0
           fi
@@ -67,5 +67,5 @@ jobs:
             type=gha,scope=${{ env.GHA_CACHE_SCOPE }},mode=max,ignore-error=true
 
           build-args: |
-            APP_NAME=${{ inputs.server-name }}-mcp
+            APP_NAME=${{ inputs.service-name }}-mcp
             PNPM_VERSION=${{ steps.pnpm-version.outputs.version }}

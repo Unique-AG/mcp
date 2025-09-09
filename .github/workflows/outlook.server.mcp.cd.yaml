@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - servers/outlook-mcp/**
+      - services/outlook-mcp/**
       - .github/workflows/outlook.server.mcp.cd.yaml
   workflow_dispatch:
 
@@ -13,5 +13,5 @@ jobs:
   release:
     uses: ./.github/workflows/_template-mcp-cd.yaml
     with:
-      server-name: outlook
-      server-path: servers/outlook-mcp
+      service-name: outlook
+      service-path: services/outlook-mcp

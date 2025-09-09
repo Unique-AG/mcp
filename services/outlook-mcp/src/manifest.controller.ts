@@ -28,7 +28,7 @@ export class ManifestController {
         'RESTful API endpoints',
       ],
       documentation: {
-        readme: 'https://github.com/Unique-AG/mcp/blob/main/servers/outlook-mcp/README.md',
+        readme: 'https://github.com/Unique-AG/connectors/blob/main/services/outlook-mcp/README.md',
         mcp: 'https://modelcontextprotocol.io/',
       },
       timestamp: new Date().toISOString(),

@@ -4,7 +4,7 @@ services:
   factset-mcp-migration:
     build:
       context: ../..  # Build from monorepo root
-      dockerfile: ./servers/factset-mcp/Dockerfile
+      dockerfile: ./servers/factset-mcp/Dockerfile  
       args:
         - MAX_HEAP_MB=1024
     environment:

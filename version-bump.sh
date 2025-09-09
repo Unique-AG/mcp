@@ -2,7 +2,7 @@
 
 # TODO: replace with release-please.
 # version-bump.sh - Script to bump version numbers across package.json, Chart.yaml, and values.yaml
-# Usage: ./version-bump.sh <server-name> <new-version>
+# Usage: ./version-bump.sh <service-name> <new-version>
 # Example: ./version-bump.sh outlook-mcp 0.0.3
 
 set -e  # Exit on any error
@@ -10,12 +10,12 @@ set -e  # Exit on any error
 # Check if correct number of arguments provided
 if [ $# -ne 2 ]; then
     echo "Error: Incorrect number of arguments"
-    echo "Usage: $0 <server-name> <new-version>"
+    echo "Usage: $0 <service-name> <new-version>"
     echo "Example: $0 outlook-mcp 0.0.3"
     exit 1
 fi
 
-SERVER_NAME="$1"
+SERVICE_NAME="$1"
 NEW_VERSION="$2"
 
 # Validate version format (basic semantic version check)
@@ -25,17 +25,17 @@ if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
 fi
 
 # Define paths
-SERVER_DIR="servers/$SERVER_NAME"
-PACKAGE_JSON="$SERVER_DIR/package.json"
-CHART_DIR="$SERVER_DIR/chart"
+SERVICE_DIR="services/$SERVICE_NAME"
+PACKAGE_JSON="$SERVICE_DIR/package.json"
+CHART_DIR="$SERVICE_DIR/chart"
 CHART_YAML="$CHART_DIR/Chart.yaml"
 VALUES_YAML="$CHART_DIR/values.yaml"
 
-# Check if server directory exists
-if [ ! -d "$SERVER_DIR" ]; then
-    echo "Error: Server directory '$SERVER_DIR' does not exist"
-    echo "Available servers:"
-    ls -1 servers/
+# Check if service directory exists
+if [ ! -d "$SERVICE_DIR" ]; then
+    echo "Error: Service directory '$SERVICE_DIR' does not exist"
+    echo "Available services:"
+    ls -1 services/
     exit 1
 fi
 
@@ -46,9 +46,9 @@ if [ ! -f "$PACKAGE_JSON" ]; then
 fi
 
 echo "Run tests & code coverage"
-pnpm test:coverage --filter=@unique-ag/$SERVER_NAME
+pnpm test:coverage --filter=@unique-ag/$SERVICE_NAME
 
-echo "Updating version to $NEW_VERSION for server: $SERVER_NAME"
+echo "Updating version to $NEW_VERSION for service: $SERVICE_NAME"
 
 # Update package.json
 echo "Updating $PACKAGE_JSON..."
@@ -100,12 +100,12 @@ if [ -d "$CHART_DIR" ]; then
         echo "Warning: values.yaml not found at '$VALUES_YAML'"
     fi
 else
-    echo "No chart directory found for $SERVER_NAME, skipping Chart.yaml and values.yaml updates"
+    echo "No chart directory found for $SERVICE_NAME, skipping Chart.yaml and values.yaml updates"
 fi
 
 echo ""
 echo "🎉 Version bump completed successfully!"
-echo "Updated $SERVER_NAME to version $NEW_VERSION"
+echo "Updated $SERVICE_NAME to version $NEW_VERSION"
 echo ""
 echo "Files updated:"
 echo "  - $PACKAGE_JSON"
@@ -120,4 +120,4 @@ fi
 echo ""
 echo "Don't forget to commit your changes:"
 echo "git add ."
-echo "git commit -m \"bump: $SERVER_NAME v$NEW_VERSION\""
+echo "git commit -m \"bump: $SERVICE_NAME v$NEW_VERSION\""

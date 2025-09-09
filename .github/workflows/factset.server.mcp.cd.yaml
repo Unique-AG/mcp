@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - servers/factset-mcp/**
+      - services/factset-mcp/**
       - .github/workflows/factset.server.mcp.cd.yaml
   workflow_dispatch:
 
@@ -13,5 +13,5 @@ jobs:
   release:
     uses: ./.github/workflows/_template-mcp-cd.yaml
     with:
-      server-name: factset
-      server-path: servers/factset-mcp
+      service-name: factset
+      service-path: services/factset-mcp
