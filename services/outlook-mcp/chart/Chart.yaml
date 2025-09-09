@@ -2,8 +2,8 @@ apiVersion: v2
 name: mcp-server-outlook
 description: An experimental MCP server for Outlook leveraging the Microsoft Graph API.
 type: application
-version: 0.3.3 # TODO: Tag must be auto-injected via release process from package.json
-appVersion: 0.3.3 # FIXME: this does not work as intended sadly, this version does not trickle down into the dependency
+version: 0.3.4 # TODO: Tag must be auto-injected via release process from package.json
+appVersion: 0.3.4 # FIXME: this does not work as intended sadly, this version does not trickle down into the dependency
 dependencies:
   - alias: server
     name: backend-service

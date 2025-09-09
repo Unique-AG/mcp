@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { globalConfig } from '../../vitest.config';
 
@@ -14,6 +15,11 @@ export default defineConfig({
       provider: 'istanbul',
       include: ['src/**', 'test/**'],
       reporter: ['json-summary'],
+    },
+  },
+  resolve: {
+    alias: {
+      '@generated': resolve(__dirname, './@generated'),
     },
   },
 });
