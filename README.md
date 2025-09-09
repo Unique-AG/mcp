@@ -57,6 +57,13 @@ pnpm build
 pnpm build --filter=@unique-ag/<package-name>
 ```
 
+### Docker
+
+You can test the Docker build and a production deployment by running:
+```bash
+docker-compose -f docker-compose.prod.yaml --env-file .env up
+```
+
 ### Testing
 
 ```bash

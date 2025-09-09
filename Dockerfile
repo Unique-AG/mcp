@@ -8,7 +8,7 @@ RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 FROM base AS pruner
 WORKDIR /app
-ARG APP_NAME=outlook-mcp
+ARG APP_NAME
 RUN --mount=type=bind,source=.,target=/src,ro \
     pnpm dlx turbo prune @unique-ag/${APP_NAME} --docker --cwd /src --out-dir /app/out
 
@@ -23,7 +23,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
 FROM base AS builder
-ARG APP_NAME=outlook-mcp
+ARG APP_NAME
 WORKDIR /app
 
 COPY --from=deps /app/ .
@@ -49,8 +49,8 @@ RUN set -eux; \
     cp -R "$ENG_DIR"/. /app/_engines;
 
 FROM node:22-bookworm-slim AS runner
-ARG APP_NAME=outlook-mcp
-ARG PNPM_VERSION=10.15.0
+ARG APP_NAME
+ARG PNPM_VERSION=10.15.1
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
