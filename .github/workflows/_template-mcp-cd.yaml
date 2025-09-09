@@ -20,7 +20,7 @@ jobs:
       packages: write
     env:
       SERVICE_PATH: ${{ inputs.service-path }}
-      CHART_REPO: ghcr.io/unique-ag/mcp/server/${{ inputs.service-name }}-mcp
+      CHART_REPO: ghcr.io/unique-ag/connectors/services/${{ inputs.service-name }}-mcp
       GHA_CACHE_SCOPE: ${{ inputs.service-name }}-mcp
     steps:
       - uses: actions/checkout@v4

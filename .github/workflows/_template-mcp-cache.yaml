@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       service-name:
-        description: "Name of the MCP server (e.g., factset, outlook)"
+        description: "Name of the service (e.g., factset, outlook)"
         required: true
         type: string
       service-path:
-        description: "Path to the server directory (e.g., services/factset-mcp)"
+        description: "Path to the services directory (e.g., services/factset-mcp)"
         required: true
         type: string
 
@@ -19,7 +19,7 @@ permissions:
 
 env:
   SERVICE_PATH: ${{ inputs.service-path }}
-  CHART_REPO: ghcr.io/unique-ag/mcp/server/${{ inputs.service-name }}-mcp
+  CHART_REPO: ghcr.io/unique-ag/connectors/services/${{ inputs.service-name }}-mcp
   GHA_CACHE_SCOPE: ${{ inputs.service-name }}-mcp
 
 jobs:
