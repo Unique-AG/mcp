@@ -27,6 +27,7 @@ import { serverInstructions } from './server.instructions';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
       validate: validateConfig,
     }),
     LoggerModule.forRootAsync({

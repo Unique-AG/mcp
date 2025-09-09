@@ -2,10 +2,10 @@ import type {
   AccessTokenMetadata,
   IOAuthStore,
   RefreshTokenMetadata,
-} from '../../src/interfaces/io-auth-store.interface';
-import type { AuthorizationCode, OAuthClient } from '../../src/interfaces/oauth-client.interface';
-import type { OAuthSession, OAuthUserProfile } from '../../src/interfaces/oauth-provider.interface';
-import type { PassportUser } from '../../src/services/oauth-strategy.service';
+} from '../interfaces/io-auth-store.interface';
+import type { AuthorizationCode, OAuthClient } from '../interfaces/oauth-client.interface';
+import type { OAuthSession, OAuthUserProfile } from '../interfaces/oauth-provider.interface';
+import type { PassportUser } from '../services/oauth-strategy.service';
 
 export class MockOAuthStore implements IOAuthStore {
   private clients = new Map<string, OAuthClient>();

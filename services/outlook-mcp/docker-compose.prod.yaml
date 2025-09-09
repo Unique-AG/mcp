@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   outlook-mcp-migration:
+    # image: ghcr.io/unique-ag/connectors/services/outlook-mcp:0.3.4
     build:
       context: ../..  # Build from monorepo root
       dockerfile: ./Dockerfile
@@ -21,6 +22,7 @@ services:
     restart: "no"
 
   outlook-mcp:
+    # image: ghcr.io/unique-ag/connectors/services/outlook-mcp:0.3.4
     build:
       context: ../..  # Build from monorepo root
       dockerfile: ./Dockerfile

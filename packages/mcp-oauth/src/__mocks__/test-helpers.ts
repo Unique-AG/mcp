@@ -1,8 +1,8 @@
 import type {
   AccessTokenMetadata,
   RefreshTokenMetadata,
-} from '../../src/interfaces/io-auth-store.interface';
-import type { AuthorizationCode, OAuthClient } from '../../src/interfaces/oauth-client.interface';
+} from '../interfaces/io-auth-store.interface';
+import type { AuthorizationCode, OAuthClient } from '../interfaces/oauth-client.interface';
 
 /**
  * Helper functions for creating test data with proper types

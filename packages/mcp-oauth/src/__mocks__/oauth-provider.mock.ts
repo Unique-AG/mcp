@@ -1,4 +1,4 @@
-import type { OAuthProviderConfig } from '../../src/interfaces/oauth-provider.interface';
+import type { OAuthProviderConfig } from '../interfaces/oauth-provider.interface';
 import { MockPassportStrategy } from './mock-passport-strategy';
 
 export const createMockOAuthProvider = (

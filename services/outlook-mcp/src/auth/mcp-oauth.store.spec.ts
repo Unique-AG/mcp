@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Test mock */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MockCacheManager, MockEncryptionService, MockPrismaService } from '../../test/__mocks__';
+import { MockCacheManager, MockEncryptionService, MockPrismaService } from '../__mocks__';
 import { McpOAuthStore } from './mcp-oauth.store';
 
 describe('McpOAuthStore', () => {

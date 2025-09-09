@@ -15,11 +15,13 @@
     "format": "biome format .",
     "format:fix": "biome format . --write",
     "check-types": "turbo check-types",
-    "syncpack": "syncpack"
+    "syncpack": "syncpack",
+    "clean:force": "rimraf -g \"**/node_modules\" \"**/.turbo\" \"**/dist\" \"**/.turbo\" \"**/coverage\" \"**/@generated\" \"**/*.tsbuildinfo\" && pnpm store prune && pnpm cache delete"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
     "concurrently": "^9.2.1",
+    "rimraf": "^6.0.1",
     "syncpack": "14.0.0-alpha.19",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",

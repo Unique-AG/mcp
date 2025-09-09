@@ -1,4 +1,4 @@
-import type { IEncryptionService } from '../../src/interfaces/encryption-service.interface';
+import type { IEncryptionService } from '../interfaces/encryption-service.interface';
 
 export class MockEncryptionService implements IEncryptionService {
   public encryptToString(plain: Buffer | string): string {
