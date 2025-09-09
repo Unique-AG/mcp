@@ -137,4 +137,4 @@ MCP server implementations:
 
 ## License
 
-Private monorepo for Unique AG.
+Refer to [LICENSE.md](./LICENSE.md).
