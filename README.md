@@ -1,6 +1,6 @@
-# MCP Monorepo
+# Connectors Monorepo
 
-A monorepo containing Model Context Protocol (MCP) servers, Unique ingestion connectorsand shared packages.
+A monorepo containing Model Context Protocol (MCP) servers, Unique ingestion connectors and shared packages.
 
 ## Quick Start
 

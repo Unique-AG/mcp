@@ -19,7 +19,11 @@
     "format": "biome format .",
     "format:fix": "biome format . --write",
     "check-types": "tsc --noEmit",
-    "test": "echo 'No test specified'"
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e:watch": "vitest watch --config vitest.e2e.config.ts",
+    "test:coverage": "vitest run --config vitest.coverage.config.ts && istanbul-badges-readme --style='square-flat'"
   },
   "dependencies": {
     "@microsoft/microsoft-graph-client": "^3.0.7",
@@ -62,6 +66,9 @@
     "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.7",
     "@nestjs/testing": "^11.1.6",
+    "@suites/di.nestjs": "^3.0.1",
+    "@suites/doubles.vitest": "^3.0.1",
+    "@suites/unit": "^3.0.1",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.13.5",
     "@types/express": "^5.0.3",
@@ -69,11 +76,17 @@
     "@types/node": "^22.13.14",
     "@types/passport": "^1.0.17",
     "@types/passport-microsoft": "^2.1.0",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-istanbul": "^3.2.4",
     "globals": "^16.3.0",
+    "istanbul-badges-readme": "^1.9.0",
     "nodemon": "^3.1.10",
     "pino-http-print": "^3.1.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^5.9.2"
+    "supertest": "^7.1.4",
+    "typescript": "^5.9.2",
+    "unplugin-swc": "^1.5.7",
+    "vitest": "^3.2.4"
   },
   "nodemonConfig": {
     "watch": [
