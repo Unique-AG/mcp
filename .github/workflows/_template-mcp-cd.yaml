@@ -3,12 +3,12 @@ name: "[TEMPLATE] MCP Server CD"
 on:
   workflow_call:
     inputs:
-      server-name:
-        description: "Name of the MCP server (e.g., factset, outlook)"
+      service-name:
+        description: "Name of the service (e.g., factset, outlook)"
         required: true
         type: string
-      server-path:
-        description: "Path to the server directory (e.g., servers/factset-mcp)"
+      service-path:
+        description: "Path to the service directory (e.g., services/factset-mcp)"
         required: true
         type: string
 
@@ -19,15 +19,15 @@ jobs:
     permissions:
       packages: write
     env:
-      SERVER_PATH: ${{ inputs.server-path }}
-      CHART_REPO: ghcr.io/unique-ag/mcp/server/${{ inputs.server-name }}-mcp
-      GHA_CACHE_SCOPE: ${{ inputs.server-name }}-mcp
+      SERVICE_PATH: ${{ inputs.service-path }}
+      CHART_REPO: ghcr.io/unique-ag/connectors/services/${{ inputs.service-name }}-mcp
+      GHA_CACHE_SCOPE: ${{ inputs.service-name }}-mcp
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - id: version
         run: |
-          VERSION=$(jq -r '.version' "${{ env.SERVER_PATH }}/package.json")
+          VERSION=$(jq -r '.version' "${{ env.SERVICE_PATH }}/package.json")
           echo "content=$VERSION" >> $GITHUB_OUTPUT
       - id: pnpm-version
         run: |
@@ -58,7 +58,7 @@ jobs:
           cache-to: |
             type=registry,ref=${{ env.CHART_REPO }}:cache,mode=min
           build-args: |
-            APP_NAME=${{ inputs.server-name }}-mcp
+            APP_NAME=${{ inputs.service-name }}-mcp
             PNPM_VERSION=${{ steps.pnpm-version.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

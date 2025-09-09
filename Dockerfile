@@ -30,7 +30,7 @@ COPY --from=deps /app/ .
 COPY ./tsconfig.json ./tsconfig.json
 COPY ./turbo.json ./turbo.json
 COPY --from=pruner /app/out/full/ .
-COPY ./servers/${APP_NAME}/prisma ./servers/${APP_NAME}/prisma
+COPY ./services/${APP_NAME}/prisma ./services/${APP_NAME}/prisma
 
 RUN pnpm --filter=@unique-ag/${APP_NAME} db:generate && \
     # This triggers Prisma to download the engines, so we can stash them in the image.
@@ -41,7 +41,7 @@ RUN --mount=type=cache,target=/root/.cache/turbo \
     pnpm --filter=@unique-ag/${APP_NAME} deploy out
 
 RUN set -eux; \
-    cd servers/${APP_NAME}; \
+    cd services/${APP_NAME}; \
     ENG_DIR="$(node -e "console.log(require.resolve('@prisma/engines/package.json'))" | xargs dirname)"; \
     echo "Engines resolved to: $ENG_DIR"; \
     test -d "$ENG_DIR"; \
@@ -71,9 +71,9 @@ RUN mkdir -p /tmp/.cache/corepack && chown -R nestjs:nodejs /tmp/.cache/corepack
 
 ENV NODE_ENV=production
 
-COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/@generated ./@generated
-COPY --from=builder --chown=nestjs:nodejs /app/servers/${APP_NAME}/public ./public
+COPY --from=builder --chown=nestjs:nodejs /app/services/${APP_NAME}/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/services/${APP_NAME}/@generated ./@generated
+COPY --from=builder --chown=nestjs:nodejs /app/services/${APP_NAME}/public ./public
 COPY --from=builder --chown=nestjs:nodejs /app/out/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/out/package.json ./package.json
 COPY --from=builder --chown=nestjs:nodejs /app/out/prisma ./prisma

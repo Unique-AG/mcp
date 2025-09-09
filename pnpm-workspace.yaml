@@ -1,5 +1,5 @@
 packages:
-  - servers/*
+  - services/*
   - packages/*
 
 injectWorkspacePackages: true

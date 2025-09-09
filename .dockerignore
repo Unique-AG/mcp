@@ -14,7 +14,7 @@
 !tsconfig*.json
 
 !packages/**
-!servers/**
+!services/**
 
 # keep the whole content of these always ignored no matter where they are
 node_modules/

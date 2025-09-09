@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "**/servers/outlook-mcp/**"
+      - "**/services/outlook-mcp/**"
       - .github/workflows/outlook.server.mcp.ci.yaml
 
 jobs:
   validate:
     uses: ./.github/workflows/_template-mcp-ci.yaml
     with:
-      server-name: outlook
-      server-path: servers/outlook-mcp
+      service-name: outlook
+      service-path: services/outlook-mcp
