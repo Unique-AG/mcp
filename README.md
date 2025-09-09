@@ -1,6 +1,6 @@
-# MCP Monorepo
+# Connectors Monorepo
 
-A monorepo containing Model Context Protocol (MCP) servers, Unique ingestion connectorsand shared packages.
+A monorepo containing Model Context Protocol (MCP) servers, Unique ingestion connectors and shared packages.
 
 ## Quick Start
 
@@ -55,6 +55,13 @@ pnpm build
 
 # Build specific package/service
 pnpm build --filter=@unique-ag/<package-name>
+```
+
+### Docker
+
+You can test the Docker build and a production deployment by running:
+```bash
+docker-compose -f docker-compose.prod.yaml --env-file .env up
 ```
 
 ### Testing
