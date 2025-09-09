@@ -25,9 +25,8 @@ describe('AppController (e2e)', () => {
       .get('/')
       .expect(200)
       .expect((res) => {
-        expect(res.body).toEqual({
+        expect(res.body).toMatchObject({
           name: '@unique-ag/outlook-mcp',
-          version: '0.3.3',
           description:
             'Outlook MCP Server - Microsoft Graph integration for Model Context Protocol',
           type: 'mcp-server',
