@@ -40,3 +40,4 @@ yarn-error.log*
 factset-auth.json
 
 **/@generated
+.idea
