@@ -22,6 +22,7 @@ import { GlobalPricesModule } from './global-prices/global-prices.module';
 import { ManifestController } from './manifest.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
+import { PromptsModule } from './prompts/prompts.module';
 import { serverInstructions } from './server.instructions';
 import { StreetAccountNewsModule } from './street-account-news/street-account-news.module';
 
@@ -116,6 +117,7 @@ import { StreetAccountNewsModule } from './street-account-news/street-account-ne
     FundamentalsModule,
     GlobalPricesModule,
     StreetAccountNewsModule,
+    PromptsModule,
   ],
   controllers: [ManifestController],
   providers: [

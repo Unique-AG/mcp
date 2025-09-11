@@ -46,7 +46,7 @@ export class MoveMailMessageTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'folder-input',
       'unique.app/system-prompt':
-        'To move emails to custom folders, first use list_mail_folders to discover available folder IDs. You can use well-known names like "inbox", "deleteditems", "drafts", "sentitems" for standard folders, or specific folder IDs for custom folders. The messageId can be obtained from search_email, list_mails, or other email listing tools.',
+        'Before invoking, ensure both messageId and destinationFolderId are provided. If destinationFolderId is unknown, ask the user or first list folders with list_mail_folders and then proceed. Accept well-known names (inbox, deleteditems, drafts, sentitems) or explicit IDs. If messageId is unknown, request it or suggest finding it via search_email or list_mails.',
     },
   })
   @Span((options, _context, _request) => ({
