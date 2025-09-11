@@ -50,7 +50,7 @@ export class GetMailMessageTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'mail-open',
       'unique.app/system-prompt':
-        'Fetches full email details by message ID. Message IDs can be obtained from search_email, list_mails, or list_mail_folder_messages. Set includeAttachments to true to get attachment metadata. Choose bodyFormat as "html" for formatted content or "text" for plain text.',
+        'Ensure messageId is provided. If the user does not know it, ask for it or suggest finding it via search_email, list_mails, or list_mail_folder_messages, then wait for the user to confirm. Only proceed once a messageId is supplied. Use includeAttachments for attachment metadata. Choose bodyFormat: html for formatted content or text for plain text.',
     },
   })
   @Span((options, _context, _request) => ({

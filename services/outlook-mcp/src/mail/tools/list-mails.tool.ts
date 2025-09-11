@@ -43,7 +43,7 @@ export class ListMailsTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'inbox',
       'unique.app/system-prompt':
-        'Returns the most recent emails from the specified folder (default: inbox). Use folder parameter with well-known names like "inbox", "sentitems", "drafts", "deleteditems" or specific folder IDs from list_mail_folders.',
+        'Returns the most recent emails from a folder. If the user does not specify a folder, confirm that inbox is intended; otherwise ask which folder to read. Accept well-known names (inbox, sentitems, drafts, deleteditems) or explicit IDs from list_mail_folders.',
     },
   })
   @Span((options, _context, _request) => ({

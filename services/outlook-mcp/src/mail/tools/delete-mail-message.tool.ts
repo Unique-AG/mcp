@@ -47,7 +47,7 @@ export class DeleteMailMessageTool extends BaseMsGraphTool {
       'unique.app/user-prompt':
         'By default, emails are moved to the Deleted Items folder (recoverable). Set permanent to true only if you want to permanently delete the email (non-recoverable).',
       'unique.app/system-prompt':
-        'Message IDs can be obtained from search_email, list_mails, or other email listing tools. Default behavior moves to Deleted Items folder. Use permanent:true with extreme caution as it cannot be undone.',
+        'Before invoking, ensure messageId is provided. If not, ask the user to specify it or guide them to find it via search_email or list_mails. Default behavior moves to Deleted Items. If permanent is true, explicitly warn the user that deletion is irreversible and ask for confirmation first.',
     },
   })
   @Span((options, _context, _request) => ({

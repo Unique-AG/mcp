@@ -67,7 +67,7 @@ export class SearchEmailTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'mail-search',
       'unique.app/system-prompt':
-        'Use this tool to find specific emails. The query parameter searches across email content. You can combine multiple filters like sender, date range, attachment status, and importance. To search within a specific folder, first use list_mail_folders to get folder IDs, then pass the folderId parameter.',
+        'If the user provides no query or criteria, ask clarifying questions (e.g., sender, subject keywords, date range, hasAttachments) to narrow the search before invoking. The query searches subject and body. Combine filters like sender, date range, attachment status, importance, and folderId. To target a folder but the ID is unknown, first list folders with list_mail_folders.',
     },
   })
   @Span((options, _context, _request) => ({

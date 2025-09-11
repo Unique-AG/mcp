@@ -48,7 +48,7 @@ export class CreateDraftEmailTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'pencil-line',
       'unique.app/system-prompt':
-        'Creates a draft email that will be saved in the Drafts folder. The email can be reviewed, edited, and sent manually later. Returns the draft message ID and a web link to view/edit the draft in Outlook.',
+        'Before invoking, ensure all required parameters are present: to (one or more email addresses), subject, and body. If any are missing or ambiguous, ask the user to provide them explicitly and wait; do not guess recipients or content. If multiple recipients are implied but not specified, ask the user to list the exact email addresses. Default isHtml to false unless the user requests HTML. Use this to create a draft in the Drafts folder for later review and manual sending. Return the draft message ID and webLink.',
     },
   })
   @Span((options, _context, _request) => ({

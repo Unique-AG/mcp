@@ -48,6 +48,8 @@ export class SendMailTool extends BaseMsGraphTool {
       'unique.app/icon': 'send',
       'unique.app/user-prompt':
         'This tool will immediately send the email. Consider using create_draft_email instead if you want to review the email before sending.',
+      'unique.app/system-prompt':
+        'Before invoking, ensure to, subject, and body are explicitly provided. If any are missing, ask the user to supply them; do not infer recipients or content. Confirm intent to send now versus drafting if the user appears uncertain. Default isHtml to false unless HTML is requested. If multiple recipients are implied but unspecified, ask the user to list exact email addresses.',
     },
   })
   @Span((options, _context, _request) => ({
