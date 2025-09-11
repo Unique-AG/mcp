@@ -5,7 +5,7 @@ server:
         reloader.stakater.com/auto: "true"
   hooks:
     migration:
-      enabled: true
+      enabled: false
       command: |
         pnpm run db:migrate:deploy
   extraObjects:
