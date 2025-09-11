@@ -10,7 +10,10 @@ const MoveThreadSchema = z.object({
 const AckAndFileSchema = z.object({
   messageId: z.string().describe('Originating message ID').meta({ title: 'Message ID' }),
   recipient: z.email().describe('Recipient to acknowledge').meta({ title: 'Recipient' }),
-  targetFolder: z.string().describe('Folder to move original into after send').meta({ title: 'Target Folder' }),
+  targetFolder: z
+    .string()
+    .describe('Folder to move original into after send')
+    .meta({ title: 'Target Folder' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
@@ -67,5 +70,3 @@ export class WorkflowPrompts {
     };
   }
 }
-
-

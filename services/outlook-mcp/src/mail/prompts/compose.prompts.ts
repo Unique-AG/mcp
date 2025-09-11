@@ -13,7 +13,10 @@ const MeetingFollowupSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
   meetingNotes: z.string().describe('Key points/decisions').meta({ title: 'Meeting Notes' }),
-  nextSteps: z.string().describe('Action items as a comma-separated list').meta({ title: 'Next Steps' }),
+  nextSteps: z
+    .string()
+    .describe('Action items as a comma-separated list')
+    .meta({ title: 'Next Steps' }),
   dueDates: z
     .string()
     .optional()
@@ -24,7 +27,10 @@ const MeetingFollowupSchema = z.object({
 const KycAmlSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
-  docChecklist: z.string().describe('Required documents as a comma-separated list').meta({ title: 'Document Checklist' }),
+  docChecklist: z
+    .string()
+    .describe('Required documents as a comma-separated list')
+    .meta({ title: 'Document Checklist' }),
   securePortalUrl: z.string().describe('Secure upload URL').meta({ title: 'Secure Upload URL' }),
   supportContact: z.string().describe('Support email/phone').meta({ title: 'Support Contact' }),
 });
@@ -33,8 +39,14 @@ const RfpCoverSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   firmName: z.string().describe('Your firm name').meta({ title: 'Firm Name' }),
   rfpTitle: z.string().describe('RFP title').meta({ title: 'RFP Title' }),
-  submissionDeadline: z.string().describe('Submission deadline').meta({ title: 'Submission Deadline' }),
-  differentiators: z.array(z.string()).describe('2-3 differentiators').meta({ title: 'Differentiators' }),
+  submissionDeadline: z
+    .string()
+    .describe('Submission deadline')
+    .meta({ title: 'Submission Deadline' }),
+  differentiators: z
+    .array(z.string())
+    .describe('2-3 differentiators')
+    .meta({ title: 'Differentiators' }),
 });
 
 const InvestorUpdateSchema = z.object({
@@ -50,15 +62,24 @@ const InvestorUpdateSchema = z.object({
 const SensitiveInfoRequestSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
-  infoRequested: z.string().describe('Information requested as a comma-separated list').meta({ title: 'Information Requested' }),
-  secureMethod: z.string().describe('Secure method (portal, encrypted link)').meta({ title: 'Secure Method' }),
+  infoRequested: z
+    .string()
+    .describe('Information requested as a comma-separated list')
+    .meta({ title: 'Information Requested' }),
+  secureMethod: z
+    .string()
+    .describe('Secure method (portal, encrypted link)')
+    .meta({ title: 'Secure Method' }),
   disclaimer: z.string().describe('Compliance disclaimer').meta({ title: 'Disclaimer' }),
 });
 
 const IntroductionSchema = z.object({
   toA: z.email().describe('First party email').meta({ title: 'First Email' }),
   toB: z.email().describe('Second party email').meta({ title: 'Second Email' }),
-  context: z.string().describe('Brief context for intro').meta({ title: 'Brief Context for Intro' }),
+  context: z
+    .string()
+    .describe('Brief context for intro')
+    .meta({ title: 'Brief Context for Intro' }),
   ask: z.string().describe('The ask for the intro').meta({ title: 'The Ask for the Intro' }),
 });
 
@@ -70,7 +91,10 @@ const AutoAckSchema = z.object({
 
 const FollowupNudgeSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
-  threadQuery: z.string().describe('Query to find the last exchange').meta({ title: 'Thread Query' }),
+  threadQuery: z
+    .string()
+    .describe('Query to find the last exchange')
+    .meta({ title: 'Thread Query' }),
 });
 
 const OutOfOfficeSchema = z.object({
@@ -87,7 +111,10 @@ const TradeConfirmationSummarySchema = z.object({
 const ComplianceEscalationSchema = z.object({
   messageId: z.string().describe('Source message ID with the issue').meta({ title: 'Message ID' }),
   recipient: z.email().describe('Compliance team recipient').meta({ title: 'Recipient' }),
-  issueSummary: z.string().describe('Short description of the issue').meta({ title: 'Issue Summary' }),
+  issueSummary: z
+    .string()
+    .describe('Short description of the issue')
+    .meta({ title: 'Issue Summary' }),
 });
 
 const GenericDraftSchema = z.object({
@@ -101,12 +128,17 @@ export class ComposePrompts {
     name: 'compose-prospect-outreach',
     title: 'Compose: Prospect Outreach',
     description: 'Compose a compliant prospect outreach email as a draft',
-      parameters: ProspectOutreachSchema,
+    parameters: ProspectOutreachSchema,
     _meta: {
       'unique.app/category': 'Compose',
     },
   })
-  public composeProspectOutreach({ recipient, clientName, valueProp, callToAction }: z.infer<typeof ProspectOutreachSchema>) {
+  public composeProspectOutreach({
+    recipient,
+    clientName,
+    valueProp,
+    callToAction,
+  }: z.infer<typeof ProspectOutreachSchema>) {
     return {
       description: 'Draft a concise, professional outreach email',
       messages: [
@@ -132,7 +164,13 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeMeetingFollowup({ recipient, clientName, meetingNotes, nextSteps, dueDates }: z.infer<typeof MeetingFollowupSchema>) {
+  public composeMeetingFollowup({
+    recipient,
+    clientName,
+    meetingNotes,
+    nextSteps,
+    dueDates,
+  }: z.infer<typeof MeetingFollowupSchema>) {
     const steps = nextSteps;
     const dues = dueDates;
     return {
@@ -160,7 +198,13 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeKycAmlRequest({ recipient, clientName, docChecklist, securePortalUrl, supportContact }: z.infer<typeof KycAmlSchema>) {
+  public composeKycAmlRequest({
+    recipient,
+    clientName,
+    docChecklist,
+    securePortalUrl,
+    supportContact,
+  }: z.infer<typeof KycAmlSchema>) {
     const list = docChecklist;
     return {
       description: 'Draft a KYC/AML document request with compliance tone',
@@ -187,7 +231,13 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeRfpCover({ recipient, firmName, rfpTitle, submissionDeadline, differentiators }: z.infer<typeof RfpCoverSchema>) {
+  public composeRfpCover({
+    recipient,
+    firmName,
+    rfpTitle,
+    submissionDeadline,
+    differentiators,
+  }: z.infer<typeof RfpCoverSchema>) {
     const diffs = differentiators.join(', ');
     return {
       description: 'Draft an RFP cover email with deadline and differentiators',
@@ -214,11 +264,20 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeInvestorUpdate({ recipient, fundName, period, performance, drivers, risks, disclaimers }: z.infer<typeof InvestorUpdateSchema>) {
+  public composeInvestorUpdate({
+    recipient,
+    fundName,
+    period,
+    performance,
+    drivers,
+    risks,
+    disclaimers,
+  }: z.infer<typeof InvestorUpdateSchema>) {
     const d = drivers;
     const r = risks;
     return {
-      description: 'Draft an investor update with performance, drivers, risks, outlook, and disclaimers',
+      description:
+        'Draft an investor update with performance, drivers, risks, outlook, and disclaimers',
       messages: [
         {
           role: 'user' as const,
@@ -242,7 +301,13 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeSensitiveInfoRequest({ recipient, clientName, infoRequested, secureMethod, disclaimer }: z.infer<typeof SensitiveInfoRequestSchema>) {
+  public composeSensitiveInfoRequest({
+    recipient,
+    clientName,
+    infoRequested,
+    secureMethod,
+    disclaimer,
+  }: z.infer<typeof SensitiveInfoRequestSchema>) {
     const info = infoRequested;
     return {
       description: 'Draft a sensitive info request that avoids PII in the email body',
@@ -345,7 +410,11 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeOutOfOffice({ recipient, returnDate, backupContact }: z.infer<typeof OutOfOfficeSchema>) {
+  public composeOutOfOffice({
+    recipient,
+    returnDate,
+    backupContact,
+  }: z.infer<typeof OutOfOfficeSchema>) {
     return {
       description: 'Draft an OOO reply including return date and backup contact',
       messages: [
@@ -369,7 +438,10 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeTradeConfirmationSummary({ messageId, recipient }: z.infer<typeof TradeConfirmationSummarySchema>) {
+  public composeTradeConfirmationSummary({
+    messageId,
+    recipient,
+  }: z.infer<typeof TradeConfirmationSummarySchema>) {
     return {
       description: 'Extract key trade details and draft an internal summary email',
       messages: [
@@ -395,7 +467,11 @@ export class ComposePrompts {
       'unique.app/category': 'Compose',
     },
   })
-  public composeComplianceEscalation({ messageId, recipient, issueSummary }: z.infer<typeof ComplianceEscalationSchema>) {
+  public composeComplianceEscalation({
+    messageId,
+    recipient,
+    issueSummary,
+  }: z.infer<typeof ComplianceEscalationSchema>) {
     return {
       description: 'Summarize the issue and include key quotes, propose triage priority',
       messages: [
@@ -438,5 +514,3 @@ export class ComposePrompts {
     };
   }
 }
-
-

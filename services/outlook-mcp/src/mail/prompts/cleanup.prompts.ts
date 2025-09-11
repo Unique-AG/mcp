@@ -7,10 +7,7 @@ const DeleteNewslettersSchema = z.object({
     .string()
     .describe("Sender domain or address, e.g., 'news@provider.com'")
     .meta({ title: 'Sender Domain or Address' }),
-  olderThanDays: z
-    .string()
-    .describe('Age threshold in days')
-    .meta({ title: 'Older Than (Days)' }),
+  olderThanDays: z.string().describe('Age threshold in days').meta({ title: 'Older Than (Days)' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
@@ -24,7 +21,10 @@ export class CleanupPrompts {
       'unique.app/category': 'Cleanup',
     },
   })
-  public deleteStaleNewsletters({ senderDomain, olderThanDays }: z.infer<typeof DeleteNewslettersSchema>) {
+  public deleteStaleNewsletters({
+    senderDomain,
+    olderThanDays,
+  }: z.infer<typeof DeleteNewslettersSchema>) {
     return {
       description: 'Identify stale newsletters and ask for confirmation before deletion',
       messages: [
@@ -41,5 +41,3 @@ export class CleanupPrompts {
     };
   }
 }
-
-

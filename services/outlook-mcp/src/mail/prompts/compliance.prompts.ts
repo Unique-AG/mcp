@@ -6,7 +6,9 @@ const ToneRiskReviewSchema = z.object({
   draftMessageId: z.string().describe('Draft message ID').meta({ title: 'Draft Message ID' }),
   riskChecklist: z
     .string()
-    .describe('Checklist as a comma-separated string, e.g., "promissory language, MNPI, suitability"')
+    .describe(
+      'Checklist as a comma-separated string, e.g., "promissory language, MNPI, suitability"',
+    )
     .meta({ title: 'Risk Checklist' }),
 });
 
@@ -19,7 +21,10 @@ const PiiRedactionSchema = z.object({
 });
 
 const PhishingSchema = z.object({
-  messageId: z.string().describe('Message ID to analyze for phishing').meta({ title: 'Message ID' }),
+  messageId: z
+    .string()
+    .describe('Message ID to analyze for phishing')
+    .meta({ title: 'Message ID' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
@@ -104,5 +109,3 @@ export class CompliancePrompts {
     };
   }
 }
-
-

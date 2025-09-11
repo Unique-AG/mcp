@@ -8,21 +8,24 @@ const LocateStatementsSchema = z.object({
 });
 
 const AttachmentTypeSchema = z.object({
-  fileType: z.string().describe('Attachment extension, e.g., pdf, xlsx').meta({ title: 'File Type' }),
+  fileType: z
+    .string()
+    .describe('Attachment extension, e.g., pdf, xlsx')
+    .meta({ title: 'File Type' }),
   dateFrom: z.string().describe('Relative phrase or ISO date from').meta({ title: 'Date From' }),
   dateTo: z.string().describe('Relative phrase or ISO date to').meta({ title: 'Date To' }),
 });
 
 const TickerDealSchema = z.object({
   keyword: z.string().describe('Ticker or deal code').meta({ title: 'Keyword' }),
-  maxResults: z
-    .string()
-    .describe('Max results')
-    .meta({ title: 'Max Results' }),
+  maxResults: z.string().describe('Max results').meta({ title: 'Max Results' }),
 });
 
 const MeetingInvitesSchema = z.object({
-  clientName: z.string().describe('Client name mentioned in invites').meta({ title: 'Client Name' }),
+  clientName: z
+    .string()
+    .describe('Client name mentioned in invites')
+    .meta({ title: 'Client Name' }),
   windowDays: z
     .string()
     .describe('Forward-looking window in days')
@@ -81,7 +84,11 @@ export class SearchPrompts {
       'unique.app/category': 'Search',
     },
   })
-  public searchByAttachmentType({ fileType, dateFrom, dateTo }: z.infer<typeof AttachmentTypeSchema>) {
+  public searchByAttachmentType({
+    fileType,
+    dateFrom,
+    dateTo,
+  }: z.infer<typeof AttachmentTypeSchema>) {
     return {
       description: 'Search emails by attachment file type and date range',
       messages: [
@@ -115,8 +122,7 @@ export class SearchPrompts {
           role: 'user' as const,
           content: {
             type: 'text' as const,
-            text:
-              `Search "${keyword}" and list up to ${maxResults} emails with short snippet summaries. Use search-email and list-mails.`,
+            text: `Search "${keyword}" and list up to ${maxResults} emails with short snippet summaries. Use search-email and list-mails.`,
           },
         },
       ],
@@ -227,5 +233,3 @@ export class SearchPrompts {
     };
   }
 }
-
-

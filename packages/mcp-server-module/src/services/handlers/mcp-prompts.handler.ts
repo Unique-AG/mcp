@@ -74,7 +74,10 @@ export class McpPromptsHandler extends McpHandlerBase {
         });
 
         if (!promptInstance) {
-          throw new McpError(ErrorCode.InternalError, `Failed to resolve prompt provider for: ${name}`);
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to resolve prompt provider for: ${name}`,
+          );
         }
 
         const context = this.createContext(mcpServer, request);

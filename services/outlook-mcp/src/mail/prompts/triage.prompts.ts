@@ -7,10 +7,7 @@ const ThreadSummarySchema = z.object({
     .string()
     .describe('Search terms, client name, or thread hint')
     .meta({ title: 'Thread Query' }),
-  maxMessages: z
-    .string()
-    .describe('Max messages to include')
-    .meta({ title: 'Max Messages' }),
+  maxMessages: z.string().describe('Max messages to include').meta({ title: 'Max Messages' }),
 });
 
 const ExtractActionsSchema = z.object({
@@ -21,7 +18,9 @@ const ClassifyFolderSchema = z.object({
   messageId: z.string().describe('Email message ID to classify').meta({ title: 'Message ID' }),
   businessTaxonomy: z
     .string()
-    .describe("Business taxonomy, e.g., ['KYC','Onboarding','Trade Confirmations','RFP','Investor Relations']")
+    .describe(
+      "Business taxonomy, e.g., ['KYC','Onboarding','Trade Confirmations','RFP','Investor Relations']",
+    )
     .meta({ title: 'Business Taxonomy' }),
 });
 
@@ -102,7 +101,10 @@ export class TriagePrompts {
       'unique.app/category': 'Triage',
     },
   })
-  public classifyAndProposeFolder({ messageId, businessTaxonomy }: z.infer<typeof ClassifyFolderSchema>) {
+  public classifyAndProposeFolder({
+    messageId,
+    businessTaxonomy,
+  }: z.infer<typeof ClassifyFolderSchema>) {
     return {
       description: 'Classify and propose a filing folder for the message',
       messages: [
@@ -172,5 +174,3 @@ export class TriagePrompts {
     };
   }
 }
-
-
