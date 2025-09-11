@@ -3,22 +3,26 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as z from 'zod';
 
 const MoveThreadSchema = z.object({
-  threadQuery: z.string().describe('Search hint for the thread'),
-  folderName: z.string().describe('Target folder name'),
+  threadQuery: z.string().describe('Search hint for the thread').meta({ title: 'Thread Query' }),
+  folderName: z.string().describe('Target folder name').meta({ title: 'Folder Name' }),
 });
 
 const AckAndFileSchema = z.object({
-  messageId: z.string().describe('Originating message ID'),
-  recipient: z.email().describe('Recipient to acknowledge'),
-  targetFolder: z.string().describe('Folder to move original into after send'),
+  messageId: z.string().describe('Originating message ID').meta({ title: 'Message ID' }),
+  recipient: z.email().describe('Recipient to acknowledge').meta({ title: 'Recipient' }),
+  targetFolder: z.string().describe('Folder to move original into after send').meta({ title: 'Target Folder' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
 export class WorkflowPrompts {
   @Prompt({
     name: 'workflow-move-thread',
+    title: 'Workflow: Move Thread',
     description: 'Locate a thread and move it to a target folder',
     parameters: MoveThreadSchema,
+    _meta: {
+      'unique.app/category': 'Workflow',
+    },
   })
   public moveThread({ threadQuery, folderName }: z.infer<typeof MoveThreadSchema>) {
     return {
@@ -39,8 +43,12 @@ export class WorkflowPrompts {
 
   @Prompt({
     name: 'workflow-ack-and-file',
+    title: 'Workflow: Acknowledge and File',
     description: 'Draft acknowledgment and file the original message after sending',
     parameters: AckAndFileSchema,
+    _meta: {
+      'unique.app/category': 'Workflow',
+    },
   })
   public ackAndFile({ messageId, recipient, targetFolder }: z.infer<typeof AckAndFileSchema>) {
     return {

@@ -3,25 +3,35 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as z from 'zod';
 
 const ToneRiskReviewSchema = z.object({
-  draftMessageId: z.string().describe('Draft message ID'),
-  riskChecklist: z.array(z.string()).describe('Checklist, e.g., promissory language, MNPI, suitability'),
+  draftMessageId: z.string().describe('Draft message ID').meta({ title: 'Draft Message ID' }),
+  riskChecklist: z
+    .array(z.string())
+    .describe('Checklist, e.g., promissory language, MNPI, suitability')
+    .meta({ title: 'Risk Checklist' }),
 });
 
 const PiiRedactionSchema = z.object({
-  draftMessageId: z.string().describe('Draft message ID'),
-  piiRules: z.array(z.string()).describe('PII types to redact, e.g., SSN, account #, DOB'),
+  draftMessageId: z.string().describe('Draft message ID').meta({ title: 'Draft Message ID' }),
+  piiRules: z
+    .array(z.string())
+    .describe('PII types to redact, e.g., SSN, account #, DOB')
+    .meta({ title: 'PII Rules' }),
 });
 
 const PhishingSchema = z.object({
-  messageId: z.string().describe('Message ID to analyze for phishing'),
+  messageId: z.string().describe('Message ID to analyze for phishing').meta({ title: 'Message ID' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
 export class CompliancePrompts {
   @Prompt({
     name: 'compliance-tone-risk-review',
+    title: 'Compliance: Tone & Risk Review',
     description: 'Review a draft for tone and compliance risks with suggested edits',
     parameters: ToneRiskReviewSchema,
+    _meta: {
+      'unique.app/category': 'Compliance',
+    },
   })
   public toneRiskReview({ draftMessageId, riskChecklist }: z.infer<typeof ToneRiskReviewSchema>) {
     const checks = riskChecklist.join(', ');
@@ -43,8 +53,12 @@ export class CompliancePrompts {
 
   @Prompt({
     name: 'compliance-pii-redaction',
+    title: 'Compliance: PII Redaction',
     description: 'Identify and redact PII in a draft content',
     parameters: PiiRedactionSchema,
+    _meta: {
+      'unique.app/category': 'Compliance',
+    },
   })
   public piiRedaction({ draftMessageId, piiRules }: z.infer<typeof PiiRedactionSchema>) {
     const rules = piiRules.join(', ');
@@ -66,8 +80,12 @@ export class CompliancePrompts {
 
   @Prompt({
     name: 'risk-phishing-suspect',
+    title: 'Risk: Phishing Analysis',
     description: 'Analyze an email for phishing/fraud red flags and recommend an action',
     parameters: PhishingSchema,
+    _meta: {
+      'unique.app/category': 'Risk',
+    },
   })
   public phishingAnalysis({ messageId }: z.infer<typeof PhishingSchema>) {
     return {

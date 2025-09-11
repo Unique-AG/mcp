@@ -3,38 +3,55 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as z from 'zod';
 
 const ThreadSummarySchema = z.object({
-  threadQuery: z.string().describe('Search terms, client name, or thread hint'),
-  maxMessages: z.number().int().positive().prefault(25).describe('Max messages to include'),
+  threadQuery: z
+    .string()
+    .describe('Search terms, client name, or thread hint')
+    .meta({ title: 'Thread Query' }),
+  maxMessages: z
+    .number()
+    .int()
+    .positive()
+    .prefault(25)
+    .describe('Max messages to include')
+    .meta({ title: 'Max Messages' }),
 });
 
 const ExtractActionsSchema = z.object({
-  messageId: z.string().describe('Email message ID to analyze'),
+  messageId: z.string().describe('Email message ID to analyze').meta({ title: 'Message ID' }),
 });
 
 const ClassifyFolderSchema = z.object({
-  messageId: z.string().describe('Email message ID to classify'),
+  messageId: z.string().describe('Email message ID to classify').meta({ title: 'Message ID' }),
   businessTaxonomy: z
     .array(z.string())
     .or(z.string())
-    .describe("Business taxonomy, e.g., ['KYC','Onboarding','Trade Confirmations','RFP','Investor Relations']"),
+    .describe("Business taxonomy, e.g., ['KYC','Onboarding','Trade Confirmations','RFP','Investor Relations']")
+    .meta({ title: 'Business Taxonomy' }),
 });
 
 const UrgencySlaSchema = z.object({
-  messageId: z.string().describe('Email message ID to analyze'),
-  slaPolicy: z.record(z.string(), z.number()).describe('Map of category -> response target (hours)'),
+  messageId: z.string().describe('Email message ID to analyze').meta({ title: 'Message ID' }),
+  slaPolicy: z
+    .record(z.string(), z.number())
+    .describe('Map of category -> response target (hours)')
+    .meta({ title: 'SLA Policy' }),
 });
 
 const UnreadAgingSchema = z.object({
-  days: z.number().int().positive().describe('Threshold in days'),
-  folder: z.string().optional().describe('Optional folder scope'),
+  days: z.number().int().positive().describe('Threshold in days').meta({ title: 'Days' }),
+  folder: z.string().optional().describe('Optional folder scope').meta({ title: 'Folder' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
 export class TriagePrompts {
   @Prompt({
     name: 'triage-summarize-thread',
+    title: 'Triage: Summarize Thread',
     description: 'Summarize a client thread with actions, key dates, and risks',
     parameters: ThreadSummarySchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public summarizeThread({ threadQuery, maxMessages }: z.infer<typeof ThreadSummarySchema>) {
     return {
@@ -56,8 +73,12 @@ export class TriagePrompts {
 
   @Prompt({
     name: 'triage-extract-action-items',
+    title: 'Triage: Extract Action Items',
     description: 'Extract structured tasks and deadlines from a single email',
     parameters: ExtractActionsSchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public extractActionItems({ messageId }: z.infer<typeof ExtractActionsSchema>) {
     return {
@@ -78,8 +99,12 @@ export class TriagePrompts {
 
   @Prompt({
     name: 'triage-classify-and-propose-folder',
+    title: 'Triage: Classify and Propose Folder',
     description: 'Classify an email and propose a target folder based on business taxonomy',
     parameters: ClassifyFolderSchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public classifyAndProposeFolder({ messageId, businessTaxonomy }: z.infer<typeof ClassifyFolderSchema>) {
     const taxonomy = Array.isArray(businessTaxonomy) ? businessTaxonomy.join(', ') : businessTaxonomy;
@@ -101,8 +126,12 @@ export class TriagePrompts {
 
   @Prompt({
     name: 'triage-urgency-sla',
+    title: 'Triage: Determine Urgency and SLA',
     description: 'Determine urgency and SLA target for a message with justification',
     parameters: UrgencySlaSchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public determineUrgencySla({ messageId, slaPolicy }: z.infer<typeof UrgencySlaSchema>) {
     return {
@@ -123,8 +152,12 @@ export class TriagePrompts {
 
   @Prompt({
     name: 'triage-unread-aging',
+    title: 'Triage: Unread Older Than N Days',
     description: 'List unread emails older than N days with brief reason-to-open',
     parameters: UnreadAgingSchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public listUnreadAging({ days, folder }: z.infer<typeof UnreadAgingSchema>) {
     const scope = folder ? ` in folder "${folder}"` : '';

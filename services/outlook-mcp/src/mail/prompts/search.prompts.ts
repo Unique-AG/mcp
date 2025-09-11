@@ -3,37 +3,52 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as z from 'zod';
 
 const LocateStatementsSchema = z.object({
-  clientName: z.string().describe('Client name to search for'),
-  since: z.string().optional().describe('ISO date lower bound'),
+  clientName: z.string().describe('Client name to search for').meta({ title: 'Client Name' }),
+  since: z.string().optional().describe('ISO date lower bound').meta({ title: 'Since (ISO Date)' }),
 });
 
 const AttachmentTypeSchema = z.object({
-  fileType: z.string().describe('Attachment extension, e.g., pdf, xlsx'),
-  dateFrom: z.string().describe('ISO date from'),
-  dateTo: z.string().describe('ISO date to'),
+  fileType: z.string().describe('Attachment extension, e.g., pdf, xlsx').meta({ title: 'File Type' }),
+  dateFrom: z.string().describe('ISO date from').meta({ title: 'Date From' }),
+  dateTo: z.string().describe('ISO date to').meta({ title: 'Date To' }),
 });
 
 const TickerDealSchema = z.object({
-  keyword: z.string().describe('Ticker or deal code'),
-  maxResults: z.number().int().positive().prefault(20).describe('Max results'),
+  keyword: z.string().describe('Ticker or deal code').meta({ title: 'Keyword' }),
+  maxResults: z
+    .number()
+    .int()
+    .positive()
+    .prefault(20)
+    .describe('Max results')
+    .meta({ title: 'Max Results' }),
 });
 
 const MeetingInvitesSchema = z.object({
-  clientName: z.string().describe('Client name mentioned in invites'),
-  windowDays: z.number().int().positive().describe('Forward-looking window in days'),
+  clientName: z.string().describe('Client name mentioned in invites').meta({ title: 'Client Name' }),
+  windowDays: z
+    .number()
+    .int()
+    .positive()
+    .describe('Forward-looking window in days')
+    .meta({ title: 'Window (Days)' }),
 });
 
 const PipelineDigestSchema = z.object({
-  keyword: z.string().describe('Ticker or deal code'),
-  period: z.string().describe("Time window, e.g., 'last 7 days'"),
+  keyword: z.string().describe('Ticker or deal code').meta({ title: 'Keyword' }),
+  period: z.string().describe("Time window, e.g., 'last 7 days'").meta({ title: 'Period' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
 export class SearchPrompts {
   @Prompt({
     name: 'search-locate-statements',
+    title: 'Search: Locate Statements',
     description: 'Find latest client statement emails with summary fields',
     parameters: LocateStatementsSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
   })
   public locateStatements({ clientName, since }: z.infer<typeof LocateStatementsSchema>) {
     return {
@@ -54,8 +69,12 @@ export class SearchPrompts {
 
   @Prompt({
     name: 'search-attachments-type',
+    title: 'Search: By Attachment Type',
     description: 'Find emails with a specific attachment type within a date range',
     parameters: AttachmentTypeSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
   })
   public searchByAttachmentType({ fileType, dateFrom, dateTo }: z.infer<typeof AttachmentTypeSchema>) {
     return {
@@ -76,8 +95,12 @@ export class SearchPrompts {
 
   @Prompt({
     name: 'search-ticker-deal',
+    title: 'Search: Ticker or Deal',
     description: 'Gather emails about a ticker or deal with snippets',
     parameters: TickerDealSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
   })
   public searchTickerDeal({ keyword, maxResults }: z.infer<typeof TickerDealSchema>) {
     return {
@@ -97,8 +120,12 @@ export class SearchPrompts {
 
   @Prompt({
     name: 'search-meeting-invites',
+    title: 'Search: Meeting Invites',
     description: 'Locate upcoming calendar meeting invites referencing a client',
     parameters: MeetingInvitesSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
   })
   public searchMeetingInvites({ clientName, windowDays }: z.infer<typeof MeetingInvitesSchema>) {
     return {
@@ -119,8 +146,12 @@ export class SearchPrompts {
 
   @Prompt({
     name: 'triage-deal-pipeline-digest',
+    title: 'Triage: Deal Pipeline Digest',
     description: 'Compile a digest of emails about a ticker/deal for a period',
     parameters: PipelineDigestSchema,
+    _meta: {
+      'unique.app/category': 'Triage',
+    },
   })
   public dealPipelineDigest({ keyword, period }: z.infer<typeof PipelineDigestSchema>) {
     return {

@@ -90,7 +90,7 @@ const ComplianceEscalationSchema = z.object({
 export class ComposePrompts {
   @Prompt({
     name: 'compose-prospect-outreach',
-    title: 'Compose Prospect Outreach',
+    title: 'Compose: Prospect Outreach',
     description: 'Compose a compliant prospect outreach email as a draft',
       parameters: ProspectOutreachSchema,
     _meta: {
@@ -116,7 +116,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-meeting-followup',
-    title: 'Compose Meeting Followup',
+    title: 'Compose: Meeting Followup',
     description: 'Compose a meeting follow-up email summarizing decisions and next steps',
     parameters: MeetingFollowupSchema,
     _meta: {
@@ -144,7 +144,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-kyc-aml-request',
-    title: 'Compose KYC/AML Request',
+    title: 'Compose: KYC/AML Request',
     description: 'Compose a KYC/AML document request email with secure upload instructions',
     parameters: KycAmlSchema,
     _meta: {
@@ -171,7 +171,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-rfp-cover',
-    title: 'Compose RFP Cover',
+    title: 'Compose: RFP Cover',
     description: 'Compose a concise RFP cover email',
     parameters: RfpCoverSchema,
     _meta: {
@@ -198,7 +198,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-investor-update',
-    title: 'Compose Investor Update',
+    title: 'Compose: Investor Update',
     description: 'Compose an investor monthly update email with disclaimers',
     parameters: InvestorUpdateSchema,
     _meta: {
@@ -226,7 +226,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-sensitive-info-request',
-    title: 'Compose Sensitive Info Request',
+    title: 'Compose: Sensitive Info Request',
     description: 'Compose a sensitive information request with compliance language',
     parameters: SensitiveInfoRequestSchema,
     _meta: {
@@ -253,7 +253,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-introduction',
-    title: 'Compose Introduction',
+    title: 'Compose: Introduction',
     description: 'Compose a double-opt introduction email between two parties',
     parameters: IntroductionSchema,
     _meta: {
@@ -277,7 +277,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-auto-ack',
-    title: 'Compose Auto Ack',
+    title: 'Compose: Auto Ack',
     description: 'Compose an acknowledgment reply draft with SLA',
     parameters: AutoAckSchema,
     _meta: {
@@ -303,7 +303,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-followup-nudge',
-    title: 'Compose Followup Nudge',
+    title: 'Compose: Followup Nudge',
     description: 'Compose a polite, concise follow-up referencing the last exchange',
     parameters: FollowupNudgeSchema,
     _meta: {
@@ -329,7 +329,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-oof',
-    title: 'Compose OOF',
+    title: 'Compose: OOF',
     description: 'Compose an out-of-office reply draft',
     parameters: OutOfOfficeSchema,
     _meta: {
@@ -353,7 +353,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-trade-confirmation-summary',
-    title: 'Compose Trade Confirmation Summary',
+    title: 'Compose: Trade Confirmation Summary',
     description: 'Summarize a trade confirmation and draft a clean internal summary',
     parameters: TradeConfirmationSummarySchema,
     _meta: {
@@ -379,7 +379,7 @@ export class ComposePrompts {
 
   @Prompt({
     name: 'compose-compliance-escalation',
-    title: 'Compose Compliance Escalation',
+    title: 'Compose: Compliance Escalation',
     description: 'Draft an escalation email to compliance with quotes and triage priority',
     parameters: ComplianceEscalationSchema,
     _meta: {

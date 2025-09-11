@@ -3,16 +3,28 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as z from 'zod';
 
 const DeleteNewslettersSchema = z.object({
-  senderDomain: z.string().describe("Sender domain or address, e.g., 'news@provider.com'"),
-  olderThanDays: z.number().int().positive().describe('Age threshold in days'),
+  senderDomain: z
+    .string()
+    .describe("Sender domain or address, e.g., 'news@provider.com'")
+    .meta({ title: 'Sender Domain or Address' }),
+  olderThanDays: z
+    .number()
+    .int()
+    .positive()
+    .describe('Age threshold in days')
+    .meta({ title: 'Older Than (Days)' }),
 });
 
 @Injectable({ scope: Scope.REQUEST })
 export class CleanupPrompts {
   @Prompt({
     name: 'cleanup-delete-newsletters',
+    title: 'Cleanup: Delete Newsletters',
     description: 'Find and optionally delete stale newsletters from a sender',
     parameters: DeleteNewslettersSchema,
+    _meta: {
+      'unique.app/category': 'Cleanup',
+    },
   })
   public deleteStaleNewsletters({ senderDomain, olderThanDays }: z.infer<typeof DeleteNewslettersSchema>) {
     return {
