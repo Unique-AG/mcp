@@ -8,9 +8,7 @@ const DeleteNewslettersSchema = z.object({
     .describe("Sender domain or address, e.g., 'news@provider.com'")
     .meta({ title: 'Sender Domain or Address' }),
   olderThanDays: z
-    .number()
-    .int()
-    .positive()
+    .string()
     .describe('Age threshold in days')
     .meta({ title: 'Older Than (Days)' }),
 });

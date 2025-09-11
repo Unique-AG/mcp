@@ -13,15 +13,19 @@ const MeetingFollowupSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
   meetingNotes: z.string().describe('Key points/decisions').meta({ title: 'Meeting Notes' }),
-  nextSteps: z.array(z.string()).describe('Action items').meta({ title: 'Next Steps' }),
-  dueDates: z.array(z.string()).optional().describe('Optional due dates for steps').meta({ title: 'Due Dates' }),
+  nextSteps: z.string().describe('Action items as a comma-separated list').meta({ title: 'Next Steps' }),
+  dueDates: z
+    .string()
+    .optional()
+    .describe('Optional due dates as a comma-separated list')
+    .meta({ title: 'Due Dates' }),
 });
 
 const KycAmlSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
-  docChecklist: z.array(z.string()).describe('Required documents').meta({ title: 'Document Checklist' }),
-  securePortalUrl: z.string().url().describe('Secure upload URL').meta({ title: 'Secure Upload URL' }),
+  docChecklist: z.string().describe('Required documents as a comma-separated list').meta({ title: 'Document Checklist' }),
+  securePortalUrl: z.string().describe('Secure upload URL').meta({ title: 'Secure Upload URL' }),
   supportContact: z.string().describe('Support email/phone').meta({ title: 'Support Contact' }),
 });
 
@@ -38,15 +42,15 @@ const InvestorUpdateSchema = z.object({
   fundName: z.string().describe('Fund name').meta({ title: 'Fund Name' }),
   period: z.string().describe('Reporting period').meta({ title: 'Reporting Period' }),
   performance: z.string().describe('Performance summary').meta({ title: 'Performance Summary' }),
-  drivers: z.array(z.string()).describe('Key drivers').meta({ title: 'Drivers' }),
-  risks: z.array(z.string()).describe('Notable risks').meta({ title: 'Risks' }),
+  drivers: z.string().describe('Key drivers as a comma-separated list').meta({ title: 'Drivers' }),
+  risks: z.string().describe('Notable risks as a comma-separated list').meta({ title: 'Risks' }),
   disclaimers: z.string().describe('Required disclaimers text').meta({ title: 'Disclaimers' }),
 });
 
 const SensitiveInfoRequestSchema = z.object({
   recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
   clientName: z.string().describe('Recipient name').meta({ title: 'Client Name' }),
-  infoRequested: z.array(z.string()).describe('Information requested').meta({ title: 'Information Requested' }),
+  infoRequested: z.string().describe('Information requested as a comma-separated list').meta({ title: 'Information Requested' }),
   secureMethod: z.string().describe('Secure method (portal, encrypted link)').meta({ title: 'Secure Method' }),
   disclaimer: z.string().describe('Compliance disclaimer').meta({ title: 'Disclaimer' }),
 });
@@ -129,8 +133,8 @@ export class ComposePrompts {
     },
   })
   public composeMeetingFollowup({ recipient, clientName, meetingNotes, nextSteps, dueDates }: z.infer<typeof MeetingFollowupSchema>) {
-    const steps = nextSteps.join('; ');
-    const dues = dueDates?.join('; ');
+    const steps = nextSteps;
+    const dues = dueDates;
     return {
       description: 'Draft a follow-up email with clear next steps and ownership',
       messages: [
@@ -157,7 +161,7 @@ export class ComposePrompts {
     },
   })
   public composeKycAmlRequest({ recipient, clientName, docChecklist, securePortalUrl, supportContact }: z.infer<typeof KycAmlSchema>) {
-    const list = docChecklist.join(', ');
+    const list = docChecklist;
     return {
       description: 'Draft a KYC/AML document request with compliance tone',
       messages: [
@@ -211,8 +215,8 @@ export class ComposePrompts {
     },
   })
   public composeInvestorUpdate({ recipient, fundName, period, performance, drivers, risks, disclaimers }: z.infer<typeof InvestorUpdateSchema>) {
-    const d = drivers.join('; ');
-    const r = risks.join('; ');
+    const d = drivers;
+    const r = risks;
     return {
       description: 'Draft an investor update with performance, drivers, risks, outlook, and disclaimers',
       messages: [
@@ -239,7 +243,7 @@ export class ComposePrompts {
     },
   })
   public composeSensitiveInfoRequest({ recipient, clientName, infoRequested, secureMethod, disclaimer }: z.infer<typeof SensitiveInfoRequestSchema>) {
-    const info = infoRequested.join(', ');
+    const info = infoRequested;
     return {
       description: 'Draft a sensitive info request that avoids PII in the email body',
       messages: [

@@ -5,16 +5,16 @@ import * as z from 'zod';
 const ToneRiskReviewSchema = z.object({
   draftMessageId: z.string().describe('Draft message ID').meta({ title: 'Draft Message ID' }),
   riskChecklist: z
-    .array(z.string())
-    .describe('Checklist, e.g., promissory language, MNPI, suitability')
+    .string()
+    .describe('Checklist as a comma-separated string, e.g., "promissory language, MNPI, suitability"')
     .meta({ title: 'Risk Checklist' }),
 });
 
 const PiiRedactionSchema = z.object({
   draftMessageId: z.string().describe('Draft message ID').meta({ title: 'Draft Message ID' }),
   piiRules: z
-    .array(z.string())
-    .describe('PII types to redact, e.g., SSN, account #, DOB')
+    .string()
+    .describe('PII types as a comma-separated string, e.g., "SSN, account #, DOB"')
     .meta({ title: 'PII Rules' }),
 });
 
@@ -34,7 +34,7 @@ export class CompliancePrompts {
     },
   })
   public toneRiskReview({ draftMessageId, riskChecklist }: z.infer<typeof ToneRiskReviewSchema>) {
-    const checks = riskChecklist.join(', ');
+    const checks = riskChecklist;
     return {
       description: 'Detect tone/risk issues and suggest edits',
       messages: [
@@ -61,7 +61,7 @@ export class CompliancePrompts {
     },
   })
   public piiRedaction({ draftMessageId, piiRules }: z.infer<typeof PiiRedactionSchema>) {
-    const rules = piiRules.join(', ');
+    const rules = piiRules;
     return {
       description: 'Propose redactions for PII and produce a redacted version',
       messages: [

@@ -4,22 +4,19 @@ import * as z from 'zod';
 
 const LocateStatementsSchema = z.object({
   clientName: z.string().describe('Client name to search for').meta({ title: 'Client Name' }),
-  since: z.string().optional().describe('ISO date lower bound').meta({ title: 'Since (ISO Date)' }),
+  since: z.string().optional().describe('Relative phrase or ISO date').meta({ title: 'Since' }),
 });
 
 const AttachmentTypeSchema = z.object({
   fileType: z.string().describe('Attachment extension, e.g., pdf, xlsx').meta({ title: 'File Type' }),
-  dateFrom: z.string().describe('ISO date from').meta({ title: 'Date From' }),
-  dateTo: z.string().describe('ISO date to').meta({ title: 'Date To' }),
+  dateFrom: z.string().describe('Relative phrase or ISO date from').meta({ title: 'Date From' }),
+  dateTo: z.string().describe('Relative phrase or ISO date to').meta({ title: 'Date To' }),
 });
 
 const TickerDealSchema = z.object({
   keyword: z.string().describe('Ticker or deal code').meta({ title: 'Keyword' }),
   maxResults: z
-    .number()
-    .int()
-    .positive()
-    .prefault(20)
+    .string()
     .describe('Max results')
     .meta({ title: 'Max Results' }),
 });
@@ -27,9 +24,7 @@ const TickerDealSchema = z.object({
 const MeetingInvitesSchema = z.object({
   clientName: z.string().describe('Client name mentioned in invites').meta({ title: 'Client Name' }),
   windowDays: z
-    .number()
-    .int()
-    .positive()
+    .string()
     .describe('Forward-looking window in days')
     .meta({ title: 'Window (Days)' }),
 });

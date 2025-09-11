@@ -8,10 +8,7 @@ const ThreadSummarySchema = z.object({
     .describe('Search terms, client name, or thread hint')
     .meta({ title: 'Thread Query' }),
   maxMessages: z
-    .number()
-    .int()
-    .positive()
-    .prefault(25)
+    .string()
     .describe('Max messages to include')
     .meta({ title: 'Max Messages' }),
 });
@@ -23,8 +20,7 @@ const ExtractActionsSchema = z.object({
 const ClassifyFolderSchema = z.object({
   messageId: z.string().describe('Email message ID to classify').meta({ title: 'Message ID' }),
   businessTaxonomy: z
-    .array(z.string())
-    .or(z.string())
+    .string()
     .describe("Business taxonomy, e.g., ['KYC','Onboarding','Trade Confirmations','RFP','Investor Relations']")
     .meta({ title: 'Business Taxonomy' }),
 });
@@ -32,13 +28,13 @@ const ClassifyFolderSchema = z.object({
 const UrgencySlaSchema = z.object({
   messageId: z.string().describe('Email message ID to analyze').meta({ title: 'Message ID' }),
   slaPolicy: z
-    .record(z.string(), z.number())
-    .describe('Map of category -> response target (hours)')
+    .string()
+    .describe('Policy string or JSON mapping category -> hours')
     .meta({ title: 'SLA Policy' }),
 });
 
 const UnreadAgingSchema = z.object({
-  days: z.number().int().positive().describe('Threshold in days').meta({ title: 'Days' }),
+  days: z.string().describe('Threshold in days').meta({ title: 'Days' }),
   folder: z.string().optional().describe('Optional folder scope').meta({ title: 'Folder' }),
 });
 
@@ -107,7 +103,6 @@ export class TriagePrompts {
     },
   })
   public classifyAndProposeFolder({ messageId, businessTaxonomy }: z.infer<typeof ClassifyFolderSchema>) {
-    const taxonomy = Array.isArray(businessTaxonomy) ? businessTaxonomy.join(', ') : businessTaxonomy;
     return {
       description: 'Classify and propose a filing folder for the message',
       messages: [
@@ -117,7 +112,7 @@ export class TriagePrompts {
             type: 'text' as const,
             text:
               `Fetch ${messageId} (get-mail-message) and list available folders (list-mail-folders). ` +
-              `Classify the message into the taxonomy: ${taxonomy}. Propose a single best target folder with rationale and confidence.`,
+              `Classify the message into the taxonomy: ${businessTaxonomy}. Propose a single best target folder with rationale and confidence.`,
           },
         },
       ],
@@ -143,7 +138,7 @@ export class TriagePrompts {
             type: 'text' as const,
             text:
               `Analyze message ${messageId} (get-mail-message). Assign urgency (Critical/High/Normal/Low), ` +
-              `SLA target per policy ${JSON.stringify(slaPolicy)}, and a brief justification referencing the text.`,
+              `SLA target per policy ${slaPolicy}, and a brief justification referencing the text.`,
           },
         },
       ],
