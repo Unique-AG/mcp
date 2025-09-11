@@ -12,6 +12,7 @@ Outside the module you must create:
 - `resource.azurerm_role_assignment` for the identity to read the KV
 - `resource.azurerm_federated_identity_credential` for Service Account / Workload to read the secret
 - `output.azurerm_user_assigned_identity.clientId` to know the clientId for the Service Account / Workload
+- means for humans to set the manual secrets (PIM…)
 
 ---
 
