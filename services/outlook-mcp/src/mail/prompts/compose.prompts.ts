@@ -86,6 +86,11 @@ const ComplianceEscalationSchema = z.object({
   issueSummary: z.string().describe('Short description of the issue').meta({ title: 'Issue Summary' }),
 });
 
+const GenericDraftSchema = z.object({
+  recipient: z.email().describe('Recipient email').meta({ title: 'Recipient' }),
+  subject: z.string().describe('Email subject').meta({ title: 'Subject' }),
+});
+
 @Injectable({ scope: Scope.REQUEST })
 export class ComposePrompts {
   @Prompt({
@@ -397,6 +402,32 @@ export class ComposePrompts {
             text:
               `Draft an escalation email to ${recipient} summarizing: ${issueSummary}. Include key quotes from ${messageId} (get-mail-message) ` +
               `and propose a triage priority. Create draft.`,
+          },
+        },
+      ],
+    };
+  }
+
+  @Prompt({
+    name: 'compose-generic-draft',
+    title: 'Compose: Generic Draft',
+    description: 'Draft an email to a recipient about a subject',
+    parameters: GenericDraftSchema,
+    _meta: {
+      'unique.app/category': 'Compose',
+    },
+  })
+  public composeGenericDraft({ recipient, subject }: z.infer<typeof GenericDraftSchema>) {
+    return {
+      description: 'Draft a concise, professional email skeleton with the given subject',
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text:
+              `Create a professional email draft to ${recipient} with subject "${subject}". ` +
+              `Keep it concise and clearly state purpose and optional next step. Create draft.`,
           },
         },
       ],

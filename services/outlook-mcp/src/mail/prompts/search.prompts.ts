@@ -39,6 +39,16 @@ const PipelineDigestSchema = z.object({
   period: z.string().describe("Time window, e.g., 'last 7 days'").meta({ title: 'Period' }),
 });
 
+const TopicSinceSchema = z.object({
+  topic: z.string().describe('Topic to search for').meta({ title: 'Topic' }),
+  since: z.string().describe('Relative phrase or ISO date').meta({ title: 'Since' }),
+});
+
+const NameSinceSchema = z.object({
+  name: z.string().describe('Person name to search for').meta({ title: 'Name' }),
+  since: z.string().describe('Relative phrase or ISO date').meta({ title: 'Since' }),
+});
+
 @Injectable({ scope: Scope.REQUEST })
 export class SearchPrompts {
   @Prompt({
@@ -164,6 +174,58 @@ export class SearchPrompts {
             text:
               `Compile a digest of emails about "${keyword}" in ${period}. ` +
               `Group bullets by: mandates, diligence, legal, investor questions, risks. Use search-email and get-mail-message.`,
+          },
+        },
+      ],
+    };
+  }
+
+  @Prompt({
+    name: 'search-topic-since',
+    title: 'Search: Topic Since Date',
+    description: 'Get all emails related to a topic since a relative phrase or date',
+    parameters: TopicSinceSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
+  })
+  public searchTopicSince({ topic, since }: z.infer<typeof TopicSinceSchema>) {
+    return {
+      description: 'Find emails about a topic since the provided date/relative period',
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text:
+              `Search for emails related to "${topic}" since ${since}. Use search-email and list-mails. ` +
+              `Return subject, date, sender, messageId, and a short snippet.`,
+          },
+        },
+      ],
+    };
+  }
+
+  @Prompt({
+    name: 'search-name-since',
+    title: 'Search: Name Since Date',
+    description: 'Search emails for information about a person since a date/relative period',
+    parameters: NameSinceSchema,
+    _meta: {
+      'unique.app/category': 'Search',
+    },
+  })
+  public searchNameSince({ name, since }: z.infer<typeof NameSinceSchema>) {
+    return {
+      description: 'Find emails that mention or are from/to the person since the provided date',
+      messages: [
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text:
+              `Search for emails concerning ${name} since ${since}. Include from/to/cc matches and body mentions. ` +
+              `Return subject, date, sender, messageId, and a short snippet.`,
           },
         },
       ],
