@@ -1,9 +1,7 @@
-import { TerminusModule } from '@nestjs/terminus';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestBed } from '@suites/unit';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { HealthConfig, healthConfig } from './health.config';
 import { HealthController } from './health.controller';
-import { VersionHealthIndicator } from './version-health.service';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -14,19 +12,12 @@ describe('HealthController', () => {
       version: '1.0.0',
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [TerminusModule],
-      controllers: [HealthController],
-      providers: [
-        {
-          provide: healthConfig.KEY,
-          useValue: mockHealthConfig,
-        },
-        VersionHealthIndicator,
-      ],
-    }).compile();
+    const { unit } = await TestBed.solitary(HealthController)
+      .mock(healthConfig.KEY)
+      .impl(() => mockHealthConfig)
+      .compile();
 
-    controller = module.get<HealthController>(HealthController);
+    controller = unit;
   });
 
   it('is defined', () => {
