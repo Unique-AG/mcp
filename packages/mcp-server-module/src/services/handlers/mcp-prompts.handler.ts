@@ -4,6 +4,7 @@ import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
   McpError,
+  Prompt,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
@@ -29,18 +30,24 @@ export class McpPromptsHandler extends McpHandlerBase {
     mcpServer.server.setRequestHandler(ListPromptsRequestSchema, () => {
       this.logger.debug('ListPromptsRequestSchema is being called');
 
-      const prompts = this.registry.getPrompts(this.mcpModuleId).map((prompt) => ({
-        name: prompt.metadata.name,
-        description: prompt.metadata.description,
-        arguments: prompt.metadata.parameters
-          ? Object.entries(prompt.metadata.parameters.shape).map(([name, definition]) => ({
-              name,
-              description: definition.meta().description,
-              required: !definition.isOptional(),
-              title: definition.meta().title,
-            }))
-          : [],
-      }));
+      const prompts = this.registry.getPrompts(this.mcpModuleId).map((prompt) => {
+        const promptSchema: Prompt = {
+          name: prompt.metadata.name,
+          description: prompt.metadata.description,
+          arguments: prompt.metadata.parameters
+            ? Object.entries(prompt.metadata.parameters.shape).map(([name, definition]) => ({
+                name,
+                description: definition.meta().description,
+                required: !definition.isOptional(),
+                title: definition.meta().title,
+              }))
+            : [],
+        };
+
+        if (prompt.metadata.title) promptSchema.title = prompt.metadata.title;
+        if (prompt.metadata._meta) promptSchema._meta = prompt.metadata._meta;
+        return promptSchema;
+      });
 
       return {
         prompts,

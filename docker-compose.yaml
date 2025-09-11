@@ -1,4 +1,4 @@
-name: mcp-monorepo
+name: connectors-monorepo
 services:
   postgres:
     image: postgres:17
