@@ -4,9 +4,11 @@ import {
   GetPromptRequestSchema,
   ListPromptsRequestSchema,
   McpError,
+  Prompt,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
+import { ZodError } from 'zod';
 import { HttpRequest } from '../../interfaces/http-adapter.interface';
 import { McpRegistryService } from '../mcp-registry.service';
 import { McpHandlerBase } from './mcp-handler.base';
@@ -29,18 +31,24 @@ export class McpPromptsHandler extends McpHandlerBase {
     mcpServer.server.setRequestHandler(ListPromptsRequestSchema, () => {
       this.logger.debug('ListPromptsRequestSchema is being called');
 
-      const prompts = this.registry.getPrompts(this.mcpModuleId).map((prompt) => ({
-        name: prompt.metadata.name,
-        description: prompt.metadata.description,
-        arguments: prompt.metadata.parameters
-          ? Object.entries(prompt.metadata.parameters.shape).map(([name, definition]) => ({
-              name,
-              description: definition.meta().description,
-              required: !definition.isOptional(),
-              title: definition.meta().title,
-            }))
-          : [],
-      }));
+      const prompts = this.registry.getPrompts(this.mcpModuleId).map((prompt) => {
+        const promptSchema: Prompt = {
+          name: prompt.metadata.name,
+          description: prompt.metadata.description,
+          arguments: prompt.metadata.parameters
+            ? Object.entries(prompt.metadata.parameters.shape).map(([name, definition]) => ({
+                name,
+                description: definition.meta().description,
+                required: !definition.isOptional(),
+                title: definition.meta().title,
+              }))
+            : [],
+        };
+
+        if (prompt.metadata.title) promptSchema.title = prompt.metadata.title;
+        if (prompt.metadata._meta) promptSchema._meta = prompt.metadata._meta;
+        return promptSchema;
+      });
 
       return {
         prompts,
@@ -55,7 +63,7 @@ export class McpPromptsHandler extends McpHandlerBase {
         const promptInfo = this.registry.findPrompt(this.mcpModuleId, name);
 
         if (!promptInfo) {
-          throw new McpError(ErrorCode.MethodNotFound, `Unknown prompt: ${name}`);
+          throw new McpError(ErrorCode.InvalidParams, `Invalid prompt name: ${name}`);
         }
 
         const contextId = ContextIdFactory.getByRequest(httpRequest);
@@ -66,7 +74,10 @@ export class McpPromptsHandler extends McpHandlerBase {
         });
 
         if (!promptInstance) {
-          throw new McpError(ErrorCode.MethodNotFound, `Unknown prompt: ${name}`);
+          throw new McpError(
+            ErrorCode.InternalError,
+            `Failed to resolve prompt provider for: ${name}`,
+          );
         }
 
         const context = this.createContext(mcpServer, request);
@@ -86,15 +97,22 @@ export class McpPromptsHandler extends McpHandlerBase {
         return result;
       } catch (error) {
         this.logger.error(error);
-        return {
-          contents: [
-            {
-              mimeType: 'text/plain',
-              text: error instanceof Error ? error.message : String(error),
-            },
-          ],
-          isError: true,
-        };
+        if (error instanceof McpError) {
+          throw error;
+        }
+        if (error instanceof ZodError) {
+          const messages = (error.issues || [])
+            .map((issue) => issue.message)
+            .filter((msg) => !!msg);
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            messages.length > 0 ? messages.join('; ') : 'Invalid or missing arguments',
+          );
+        }
+        throw new McpError(
+          ErrorCode.InternalError,
+          error instanceof Error ? error.message : String(error),
+        );
       }
     });
   }

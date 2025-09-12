@@ -52,7 +52,7 @@ export class ListMailFolderMessagesTool extends BaseMsGraphTool {
     _meta: {
       'unique.app/icon': 'mail',
       'unique.app/system-prompt':
-        'Requires a folderId parameter - use list_mail_folders first to get available folder IDs. Supports OData filters for advanced filtering (e.g., "isRead eq false" for unread emails, "hasAttachments eq true" for emails with attachments). Can sort by receivedDateTime, subject, from, or importance.',
+        'Ensure folderId is provided. If the folder is unknown, ask the user which folder they want or discover it with list_mail_folders first. Supports optional OData filters (e.g., isRead eq false, hasAttachments eq true) and sorting by receivedDateTime, subject, from, or importance.',
     },
   })
   @Span((options, _context, _request) => ({

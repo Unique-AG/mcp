@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "concurrently --kill-others -P \"turbo watch build --filter='./packages/*'\" \"turbo dev {@}\"",
+    "db:migrate": "turbo db:migrate",
     "codegen": "turbo codegen",
     "test": "turbo test",
     "test:watch": "turbo test:watch",

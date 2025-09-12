@@ -40,4 +40,8 @@ yarn-error.log*
 factset-auth.json
 
 **/@generated
+
+.terraform
+.terraform.lock.hcl
+
 .idea

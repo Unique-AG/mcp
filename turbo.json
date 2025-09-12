@@ -19,6 +19,7 @@
       "persistent": true,
       "dependsOn": ["^build"]
     },
+    "db:migrate": {},
     "test": {
       "cache": false
     },
